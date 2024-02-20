@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+option java_package = "com.vopros.cityron.application";
+option java_multiple_files = true;
+
+message Settings {
+  string uuid = 1;
+  repeated Ids tokens = 2;
+}
+
+message Ids {
+  string local_token = 1;
+  string server_token = 2;
+  Controllers controller = 3;
+}
+
+message Controllers {
+  string name = 1;
+  string ip_address = 2;
+  string id_cpu = 3;
+}
