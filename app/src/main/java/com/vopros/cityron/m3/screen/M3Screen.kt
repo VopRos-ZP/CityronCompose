@@ -1,117 +1,132 @@
 package com.vopros.cityron.m3.screen
 
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material3.Button
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.Tab
+import androidx.compose.material3.TabRow
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.window.PopupProperties
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.ramcosta.composedestinations.annotation.Destination
-import com.ramcosta.composedestinations.navigation.DestinationsNavigator
+import com.vopros.cityron.controller.ControllerItem
+import com.vopros.cityron.m3.domain.M3State
 import com.vopros.cityron.navigation.MainNavGraph
+import com.vopros.cityron.ui.components.ListItemPicker
 import com.vopros.cityron.ui.components.Loading
+import com.vopros.cityron.ui.components.tab.ControllerPagerTab
+import com.vopros.cityron.ui.screens.Screen
+import com.vopros.cityron.utils.Temp
+import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 
 @MainNavGraph
 @Destination
 @Composable
 fun M3Screen(
-    navigator: DestinationsNavigator,
     controllerItemString: String = "",
-    viewModel: M3ScreenViewModel = hiltViewModel(),
+    viewModel: M3ControllerViewModel = hiltViewModel(),
 ) {
+    val item = Json.decodeFromString<ControllerItem>(controllerItemString)
+    val scope = rememberCoroutineScope()
     val stateState = viewModel.state.collectAsState()
-    when (val state = stateState.value) {
-        null -> Loading()
-        else -> {
-            LazyColumn {
-                item {
-                    ControllerStateItem(title = "Старт/Стоп") {
-                        Button(onClick = { /*TODO*/ }) {
-                            Text(text = "Запустить")
+    var index by remember { mutableIntStateOf(0) }
+    val pagerState = rememberPagerState { 3 }
+    val scrollToPage = { i: Int ->
+        index = i
+        scope.launch { pagerState.animateScrollToPage(index) }
+    }
+    Screen(title = item.name) {
+        when (val state = stateState.value) {
+            null -> Loading()
+            else -> {
+                val tabs = listOf(
+                    ControllerPagerTab(
+                        title = "Температура",
+                        content = { FirstPage(item, state, viewModel) }
+                    ),
+                    ControllerPagerTab(
+                        title = "События",
+                        content = { /*SecondPage(item, state, viewModel)*/ }
+                    ),
+                    ControllerPagerTab(
+                        title = "Планировщик",
+                        content = { /*ThirdPage(item, state, viewModel)*/ }
+                    ),
+                )
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp),
+                ) {
+                    TabRow(
+                        selectedTabIndex = index,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        tabs.mapIndexed { i, tab ->
+                            Tab(
+                                selected = index == i,
+                                onClick = { scrollToPage(i) },
+                                text = { Text(text = tab.title) }
+                            )
                         }
                     }
-                }
-                item {
-                    ControllerStateItem(title = "Уставка, С") {
-                        TextField(
-                            value = "${state.state.set.temp / 10}",
-                            onValueChange = {
-                                // viewModel.send(it.toInt() * 10)
-                            }
-                        )
-                    }
-                }
-                item {
-                    var expanded by remember { mutableStateOf(false) }
-                    ControllerStateItem(title = "Режим работы") {
-                        Text(
-                            text = "",
-                        )
-                        DropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false },
-                        ) {
-                            DropdownMenuItem(text = { Text(text = "Зима") }, onClick = { /*TODO*/ })
-                            DropdownMenuItem(text = { Text(text = "Лето") }, onClick = { /*TODO*/ })
-                        }
-                    }
-                }
-                item {
-                    var expanded by remember { mutableStateOf(false) }
-                    ControllerStateItem(title = "Управление режимом Зима/Лето") {
-                        DropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false }
-                        ) {
-                            DropdownMenuItem(text = { Text(text = "Зима") }, onClick = { /*TODO*/ })
-                            DropdownMenuItem(text = { Text(text = "Лето") }, onClick = { /*TODO*/ })
-                        }
-                    }
-                }
-                item {
-                    var expanded by remember { mutableStateOf(false) }
-                    ControllerStateItem(title = "Скорость вентилятора") {
-                        DropdownMenu(
-                            expanded = expanded,
-                            onDismissRequest = { expanded = false }
-                        ) {
-                            (1..5).map {
-                                DropdownMenuItem(text = { Text(text = "$it") }, onClick = { /*TODO*/ })
-                            }
-                        }
+                    HorizontalPager(
+                        state = pagerState,
+                        userScrollEnabled = false
+                    ) {
+                        tabs[it].content()
                     }
                 }
             }
         }
     }
-    DisposableEffect(Unit) {
-        viewModel.listenState(Json.decodeFromString(controllerItemString))
-        onDispose { viewModel.disposeState() }
+    LaunchedEffect(Unit) {
+        viewModel.fetchState(item)
     }
 }
 
 @Composable
-fun ControllerStateItem(
-    title: String,
-    right: @Composable RowScope.() -> Unit
+fun FirstPage(
+    controllerItem: ControllerItem,
+    m3: M3State,
+    viewModel: M3ControllerViewModel
 ) {
-    Row {
-        Text(text = title)
-        Spacer(modifier = Modifier.weight(1f))
-        right(this)
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        ListItemPicker(
+            value = Temp.toGrade(m3.state.set.temp),
+            onValueChange = { s ->
+                val value = s.replace(".", "").toInt()
+                viewModel.updateState(controllerItem, "set-temp", value)
+            },
+            list = (50..450).step(5).map { Temp.toGrade(it) }.toList()
+        )
     }
+}
+
+/** Логи **/
+@Composable
+fun SecondPage(
+    controllerItem: ControllerItem,
+    m3: M3State,
+    viewModel: M3ControllerViewModel
+) {
+    // потом сделаю
 }
