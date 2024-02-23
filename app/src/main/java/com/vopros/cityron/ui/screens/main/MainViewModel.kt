@@ -1,15 +1,19 @@
 package com.vopros.cityron.ui.screens.main
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vopros.cityron.controller.ControllerItem
 import com.vopros.cityron.local.LocalStore
 import com.vopros.cityron.m3.domain.M3State
 import com.vopros.cityron.repository.controllerState.ControllerStateRepository
+import com.vopros.cityron.repository.controllerState.LocalControllerStateRepositoryImpl
 import com.vopros.cityron.repository.controllerState.LocalStateRepo
 import com.vopros.cityron.repository.controllerState.ServerStateRepo
 import com.vopros.cityron.repository.wifi.WifiRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import io.ktor.client.HttpClient
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
