@@ -1,22 +1,17 @@
 package com.vopros.cityron.ui.screens.main
 
-import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.vopros.cityron.controller.ControllerItem
 import com.vopros.cityron.local.LocalStore
 import com.vopros.cityron.m3.domain.M3State
 import com.vopros.cityron.repository.controllerState.ControllerStateRepository
-import com.vopros.cityron.repository.controllerState.LocalControllerStateRepositoryImpl
 import com.vopros.cityron.repository.controllerState.LocalStateRepo
 import com.vopros.cityron.repository.controllerState.ServerStateRepo
 import com.vopros.cityron.repository.wifi.WifiRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.ktor.client.HttpClient
-import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.launch
 import kotlinx.serialization.json.Json
 import javax.inject.Inject
@@ -36,9 +31,8 @@ class MainViewModel @Inject constructor(
 
     fun fetchControllers() {
         viewModelScope.launch {
-            localStore.data
-                .combine(wifiRepository.isInLocalNetwork()) { s, iiln -> Pair(s, iiln) }
-                .collect { (s, i) ->
+            localStore.data.collect { s ->
+                wifiRepository.isInLocalNetwork().collect { i ->
                     val fetchState: suspend (ControllerStateRepository, String) -> Int = { repo, id ->
                         try {
                             Json.decodeFromString<M3State>(repo.getState(id))
@@ -51,19 +45,18 @@ class MainViewModel @Inject constructor(
                     val res = controllers.map { controller ->
                         when (i) {
                             true -> when (val local = fetchState(localStateRepository, controller.ipAddress)) {
+                                0 -> Pair(controller, 0)
+                                else -> when (fetchState(serverStateRepository, controller.idCpu)) {
                                     0 -> Pair(controller, 0)
-                                    else -> {
-                                        when (fetchState(serverStateRepository, controller.idCpu)) {
-                                            0 -> Pair(controller, 0)
-                                            else -> Pair(controller, local)
-                                        }
-                                    }
+                                    else -> Pair(controller, local)
                                 }
+                            }
                             else -> Pair(controller, fetchState(serverStateRepository, controller.idCpu))
                         }
                     }
                     _controllers.emit(res)
                 }
+            }
         }
     }
 

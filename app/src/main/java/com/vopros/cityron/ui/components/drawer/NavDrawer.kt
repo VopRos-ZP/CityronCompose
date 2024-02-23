@@ -63,36 +63,55 @@ fun NavDrawer(
                     )
                 }
                 controllers.mapIndexed { i, (controller, s) ->
-                    NavigationDrawerItem(
-                        label = {
-                            val color = when (s) {
-                                0 -> Color.Green
-                                1 -> Color.Red
-                                2 -> Color.Yellow
-                                else -> Color.Transparent
-                            }
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(text = controller.name)
-                                Spacer(modifier = Modifier.weight(1f))
-                                Box(
-                                    modifier = Modifier
-                                        .size(15.dp)
-                                        .clip(RoundedCornerShape(percent = 100))
-                                        .background(color)
-                                )
-                            }
-                        },
-                        selected = selected == i,
-                        onClick = {
-                            selected = i
-                            closeDrawer()
-                            navController.navigate(M3ScreenDestination(Json.encodeToString(controller))) {
-                                launchSingleTop = true
-                            }
+                    val ripple: @Composable (@Composable () -> Unit) -> Unit = {
+                        when (s != 0) {
+                            true -> CompositionLocalProvider(
+                                LocalRippleTheme provides ClearRippleTheme,
+                                content = it
+                            )
+                            else -> it()
                         }
-                    )
+                    }
+                    ripple {
+                        NavigationDrawerItem(
+                            label = {
+                                val color = when (s) {
+                                    0 -> Color.Green
+                                    1 -> Color.Red
+                                    2 -> Color.Yellow
+                                    else -> Color.Transparent
+                                }
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Text(text = controller.name)
+                                    Spacer(modifier = Modifier.weight(1f))
+                                    Box(
+                                        modifier = Modifier
+                                            .size(15.dp)
+                                            .clip(RoundedCornerShape(percent = 100))
+                                            .background(color)
+                                    )
+                                }
+                            },
+                            selected = selected == i,
+                            onClick = {
+                                if (s == 0) {
+                                    selected = i
+                                    closeDrawer()
+                                    navController.navigate(
+                                        M3ScreenDestination(
+                                            Json.encodeToString(
+                                                controller
+                                            )
+                                        )
+                                    ) {
+                                        launchSingleTop = true
+                                    }
+                                }
+                            }
+                        )
+                    }
                 }
                 NavigationDrawerItem(
                     label = { Text(text = "Найти контроллер") },

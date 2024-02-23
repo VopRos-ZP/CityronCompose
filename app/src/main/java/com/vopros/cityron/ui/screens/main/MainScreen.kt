@@ -17,6 +17,7 @@ import com.ramcosta.composedestinations.DestinationsNavHost
 import com.vopros.cityron.NavGraphs
 import com.vopros.cityron.ui.components.drawer.NavDrawer
 import com.vopros.cityron.ui.components.toolbar.Toolbar
+import com.vopros.cityron.ui.theme.LocalDrawer
 import com.vopros.cityron.ui.theme.LocalToolbar
 import kotlinx.coroutines.launch
 
@@ -34,7 +35,8 @@ fun MainScreen(
         controllers = controllers
     ) {
         CompositionLocalProvider(
-            LocalToolbar provides hiltViewModel()
+            LocalToolbar provides hiltViewModel(),
+            LocalDrawer provides drawerState
         ) {
             Scaffold(
                 topBar = { Toolbar { scope.launch { drawerState.open() } } },
@@ -47,7 +49,7 @@ fun MainScreen(
             }
         }
     }
-    LaunchedEffect(Unit) {
+    LaunchedEffect(drawerState.currentValue) {
         viewModel.fetchControllers()
     }
 }
