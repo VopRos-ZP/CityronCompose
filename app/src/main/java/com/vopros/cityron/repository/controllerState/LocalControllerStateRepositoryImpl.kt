@@ -1,5 +1,6 @@
 package com.vopros.cityron.repository.controllerState
 
+import com.vopros.cityron.domain.events.LogResult
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
@@ -19,6 +20,12 @@ class LocalControllerStateRepositoryImpl @Inject constructor(
         httpClient.post("http://$ipOrControllerId/conf") {
             setBody("$key=$value")
         }
+    }
+
+    override suspend fun fetchLog(ipOrControllerId: String, count: Int, types: Int, sources: Int, reasons: Int): LogResult {
+        return httpClient
+            .get("http://$ipOrControllerId/json?events&count=$count&types=$types&sources=$sources&reasons=$reasons")
+            .body()
     }
 
 }

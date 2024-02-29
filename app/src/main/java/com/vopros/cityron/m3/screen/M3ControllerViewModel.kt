@@ -19,5 +19,6 @@ class M3ControllerViewModel @Inject constructor(
     wifiRepository = wifiRepository,
     localStateRepository = localStateRepository,
     serverStateRepository = serverStateRepository,
-    convert = { Json.decodeFromString(it) }
+    convert = { Json.decodeFromString(it) },
+    default = M3State()
 )

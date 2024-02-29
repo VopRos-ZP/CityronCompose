@@ -16,7 +16,7 @@ fun InfoItem(info: Info) {
         Row {
             Text(text = "${info.devName}#${info.idUsr}")
             Spacer(modifier = Modifier.weight(1f))
-            Button(onClick = { /*TODO*/ }) {
+            Button(onClick = { /*TODO: Нажатие на "Добавить" */ }) {
                 Text(text = "Добавить")
             }
         }

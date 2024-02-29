@@ -4,5 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class M3State(
-    val state: State
+    val state: State = State()
 )

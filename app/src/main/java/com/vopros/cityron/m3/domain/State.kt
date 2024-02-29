@@ -5,15 +5,15 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class State(
-    val alarms: Int,
-    val algo: Algo,
-    val crcSched: String,
-    val crcSettings: String,
-    val ipLoc: String,
-    val rtcTime: Int,
+    val alarms: Int = 0,
+    val algo: Algo = Algo(),
+    val crcSched: String = "",
+    val crcSettings: String = "",
+    val ipLoc: String = "",
+    val rtcTime: Int = 0,
     @SerialName("set")
-    val `set`: Set,
-    val srv: Srv,
-    val ul: Int,
-    val uptime: Int
+    val `set`: Set = Set(),
+    val srv: Srv = Srv(),
+    val ul: Int = 0,
+    val uptime: Int = 0
 )

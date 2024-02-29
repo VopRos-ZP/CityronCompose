@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Srv(
-    val connect: Int,
-    val isBind: Int,
-    val metricAddr: String
+    val connect: Int = 0,
+    val isBind: Int = 0,
+    val metricAddr: String = ""
 )

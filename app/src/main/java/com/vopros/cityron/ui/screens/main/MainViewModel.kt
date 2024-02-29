@@ -46,10 +46,7 @@ class MainViewModel @Inject constructor(
                         when (i) {
                             true -> when (val local = fetchState(localStateRepository, controller.ipAddress)) {
                                 0 -> Pair(controller, 0)
-                                else -> when (fetchState(serverStateRepository, controller.idCpu)) {
-                                    0 -> Pair(controller, 0)
-                                    else -> Pair(controller, local)
-                                }
+                                else -> Pair(controller, local)
                             }
                             else -> Pair(controller, fetchState(serverStateRepository, controller.idCpu))
                         }
