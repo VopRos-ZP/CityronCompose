@@ -10,12 +10,8 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
-import java.nio.file.attribute.UserPrincipal
 import java.time.Instant
 import java.time.ZoneId
-import java.util.Calendar
-import java.util.Date
 
 abstract class ControllerViewModel<T> (
     private val wifiRepository: WifiRepository,
@@ -88,6 +84,7 @@ abstract class ControllerViewModel<T> (
                                 },
                                 result = when (Triple(it[3], it[4], it[5])) {
                                     Triple(3, 8, 0) -> "Веб-интерфейс > Уставка ${Temp.toGrade(it[6])}°C"
+
                                     else -> ""
                                 }
                             )
