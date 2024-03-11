@@ -1,11 +1,12 @@
-package com.vopros.cityron.repository.controllerState
+package ru.cityron.network.impl
 
-import com.vopros.cityron.domain.events.LogResult
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.get
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import ru.cityron.network.ControllerStateRepository
+import ru.cityron.network.LogResult
 import javax.inject.Inject
 
 class LocalControllerStateRepositoryImpl @Inject constructor(

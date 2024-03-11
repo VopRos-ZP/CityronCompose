@@ -1,4 +1,4 @@
-package com.vopros.cityron.repository.controllerState
+package ru.cityron.network.impl
 
 import javax.inject.Qualifier
 

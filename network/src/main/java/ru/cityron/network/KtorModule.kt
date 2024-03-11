@@ -1,4 +1,4 @@
-package com.vopros.cityron.di
+package ru.cityron.network
 
 import android.util.Log
 import dagger.Module

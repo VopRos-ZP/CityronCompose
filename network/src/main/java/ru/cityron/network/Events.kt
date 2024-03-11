@@ -1,4 +1,4 @@
-package com.vopros.cityron.domain.events
+package ru.cityron.network
 
 import kotlinx.serialization.Serializable
 

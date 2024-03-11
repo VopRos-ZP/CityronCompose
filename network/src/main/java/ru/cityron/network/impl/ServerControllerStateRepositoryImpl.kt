@@ -1,7 +1,5 @@
-package com.vopros.cityron.repository.controllerState
+package ru.cityron.network.impl
 
-import com.vopros.cityron.domain.events.LogResult
-import com.vopros.cityron.utils.Network
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
 import io.ktor.client.request.cookie
@@ -12,6 +10,9 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import io.ktor.http.Cookie
 import io.ktor.http.setCookie
+import ru.cityron.network.ControllerStateRepository
+import ru.cityron.network.LogResult
+import ru.cityron.network.Network.BASE_URL
 import javax.inject.Inject
 
 class ServerControllerStateRepositoryImpl @Inject constructor(
@@ -24,21 +25,21 @@ class ServerControllerStateRepositoryImpl @Inject constructor(
     })
 
     private suspend fun login(): Cookie {
-        return httpClient.post("${Network.BASE_URL}/auth") {
+        return httpClient.post("$BASE_URL/auth") {
             setBody(multiPartContent)
         }.setCookie().first()
     }
 
     override suspend fun getState(ipOrControllerId: String): String {
         val cookie = login()
-        return httpClient.get("${Network.BASE_URL}/$ipOrControllerId/json?state") {
+        return httpClient.get("$BASE_URL/$ipOrControllerId/json?state") {
             cookie(cookie.name, cookie.value)
         }.body()
     }
 
     override suspend fun updateState(ipOrControllerId: String, key: String, value: Any) {
         val cookie = login()
-        httpClient.post("${Network.BASE_URL}/$ipOrControllerId/conf") {
+        httpClient.post("$BASE_URL/$ipOrControllerId/conf") {
             cookie(cookie.name, cookie.value)
             setBody("$key=$value")
         }
@@ -46,7 +47,7 @@ class ServerControllerStateRepositoryImpl @Inject constructor(
 
     override suspend fun fetchLog(ipOrControllerId: String, count: Int, types: Int, sources: Int, reasons: Int): LogResult {
         return httpClient
-            .get("${Network.BASE_URL}/$ipOrControllerId/json?events&count=$count&types=$types&sources=$sources&reasons=$reasons")
+            .get("$BASE_URL/$ipOrControllerId/json?events&count=$count&types=$types&sources=$sources&reasons=$reasons")
             .body()
     }
 

@@ -1,6 +1,6 @@
 plugins {
-    alias(libs.plugins.androidApplication)
-    alias(libs.plugins.kotlinAndroid)
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.hilt)
     alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.serialization)
@@ -54,8 +54,8 @@ android {
 
 dependencies {
     // Ktor
-    implementation(libs.bundles.ktor)
-    implementation(libs.datastore)
+    implementation(project(":network"))
+    implementation(libs.ktor.client.json)
     // DI
     implementation(libs.hilt.android)
     implementation(libs.hilt.compose)
@@ -68,6 +68,7 @@ dependencies {
     implementation(libs.core.ktx)
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.activity.compose)
+    implementation(libs.datastore)
     // Compose
     implementation(platform(libs.compose.bom))
     implementation(libs.ui)

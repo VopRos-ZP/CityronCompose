@@ -172,12 +172,11 @@ private fun parseEvents(useCase: EventUseCase) : AnnotatedString = buildAnnotate
     val format = DateTimeFormatter.ofPattern("HH:mm:ss")
 
     append(useCase.date.toLocalTime().format(format))
-    val style = when (useCase.type) {
-        "Авария" -> Color.Red
-        else -> Color.Black
-    }
-    withStyle(SpanStyle(color = style)) {
-        append(" [${useCase.type}]")
+    when (useCase.type) {
+        "Авария" -> withStyle(SpanStyle(color = Color.Red)) {
+            append(" [${useCase.type}]")
+        }
+        else -> append(" [${useCase.type}]")
     }
     append(" ${useCase.result}")
 }

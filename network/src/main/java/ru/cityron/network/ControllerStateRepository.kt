@@ -1,6 +1,4 @@
-package com.vopros.cityron.repository.controllerState
-
-import com.vopros.cityron.domain.events.LogResult
+package ru.cityron.network
 
 interface ControllerStateRepository {
     suspend fun getState(ipOrControllerId: String): String

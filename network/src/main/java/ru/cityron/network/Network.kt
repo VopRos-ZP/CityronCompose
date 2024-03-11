@@ -1,7 +1,5 @@
-package com.vopros.cityron.utils
+package ru.cityron.network
 
 object Network {
-
     const val BASE_URL = "https://rcserver.ru"
-
 }

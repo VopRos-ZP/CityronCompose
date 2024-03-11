@@ -1,13 +1,13 @@
 package com.vopros.cityron.m3.screen
 
 import com.vopros.cityron.m3.domain.M3State
-import com.vopros.cityron.repository.controllerState.ControllerStateRepository
-import com.vopros.cityron.repository.controllerState.LocalStateRepo
-import com.vopros.cityron.repository.controllerState.ServerStateRepo
 import com.vopros.cityron.repository.wifi.WifiRepository
 import com.vopros.cityron.ui.screens.controller.ControllerViewModel
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.serialization.json.Json
+import ru.cityron.network.ControllerStateRepository
+import ru.cityron.network.impl.LocalStateRepo
+import ru.cityron.network.impl.ServerStateRepo
 import javax.inject.Inject
 
 @HiltViewModel

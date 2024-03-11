@@ -26,7 +26,6 @@ import com.ramcosta.composedestinations.annotation.Destination
 import com.vopros.cityron.local.Info
 import com.vopros.cityron.navigation.FindControllerNavGraph
 import com.vopros.cityron.ui.screens.Screen
-import com.vopros.cityron.ui.theme.LocalToolbar
 
 @FindControllerNavGraph(start = true)
 @Destination

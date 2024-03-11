@@ -15,4 +15,5 @@ dependencyResolutionManagement {
 
 rootProject.name = "Cityron"
 include(":app")
- 
+/** Features **/
+include(":network")
