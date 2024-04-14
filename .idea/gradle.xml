@@ -10,7 +10,15 @@
           <set>
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/app" />
-            <option value="$PROJECT_DIR$/network" />
+            <option value="$PROJECT_DIR$/atlas" />
+            <option value="$PROJECT_DIR$/atlas/data" />
+            <option value="$PROJECT_DIR$/atlas/domain" />
+            <option value="$PROJECT_DIR$/core" />
+            <option value="$PROJECT_DIR$/core/data" />
+            <option value="$PROJECT_DIR$/core/domain" />
+            <option value="$PROJECT_DIR$/m3" />
+            <option value="$PROJECT_DIR$/m3/data" />
+            <option value="$PROJECT_DIR$/m3/domain" />
           </set>
         </option>
         <option name="resolveExternalAnnotations" value="false" />

@@ -53,26 +53,30 @@ android {
 }
 
 dependencies {
-    // Ktor
-    implementation(project(":network"))
-    implementation(libs.ktor.client.json)
-    // DI
-    implementation(libs.hilt.android)
-    implementation(libs.hilt.compose)
-    debugImplementation(libs.ui.tooling)
-    ksp(libs.hilt.compiler)
-    // Navigation
-    implementation(libs.compose.destinations)
-    ksp(libs.compose.destinations.ksp)
-    // Core
+    implementation(project(":core:domain"))
+    implementation(project(":core:data"))
+
+    implementation(project(":m3:domain"))
+    implementation(project(":m3:data"))
+    /*** PRESENTATION ***/
+    /** Core **/
     implementation(libs.core.ktx)
     implementation(libs.lifecycle.runtime.ktx)
     implementation(libs.activity.compose)
-    implementation(libs.datastore)
-    // Compose
+    /** Compose **/
     implementation(platform(libs.compose.bom))
     implementation(libs.ui)
     implementation(libs.ui.graphics)
     implementation(libs.ui.tooling.preview)
     implementation(libs.material3)
+    /** DI **/
+    implementation(libs.hilt.android)
+    implementation(libs.hilt.compose)
+    debugImplementation(libs.ui.tooling)
+    ksp(libs.hilt.compiler)
+    /** Navigation **/
+    implementation(libs.compose.destinations)
+    ksp(libs.compose.destinations.ksp)
+    /** HighCharts **/
+    implementation(libs.highcharts)
 }

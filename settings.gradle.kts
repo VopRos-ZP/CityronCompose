@@ -9,6 +9,7 @@ dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         google()
+        maven(url = "https://jitpack.io")
         mavenCentral()
     }
 }
@@ -16,4 +17,11 @@ dependencyResolutionManagement {
 rootProject.name = "Cityron"
 include(":app")
 /** Features **/
-include(":network")
+include(":core:domain")
+include(":core:data")
+
+include(":m3:domain")
+include(":m3:data")
+
+include(":atlas:domain")
+include(":atlas:data")

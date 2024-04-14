@@ -13,12 +13,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.ramcosta.composedestinations.annotation.Destination
-import com.vopros.cityron.navigation.MainNavGraph
+import com.vopros.cityron.ui.navigation.DrawerNavGraph
 import com.vopros.cityron.ui.theme.LocalDrawer
 import kotlinx.coroutines.launch
 
 @Preview(showSystemUi = true)
-@MainNavGraph(start = true)
+@DrawerNavGraph(start = true)
 @Destination
 @Composable
 fun BlankScreen() {
