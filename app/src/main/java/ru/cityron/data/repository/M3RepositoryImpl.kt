@@ -23,6 +23,8 @@ class M3RepositoryImpl @Inject constructor(
     private val currentRepository: CurrentRepository
 ) : M3Repository {
 
+    private val coroutineScope = CoroutineScope(Dispatchers.IO)
+
     override val state: Flow<M3State> = flow {
         while (true) {
             val (controller, source) = currentRepository.current!!
@@ -32,7 +34,11 @@ class M3RepositoryImpl @Inject constructor(
             emit(result)
             delay(1000)
         }
-    }
+    }.stateIn(
+        scope = coroutineScope,
+        started = SharingStarted.Lazily,
+        initialValue = M3State()
+    )
 
     override suspend fun getAll(): M3All {
         val (controller, source) = currentRepository.current!!

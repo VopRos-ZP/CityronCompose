@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import ru.cityron.presentation.screens.events.EventsScreen
+import ru.cityron.presentation.screens.metrics.MetricsScreen
 
 @Composable
 fun M3TabsScreen() {
@@ -36,7 +37,8 @@ private fun M3TabsScreenContent(
 ) {
     val pages = listOf(
         TabWithPage("Температура") { M3TempScreen() },
-        TabWithPage("События") { EventsScreen() }
+        TabWithPage("События") { EventsScreen() },
+        TabWithPage("Метрики") { MetricsScreen() },
     )
     val pagerState = rememberPagerState { pages.size }
     val scope = rememberCoroutineScope()
@@ -66,9 +68,11 @@ private fun M3TabsScreenContent(
 private fun M3TempScreen() {
     val viewModel: M3ViewModel = hiltViewModel()
     val state by viewModel.state.collectAsState()
-    Text(
-        text = "${state.set.temp} C"
-    )
+    if (state.state != null) {
+        Text(
+            text = "${state.state!!.set.temp} C"
+        )
+    }
     LaunchedEffect(key1 = Unit) {
         viewModel.fetchState()
     }
