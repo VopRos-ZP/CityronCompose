@@ -1,18 +1,19 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
-    alias(libs.plugins.hilt)
-    alias(libs.plugins.ksp)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.ksp)
+    alias(libs.plugins.hilt)
 }
 
 android {
-    namespace = "com.vopros.cityron"
+    namespace = "ru.cityron"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.vopros.cityron"
-        minSdk = 28
+        applicationId = "ru.cityron"
+        minSdk = 26
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -53,30 +54,28 @@ android {
 }
 
 dependencies {
-    implementation(project(":core:domain"))
-    implementation(project(":core:data"))
-
-    implementation(project(":m3:domain"))
-    implementation(project(":m3:data"))
-    /*** PRESENTATION ***/
-    /** Core **/
-    implementation(libs.core.ktx)
-    implementation(libs.lifecycle.runtime.ktx)
-    implementation(libs.activity.compose)
-    /** Compose **/
-    implementation(platform(libs.compose.bom))
-    implementation(libs.ui)
-    implementation(libs.ui.graphics)
-    implementation(libs.ui.tooling.preview)
-    implementation(libs.material3)
-    /** DI **/
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.lifecycle.runtime.ktx)
+    implementation(libs.androidx.activity.compose)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.ui)
+    implementation(libs.androidx.material3)
+    implementation(libs.androidx.navigation)
+    /** Serialization **/
+    implementation(libs.kotlinx.serialization)
+    implementation(libs.gson)
+    /** Network **/
+    implementation(libs.okhttp)
+    implementation(libs.okhttp.logging.interceptor)
+    /**  **/
+    implementation(libs.fingerprint.android)
+    implementation(libs.highcharts.android)
+    /** Room **/
+    implementation(libs.room.ktx)
+    implementation(libs.room.runtime)
+    ksp(libs.room.compiler)
+    /** Hilt **/
     implementation(libs.hilt.android)
-    implementation(libs.hilt.compose)
-    debugImplementation(libs.ui.tooling)
+    implementation(libs.androidx.hilt.navigation)
     ksp(libs.hilt.compiler)
-    /** Navigation **/
-    implementation(libs.compose.destinations)
-    ksp(libs.compose.destinations.ksp)
-    /** HighCharts **/
-    implementation(libs.highcharts)
 }

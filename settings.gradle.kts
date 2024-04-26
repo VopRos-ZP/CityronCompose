@@ -16,12 +16,3 @@ dependencyResolutionManagement {
 
 rootProject.name = "Cityron"
 include(":app")
-/** Features **/
-include(":core:domain")
-include(":core:data")
-
-include(":m3:domain")
-include(":m3:data")
-
-include(":atlas:domain")
-include(":atlas:data")
