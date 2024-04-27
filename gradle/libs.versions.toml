@@ -27,6 +27,8 @@ androidx-ui = { group = "androidx.compose.ui", name = "ui" }
 androidx-ui-graphics = { group = "androidx.compose.ui", name = "ui-graphics" }
 androidx-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
 androidx-material3 = { group = "androidx.compose.material", name = "material" }
+androidx-material-icons = { module = "androidx.compose.material:material-icons-core" }
+androidx-material-icons-ext = { module = "androidx.compose.material:material-icons-extended" }
 datastore = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 # Navigation
 androidx-navigation = { module = "androidx.navigation:navigation-compose", version.ref = "navigation" }

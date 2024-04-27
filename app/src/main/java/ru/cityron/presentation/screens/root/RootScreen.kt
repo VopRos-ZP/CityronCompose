@@ -13,8 +13,12 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalDrawer
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CloudOff
+import androidx.compose.material.icons.filled.CloudQueue
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.rememberDrawerState
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
@@ -100,9 +104,11 @@ fun ControllerDrawerItem(
                 Status.OFFLINE -> Color.Yellow
                 Status.ALERT -> Color.Red
             }
-            val icon = when (source) {
-                is DataSource.Local -> Icons.Filled.Home
-                is DataSource.Remote -> Icons.Default.DateRange
+            val icon = when {
+                source.status == Status.OFFLINE -> Icons.Default.CloudOff
+                source is DataSource.Local -> Icons.Default.Wifi
+                source is DataSource.Remote -> Icons.Default.CloudQueue
+                else -> throw RuntimeException("")
             }
             Icon(
                 imageVector = icon,

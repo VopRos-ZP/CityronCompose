@@ -10,6 +10,7 @@ import androidx.compose.material.Scaffold
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.Text
+import androidx.compose.material.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -23,8 +24,11 @@ import ru.cityron.presentation.screens.metrics.MetricsScreen
 
 @Composable
 fun M3TabsScreen() {
+
     Scaffold(
-        topBar = {}
+        topBar = {
+            TopAppBar(title = { Text(text = "") })
+        }
     ) {
         M3TabsScreenContent(it)
     }
@@ -68,11 +72,8 @@ private fun M3TabsScreenContent(
 private fun M3TempScreen() {
     val viewModel: M3ViewModel = hiltViewModel()
     val state by viewModel.state.collectAsState()
-    if (state.state != null) {
-        Text(
-            text = "${state.state!!.set.temp} C"
-        )
-    }
+
+
     LaunchedEffect(key1 = Unit) {
         viewModel.fetchState()
     }
