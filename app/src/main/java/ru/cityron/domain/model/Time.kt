@@ -4,7 +4,7 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Time(
-    val fSntp: Int,
-    val ip: String,
-    val zone: Int
+    val fSntp: Int = 0,
+    val ip: String = "",
+    val zone: Int = 3
 )

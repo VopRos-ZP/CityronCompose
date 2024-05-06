@@ -4,5 +4,5 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class MetricChart(
-    val chart: Chart
+    val chart: Chart = Chart()
 )

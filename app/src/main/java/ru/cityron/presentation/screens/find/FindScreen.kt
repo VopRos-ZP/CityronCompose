@@ -29,11 +29,11 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import ru.cityron.domain.model.Controller
 
 @Composable
-fun FindScreen() {
+fun FindScreen(onClick: () -> Unit) {
     val viewModel: FindViewModel = hiltViewModel()
     val infoList by viewModel.infoList.collectAsState()
     Scaffold(
-        topBar = { FindTopBar() },
+        topBar = { FindTopBar(onClick) },
     ) {
         FindScreenContent(it, infoList, viewModel::addController)
     }
@@ -99,10 +99,10 @@ private fun ControllerItem(
 }
 
 @Composable
-fun FindTopBar() {
+fun FindTopBar(onClick: () -> Unit) {
     TopAppBar(
         navigationIcon = {
-            IconButton(onClick = { /* open drawer */ }) {
+            IconButton(onClick = onClick) {
                 Icon(
                     imageVector = Icons.Filled.Menu,
                     contentDescription = "menu"

@@ -4,8 +4,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class Srv(
-    val fEn: Int,
-    val fMetric: Int,
-    val fUser: Int,
+    val fEn: Int = 0,
+    val fMetric: Int = 0,
+    val fUser: Int = 0,
     val fUserIp: String = "0.0.0.0"
 )

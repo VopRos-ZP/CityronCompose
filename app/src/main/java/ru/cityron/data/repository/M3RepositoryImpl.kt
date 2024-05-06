@@ -4,60 +4,66 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.FlowCollector
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.serialization.json.Json
-import ru.cityron.domain.model.Controller
-import ru.cityron.domain.model.DataSource
+import ru.cityron.domain.model.JsonSched
+import ru.cityron.domain.model.JsonSettings
 import ru.cityron.domain.model.JsonState
-import ru.cityron.domain.model.m3.M3All
+import ru.cityron.domain.model.JsonStatic
+import ru.cityron.domain.model.m3.M3Sched
+import ru.cityron.domain.model.m3.M3Settings
 import ru.cityron.domain.model.m3.M3State
-import ru.cityron.domain.repository.CurrentRepository
-import ru.cityron.domain.repository.HttpRepository
+import ru.cityron.domain.model.m3.M3Static
 import ru.cityron.domain.repository.M3Repository
+import ru.cityron.domain.repository.NetworkRepository
 import javax.inject.Inject
 
 class M3RepositoryImpl @Inject constructor(
-    private val httpRepository: HttpRepository,
-    private val currentRepository: CurrentRepository
+    private val networkRepository: NetworkRepository,
 ) : M3Repository {
 
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     override val state: Flow<M3State> = flow {
-        while (true) {
-            val (controller, source) = currentRepository.current!!
-            val result = sendControllerRequest<JsonState<M3State>>(
-                controller, source, "json?state"
-            ).state
-            emit(result)
-            delay(1000)
-        }
+        sendRequests<JsonState<M3State>, M3State>("static") { state }
     }.stateIn(
         scope = coroutineScope,
         started = SharingStarted.Lazily,
         initialValue = M3State()
     )
 
-    override suspend fun getAll(): M3All {
-        val (controller, source) = currentRepository.current!!
-        return sendControllerRequest(controller, source, "json?all")
-    }
+    override val static: Flow<M3Static> = flow {
+        sendRequests<JsonStatic<M3Static>, M3Static>("static") { static }
+    }.stateIn(
+        scope = coroutineScope,
+        started = SharingStarted.Lazily,
+        initialValue = M3Static()
+    )
 
-    override suspend fun getState(): M3State {
-        val (controller, source) = currentRepository.current!!
-        return sendControllerRequest<JsonState<M3State>>(
-            controller, source, "json?state"
-        ).state
-    }
+    override val settings: Flow<M3Settings> = flow {
+        sendRequests<JsonSettings<M3Settings>, M3Settings>("settings") { settings }
+    }.stateIn(
+        scope = coroutineScope,
+        started = SharingStarted.Lazily,
+        initialValue = M3Settings()
+    )
 
-    private suspend inline fun <reified T> sendControllerRequest(
-        it: Controller, source: DataSource, suffix: String
-    ): T {
-        return when (source) {
-            is DataSource.Local -> fromJson<T>(httpRepository.get("http://${it.ipAddress}/$suffix"))
-            is DataSource.Remote -> fromJson<T>(httpRepository.get("https://rcserver.ru/rc/${it.idCpu}/json?state"))
+    override val sched: Flow<M3Sched> = flow {
+        sendRequests<JsonSched<M3Sched>, M3Sched>("sched") { sched }
+    }.stateIn(
+        scope = coroutineScope,
+        started = SharingStarted.Lazily,
+        initialValue = M3Sched()
+    )
+
+    private suspend inline fun <reified T, R> FlowCollector<R>.sendRequests(path: String, transform: T.() -> R) {
+        while (true) {
+            val result = fromJson<T>(networkRepository.get(path)).transform()
+            emit(result)
+            delay(1000)
         }
     }
 

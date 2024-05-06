@@ -5,12 +5,12 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class M3Task(
     val i: Int = 0,
-    val day: Int,
-    val fan: Int,
-    val hour: Int,
-    val min: Int,
-    val mode: Int,
-    val on: Int,
-    val power: Int,
-    val temp: Int
+    val day: Int = 0,
+    val fan: Int = 1,
+    val hour: Int = 0,
+    val min: Int = 0,
+    val mode: Int = 0,
+    val on: Int = 0,
+    val power: Int = 0,
+    val temp: Int = 50
 )

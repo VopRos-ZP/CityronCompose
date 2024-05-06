@@ -6,11 +6,16 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -19,26 +24,20 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
+import ru.cityron.presentation.components.BackScaffold
 import ru.cityron.presentation.screens.events.EventsScreen
 import ru.cityron.presentation.screens.metrics.MetricsScreen
 
 @Composable
-fun M3TabsScreen() {
-
-    Scaffold(
-        topBar = {
-            TopAppBar(title = { Text(text = "") })
-        }
-    ) {
-        M3TabsScreenContent(it)
+fun M3TabsScreen(onClick: () -> Unit) {
+    BackScaffold(title = "", onClick = onClick) {
+        M3TabsScreenContent()
     }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun M3TabsScreenContent(
-    paddingValues: PaddingValues
-) {
+private fun M3TabsScreenContent() {
     val pages = listOf(
         TabWithPage("Температура") { M3TempScreen() },
         TabWithPage("События") { EventsScreen() },
@@ -47,7 +46,7 @@ private fun M3TabsScreenContent(
     val pagerState = rememberPagerState { pages.size }
     val scope = rememberCoroutineScope()
     Column(
-        modifier = Modifier.padding(paddingValues)
+        modifier = Modifier.padding()
     ) {
         TabRow(selectedTabIndex = pagerState.currentPage) {
             pages.forEachIndexed { i, tab ->

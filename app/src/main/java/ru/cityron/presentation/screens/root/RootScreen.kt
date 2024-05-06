@@ -15,9 +15,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.CloudQueue
-import androidx.compose.material.icons.filled.DateRange
-import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material.rememberDrawerState
 import androidx.compose.material.ripple.rememberRipple
@@ -61,7 +58,7 @@ fun RootScreen() {
                     selected = navBackStackEntry?.destination?.hierarchy?.any { it.route == controller.name } ?: false,
                     onClick = {
                         viewModel.selectController(controller to source)
-                        navigationState.navigate(controller.name)
+                        navigationState.navigateTo(controller.name)
                         scope.launch { drawerState.close() }
                     }
                 )
@@ -78,7 +75,8 @@ fun RootScreen() {
     ) {
         RootNavGraph(
             navHostController = navigationState.navHostController,
-            controllers = controllers.keys.toList()
+            controllers = controllers.keys.toList(),
+            openDrawer = { scope.launch { drawerState.open() } }
         )
     }
     LaunchedEffect(Unit) {
