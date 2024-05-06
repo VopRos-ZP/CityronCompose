@@ -6,6 +6,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import ru.cityron.domain.model.Controller
+import ru.cityron.domain.model.DataSource
 import ru.cityron.domain.repository.CurrentRepository
 import ru.cityron.domain.repository.M3Repository
 import java.net.SocketTimeoutException
@@ -17,21 +19,14 @@ class M3ViewModel @Inject constructor(
     private val m3Repository: M3Repository
 ) : ViewModel() {
 
+    private val _controller = MutableStateFlow<Pair<Controller, DataSource>?>(null)
+    val controller = _controller.asStateFlow()
+
     private val _state = MutableStateFlow<M3TabsState>(M3TabsState.Loading)
     val state = _state.asStateFlow()
 
     fun fetchState() {
-        viewModelScope.launch {
-            try {
-                m3Repository.state.collect {
-                    _state.value = M3TabsState.Success(
-                        currentRepository.current!!.first, it
-                    )
-                }
-            } catch (_: SocketTimeoutException) {
-                _state.value = M3TabsState.Error("Нет связи")
-            }
-        }
+        _controller.value = currentRepository.current
     }
 
     fun closeError() {

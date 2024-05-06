@@ -29,8 +29,12 @@ import ru.cityron.presentation.screens.events.EventsScreen
 import ru.cityron.presentation.screens.metrics.MetricsScreen
 
 @Composable
-fun M3TabsScreen(onClick: () -> Unit) {
-    BackScaffold(title = "", onClick = onClick) {
+fun M3TabsScreen(
+    onClick: () -> Unit,
+    viewModel: M3ViewModel = hiltViewModel()
+) {
+    val pair by viewModel.controller.collectAsState()
+    BackScaffold(title = pair?.first?.name ?: "", onClick = onClick) {
         M3TabsScreenContent()
     }
 }

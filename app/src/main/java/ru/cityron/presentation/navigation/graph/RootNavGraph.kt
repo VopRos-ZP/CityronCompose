@@ -23,7 +23,7 @@ fun RootNavGraph(
         composable(Screen.Find.route) { FindScreen(openDrawer) }
         controllers.forEach { controller ->
             if (controller.name.startsWith("M3")) {
-                m3NavGraph(controller.name)
+                m3NavGraph(controller.name, openDrawer)
             }
         }
     }

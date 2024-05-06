@@ -9,6 +9,7 @@ import ru.cityron.data.repository.ControllerRepositoryImpl
 import ru.cityron.data.repository.CurrentRepositoryImpl
 import ru.cityron.data.repository.HttpRepositoryImpl
 import ru.cityron.data.repository.M3RepositoryImpl
+import ru.cityron.data.repository.MetricRepositoryImpl
 import ru.cityron.data.repository.NetworkRepositoryImpl
 import ru.cityron.data.repository.UdpRepositoryImpl
 import ru.cityron.domain.repository.ConnectivityRepository
@@ -16,6 +17,7 @@ import ru.cityron.domain.repository.ControllerRepository
 import ru.cityron.domain.repository.CurrentRepository
 import ru.cityron.domain.repository.HttpRepository
 import ru.cityron.domain.repository.M3Repository
+import ru.cityron.domain.repository.MetricRepository
 import ru.cityron.domain.repository.NetworkRepository
 import ru.cityron.domain.repository.UdpRepository
 import javax.inject.Singleton
@@ -51,5 +53,9 @@ interface RepositoryModule {
     @Binds
     @Singleton
     fun bindNetworkRepository(networkRepositoryImpl: NetworkRepositoryImpl): NetworkRepository
+
+    @Binds
+    @Singleton
+    fun bindMetricRepository(metricRepositoryImpl: MetricRepositoryImpl): MetricRepository
 
 }
