@@ -1,18 +1,26 @@
 package ru.cityron.presentation.screens.root
 
+import android.annotation.SuppressLint
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.DrawerValue
+import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.ModalDrawer
+import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.PlaylistAdd
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.CloudOff
 import androidx.compose.material.icons.filled.CloudQueue
 import androidx.compose.material.icons.filled.Wifi
@@ -38,7 +46,11 @@ import ru.cityron.domain.model.Status
 import ru.cityron.presentation.navigation.Screen
 import ru.cityron.presentation.navigation.graph.RootNavGraph
 import ru.cityron.presentation.navigation.rememberNavigationState
+import ru.cityron.ui.theme.Green
+import ru.cityron.ui.theme.Orange
+import ru.cityron.ui.theme.Red
 
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun RootScreen() {
     val scope = rememberCoroutineScope()
@@ -63,14 +75,29 @@ fun RootScreen() {
                     }
                 )
             }
-            DrawerItem(
-                text = "Поиск контроллера",
-                selected = navBackStackEntry?.destination?.route == Screen.Find.route,
-                onClick = {
-                    navigationState.navigateTo(Screen.Find.route)
-                    scope.launch { drawerState.close() }
-                }
+            Scaffold(
+                floatingActionButton = {
+
+                },
+                content = {}
             )
+//            DrawerItem(
+//                text = "Поиск контроллера",
+//                selected = navBackStackEntry?.destination?.route == Screen.Find.route,
+//                onClick = {
+//                    navigationState.navigateTo(Screen.Find.route)
+//                    scope.launch { drawerState.close() }
+//                }
+//            )
+            FloatingActionButton(onClick = {
+                navigationState.navigateTo(Screen.Find.route)
+                scope.launch { drawerState.close() }
+            }) {
+                Icon(
+                    imageVector = Icons.Default.Add,
+                    contentDescription = null
+                )
+            }
         }
     ) {
         RootNavGraph(
@@ -96,23 +123,10 @@ fun ControllerDrawerItem(
         onClick = onClick,
         enabled = source.status != Status.OFFLINE,
         selected = selected,
-        action = {
-            val color = when (source.status) {
-                Status.ONLINE -> Color.Green
-                Status.OFFLINE -> Color.Yellow
-                Status.ALERT -> Color.Red
-            }
-            val icon = when {
-                source.status == Status.OFFLINE -> Icons.Default.CloudOff
-                source is DataSource.Local -> Icons.Default.Wifi
-                source is DataSource.Remote -> Icons.Default.CloudQueue
-                else -> throw RuntimeException("")
-            }
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = color
-            )
+        status = when (source.status) {
+            Status.ONLINE -> Green
+            Status.OFFLINE -> Orange
+            Status.ALERT -> Red
         }
     )
 }
@@ -120,7 +134,7 @@ fun ControllerDrawerItem(
 @Composable
 fun DrawerItem(
     text: String,
-    action: @Composable () -> Unit = {},
+    status: Color,
     enabled: Boolean = true,
     selected: Boolean = false,
     onClick: () -> Unit = {}
@@ -145,6 +159,11 @@ fun DrawerItem(
     ) {
         Text(text = text, color = textColor)
         Spacer(modifier = Modifier.weight(1f))
-        action()
+        Box(
+            modifier = Modifier
+                .size(16.dp)
+                .clip(RoundedCornerShape(percent = 50))
+                .background(color = status)
+        )
     }
 }
