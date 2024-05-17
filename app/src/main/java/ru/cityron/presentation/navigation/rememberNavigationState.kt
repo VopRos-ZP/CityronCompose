@@ -22,6 +22,10 @@ class NavigationState(val navHostController: NavHostController) {
         navHostController.navigate(route)
     }
 
+    fun navigateUp() {
+        navHostController.navigateUp()
+    }
+
 }
 
 @Composable

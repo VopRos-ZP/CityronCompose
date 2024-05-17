@@ -5,7 +5,10 @@ sealed class Screen(
 ) {
 
     data object Blank : Screen(ROUTE_BLANK)
+    data object FindFlow : Screen(ROUTE_FIND_FLOW)
     data object Find : Screen(ROUTE_FIND)
+    data object AddController : Screen(ROUTE_ADD_CONTROLLER)
+    data object AddCustom : Screen(ROUTE_ADD_CUSTOM)
 
     data object Alerts : Screen(ROUTE_ALERTS)
     data object Schedulers : Screen(ROUTE_SCHEDULERS)
@@ -14,7 +17,10 @@ sealed class Screen(
 
     companion object {
         const val ROUTE_BLANK = "blank"
+        const val ROUTE_FIND_FLOW = "find_flow"
         const val ROUTE_FIND = "find"
+        const val ROUTE_ADD_CONTROLLER = "add_controller"
+        const val ROUTE_ADD_CUSTOM = "add_custom"
         const val ROUTE_ALERTS = "alerts"
         const val ROUTE_SCHEDULERS = "alerts"
 

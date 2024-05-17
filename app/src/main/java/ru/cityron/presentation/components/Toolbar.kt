@@ -2,8 +2,10 @@ package ru.cityron.presentation.components
 
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
+import androidx.compose.material.contentColorFor
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
@@ -41,12 +43,14 @@ private fun ToolBar(
     onClick: () -> Unit,
 ) {
     TopAppBar(
+        backgroundColor = MaterialTheme.colors.primary,
         title = { Text(text = title) },
         navigationIcon = {
             IconButton(onClick = onClick) {
                 Icon(
                     imageVector = icon,
-                    contentDescription = null
+                    contentDescription = null,
+                    tint = MaterialTheme.colors.onBackground
                 )
             }
         }

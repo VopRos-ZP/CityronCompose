@@ -7,23 +7,34 @@ import androidx.navigation.compose.composable
 import ru.cityron.domain.model.Controller
 import ru.cityron.presentation.navigation.Screen
 import ru.cityron.presentation.screens.blank.BlankScreen
-import ru.cityron.presentation.screens.find.FindScreen
 
 @Composable
 fun RootNavGraph(
     navHostController: NavHostController,
     controllers: List<Controller>,
-    openDrawer: () -> Unit
+    onDrawer: () -> Unit,
+    onBack: () -> Unit,
+    onAddClick: (Controller) -> Unit,
+    onCustomClick: () -> Unit,
 ) {
     NavHost(
         navController = navHostController,
         startDestination = Screen.Blank.route
     ) {
-        composable(Screen.Blank.route) { BlankScreen(openDrawer) }
-        composable(Screen.Find.route) { FindScreen(openDrawer) }
+        composable(Screen.Blank.route) { BlankScreen(onDrawer) }
+        findNavGraph(
+            onDrawer = onDrawer,
+            onBack = onBack,
+            onAddClick = onAddClick,
+            onCustomClick = onCustomClick
+        )
         controllers.forEach { controller ->
             if (controller.name.startsWith("M3")) {
-                m3NavGraph(controller.name, openDrawer)
+                m3NavGraph(
+                    route = controller.name,
+                    onDrawer = onDrawer,
+                    onBack = onBack
+                )
             }
         }
     }
