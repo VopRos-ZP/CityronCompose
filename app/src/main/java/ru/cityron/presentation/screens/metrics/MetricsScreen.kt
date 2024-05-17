@@ -11,10 +11,15 @@ import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.highsoft.highcharts.common.hichartsclasses.HIChart
 import com.highsoft.highcharts.common.hichartsclasses.HIColumn
+import com.highsoft.highcharts.common.hichartsclasses.HILabels
 import com.highsoft.highcharts.common.hichartsclasses.HIOptions
+import com.highsoft.highcharts.common.hichartsclasses.HISeries
 import com.highsoft.highcharts.common.hichartsclasses.HITitle
+import com.highsoft.highcharts.common.hichartsclasses.HIXAxis
+import com.highsoft.highcharts.common.hichartsclasses.HIYAxis
 import com.highsoft.highcharts.core.HIChartView
 import ru.cityron.R
+import ru.cityron.domain.utils.Temp
 import java.util.Collections
 
 @Composable
@@ -27,18 +32,51 @@ fun MetricsScreen(
         factory = { View.inflate(it, R.layout.chart_view, null) },
         update = {
             with(it.findViewById<HIChartView>(R.id.chartView)) {
-                val options = HIOptions().apply {
-                    this.chart = HIChart().apply { type = "line" }
+                if (chart != null) {
+                    val options = HIOptions().apply {
+                        this.chart = HIChart().apply {
+                            type = "line"
+                        }
 
-                    val title = HITitle()
-                    title.text = "Demo chart"
-                    this.title = title
+                        this.xAxis = arrayListOf(
+                            HIXAxis().apply {
+                                type = "datetime"
+                                minRange = 3e5
+                            }
+                        )
+                        this.yAxis = arrayListOf(
+                            HIYAxis().apply {
+                                minRange = 10
+                                title = HITitle().apply {
+                                    isEnabled = true
+                                }
+                                labels = HILabels().apply {
+                                    format = "{value}°C"
+                                }
+                            }
+                        )
 
-                    val series = HIColumn()
-                    series.data = ArrayList(chart?.channel ?: emptyList())
-                    this.series = ArrayList(Collections.singletonList(series))
+                        val title = HITitle()
+                        title.text = ""
+                        this.title = title
+
+                        val dataWithDate = chart!!.channel.mapIndexed { i, temp ->
+                            arrayOf(
+                                (688_680_000 * i) + chart!!.start,
+                                when (temp) {
+                                    null -> null
+                                    else -> Temp.toGrade(temp).toDouble()
+                                }
+                            )
+                        }
+
+                        val series = HISeries().apply {
+                            data = ArrayList(dataWithDate)
+                        }
+                        this.series = ArrayList(Collections.singletonList(series))
+                    }
+                    this.options = options
                 }
-                this.options = options
             }
         }
     )
