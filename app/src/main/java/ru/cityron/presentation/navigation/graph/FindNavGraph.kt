@@ -5,8 +5,9 @@ import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import ru.cityron.domain.model.Controller
 import ru.cityron.presentation.navigation.Screen
-import ru.cityron.presentation.screens.AddCustomScreen
+import ru.cityron.presentation.navigation.slideInOutComposable
 import ru.cityron.presentation.screens.addController.AddControllerScreen
+import ru.cityron.presentation.screens.addCustom.AddCustomScreen
 import ru.cityron.presentation.screens.find.FindScreen
 
 fun NavGraphBuilder.findNavGraph(
@@ -26,16 +27,16 @@ fun NavGraphBuilder.findNavGraph(
                 onCustomClick = onCustomClick
             )
         }
-        composable(route = Screen.AddController.route) {
+        slideInOutComposable(route = Screen.AddController.route) {
             AddControllerScreen(
                 onClick = onBack,
                 // onLoginClick = onLoginClick
             )
         }
-        composable(route = Screen.AddCustom.route) {
+        slideInOutComposable(route = Screen.AddCustom.route) {
             AddCustomScreen(
                 onClick = onBack,
-                onNextClick = {}
+                onNextClick = onBack
             )
         }
     }

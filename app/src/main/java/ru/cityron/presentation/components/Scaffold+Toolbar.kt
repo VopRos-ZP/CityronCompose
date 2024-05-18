@@ -6,8 +6,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Scaffold
+import androidx.compose.material.SnackbarHost
+import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.swipeable
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 
@@ -15,10 +19,12 @@ import androidx.compose.ui.Modifier
 fun DrawerScaffold(
     title: String,
     onClick: () -> Unit,
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     content: @Composable BoxScope.() -> Unit,
 ) {
     ToolbarScaffold(
         topBar = { DrawerTopBar(title = title, onClick = onClick) },
+        snackbarHostState = snackbarHostState,
         content = content
     )
 }
@@ -27,10 +33,12 @@ fun DrawerScaffold(
 fun BackScaffold(
     title: String,
     onClick: () -> Unit,
+    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     content: @Composable BoxScope.() -> Unit,
 ) {
     ToolbarScaffold(
         topBar = { BackTopBar(title = title, onClick = onClick) },
+        snackbarHostState = snackbarHostState,
         content = content
     )
 }
@@ -39,8 +47,17 @@ fun BackScaffold(
 fun ToolbarScaffold(
     topBar: @Composable () -> Unit,
     content: @Composable BoxScope.() -> Unit,
+    snackbarHostState: SnackbarHostState
 ) {
-    Scaffold(topBar = topBar) {
+    Scaffold(
+        topBar = topBar,
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                snackbar = { Snackbar(it) }
+            )
+        }
+    ) {
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -49,4 +66,5 @@ fun ToolbarScaffold(
             content = content
         )
     }
+
 }

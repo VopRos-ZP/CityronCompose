@@ -63,6 +63,7 @@ fun RootScreen() {
         scrimColor = Color.Transparent,
         drawerBackgroundColor = MaterialTheme.colors.primary,
         drawerElevation = 1.dp,
+        gesturesEnabled = false,
         drawerContent = {
             Column(
                 modifier = Modifier
