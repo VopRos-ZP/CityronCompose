@@ -4,20 +4,35 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.serialization.json.Json
+import ru.cityron.domain.InfoState
 import ru.cityron.domain.model.Controller
 import ru.cityron.domain.model.Info
+import ru.cityron.domain.model.Ip
+import ru.cityron.domain.model.JsonStatic
+import ru.cityron.domain.repository.ControllerRepository
+import ru.cityron.domain.repository.HttpRepository
+import ru.cityron.domain.repository.IpRepository
 import ru.cityron.domain.repository.UdpRepository
+import ru.cityron.domain.utils.Path.JSON_STATIC
 import java.net.SocketTimeoutException
 import javax.inject.Inject
 import javax.inject.Singleton
 
+private val json = Json {
+    ignoreUnknownKeys = true
+}
+
 @Singleton
 class GetInfoListUseCase @Inject constructor(
     private val udpRepository: UdpRepository,
-    private val controllersUseCase: GetControllersUseCase
+    private val controllersUseCase: GetControllersUseCase,
+    private val httpRepository: HttpRepository,
+    private val ipRepository: IpRepository
 ) {
 
     private val atlasTestInfo = Info(
@@ -45,17 +60,20 @@ class GetInfoListUseCase @Inject constructor(
                     list.clear()
 
                     list.add(atlasTestInfo)
+                    val infoList = getInfoListByIps(ipRepository.fetchAll())
+                    try {
+                        infoList.add(udpRepository.receive())
+                    } catch (_: SocketTimeoutException) {}
 
-                    val info = udpRepository.receive()
-                    if (!list.contains(info)) {
-                        list.add(info)
+                    for (info in infoList) {
+                        if (!list.contains(info)) {
+                            list.add(info)
+                        }
                     }
                     emit(list.associateWith { i -> added.contains(i.idCpu) })
                     udpRepository.close()
                     delay(1000)
                 }
-            } catch (_: SocketTimeoutException) {
-                emit(list.associateWith { i -> added.contains(i.idCpu) })
             } catch (e: Exception) {
                 e.printStackTrace()
             }
@@ -65,5 +83,28 @@ class GetInfoListUseCase @Inject constructor(
         started = SharingStarted.Lazily,
         initialValue = emptyMap()
     )
+
+    private suspend fun getInfoListByIps(ipList: List<Ip>): MutableList<Info> {
+        val list = mutableListOf<Info>()
+        for (ip in ipList) {
+            val static = json.decodeFromString<JsonStatic<InfoState>>(httpRepository.get("http://${ip.address}/$JSON_STATIC")).static
+            list.add(
+                Info(
+                    cmd = "info",
+                    type = 0,
+                    idCpu = static.idCpu,
+                    idUsr = static.idUsr,
+                    devName = static.devName,
+                    name = "",
+                    usePass = 0,
+                    dhcp = 1,
+                    ip = ip.address,
+                    mask = "",
+                    setIp = ""
+                )
+            )
+        }
+        return list
+    }
 
 }

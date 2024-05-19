@@ -1,9 +1,9 @@
 package ru.cityron.data.repository
 
-import ru.cityron.data.room.ControllerDatabase
-import ru.cityron.data.room.ControllerDto
-import ru.cityron.data.room.toController
-import ru.cityron.data.room.toDto
+import ru.cityron.data.room.controller.ControllerDatabase
+import ru.cityron.data.room.controller.ControllerDto
+import ru.cityron.data.room.controller.toController
+import ru.cityron.data.room.controller.toDto
 import ru.cityron.domain.model.Controller
 import ru.cityron.domain.repository.ControllerRepository
 import javax.inject.Inject

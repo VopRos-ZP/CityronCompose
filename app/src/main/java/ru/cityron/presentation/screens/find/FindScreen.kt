@@ -52,7 +52,7 @@ fun FindScreen(
     val viewModel: FindViewModel = hiltViewModel()
     val infoList by viewModel.infoList.collectAsState()
     DrawerScaffold(title = "Поиск контроллеров", onClick = onClick) {
-        FindScreenContent(infoList, onAddClick, onCustomClick)
+        FindScreenContent(infoList, viewModel::addController, onCustomClick)
     }
     LaunchedEffect(key1 = Unit) {
         viewModel.fetchInfoList()

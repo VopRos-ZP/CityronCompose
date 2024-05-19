@@ -9,6 +9,7 @@ import ru.cityron.data.repository.ConnectivityRepositoryImpl
 import ru.cityron.data.repository.ControllerRepositoryImpl
 import ru.cityron.data.repository.CurrentRepositoryImpl
 import ru.cityron.data.repository.HttpRepositoryImpl
+import ru.cityron.data.repository.IpRepositoryImpl
 import ru.cityron.data.repository.M3RepositoryImpl
 import ru.cityron.data.repository.MetricRepositoryImpl
 import ru.cityron.data.repository.NetworkRepositoryImpl
@@ -18,6 +19,7 @@ import ru.cityron.domain.repository.ConnectivityRepository
 import ru.cityron.domain.repository.ControllerRepository
 import ru.cityron.domain.repository.CurrentRepository
 import ru.cityron.domain.repository.HttpRepository
+import ru.cityron.domain.repository.IpRepository
 import ru.cityron.domain.repository.M3Repository
 import ru.cityron.domain.repository.MetricRepository
 import ru.cityron.domain.repository.NetworkRepository
@@ -63,5 +65,9 @@ interface RepositoryModule {
     @Binds
     @Singleton
     fun bindCheckIpRepository(checkIpRepositoryImpl: CheckIpRepositoryImpl): CheckIpRepository
+
+    @Binds
+    @Singleton
+    fun bindIpRepository(ipRepositoryImpl: IpRepositoryImpl): IpRepository
 
 }

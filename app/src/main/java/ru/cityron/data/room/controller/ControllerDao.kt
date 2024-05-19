@@ -1,4 +1,4 @@
-package ru.cityron.data.room
+package ru.cityron.data.room.controller
 
 import androidx.room.Dao
 import androidx.room.Query

@@ -7,7 +7,8 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import ru.cityron.data.room.ControllerDatabase
+import ru.cityron.data.room.controller.ControllerDatabase
+import ru.cityron.data.room.ip.IpDatabase
 import javax.inject.Singleton
 
 @Module
@@ -22,6 +23,16 @@ object RoomModule {
         context = context,
         klass = ControllerDatabase::class.java,
         name = "controllers"
-    ).fallbackToDestructiveMigration() .build()
+    ).fallbackToDestructiveMigration().build()
+
+    @Provides
+    @Singleton
+    fun provideIpDatabase(
+        @ApplicationContext context: Context
+    ): IpDatabase = Room.databaseBuilder(
+        context = context,
+        klass = IpDatabase::class.java,
+        name = "ip"
+    ).fallbackToDestructiveMigration().build()
 
 }
