@@ -6,36 +6,24 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material.Icon
-import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.RangeSlider
-import androidx.compose.material.Scaffold
 import androidx.compose.material.Slider
 import androidx.compose.material.SliderDefaults
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRow
 import androidx.compose.material.Text
-import androidx.compose.material.TopAppBar
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.MenuBook
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -51,8 +39,9 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import ru.cityron.R
-import ru.cityron.presentation.components.BackScaffold
 import ru.cityron.presentation.components.DrawerScaffold
+import ru.cityron.presentation.components.HTabRow
+import ru.cityron.presentation.components.TabWithPage
 import ru.cityron.presentation.components.Thermostat
 import ru.cityron.presentation.screens.events.EventsScreen
 import ru.cityron.presentation.screens.metrics.MetricsScreen
@@ -77,25 +66,10 @@ private fun M3TabsScreenContent() {
         TabWithPage("Метрики", R.drawable.metrics) { MetricsScreen() },
     )
     val pagerState = rememberPagerState { pages.size }
-    val scope = rememberCoroutineScope()
     Column(
         modifier = Modifier.fillMaxSize()
     ) {
-        TabRow(selectedTabIndex = pagerState.currentPage) {
-            pages.forEachIndexed { i, tab ->
-                Tab(
-                    icon = {
-                        Icon(
-                            painter = painterResource(id = tab.icon),
-                            contentDescription = null
-                        )
-                    },
-                    text = { Text(text = tab.title, fontSize = 12.sp) },
-                    selected = pagerState.currentPage == i,
-                    onClick = { scope.launch { pagerState.animateScrollToPage(i) } }
-                )
-            }
-        }
+        HTabRow(pagerState = pagerState, tabs = pages)
         HorizontalPager(
             state = pagerState,
             userScrollEnabled = false
@@ -112,7 +86,7 @@ private fun M3TempScreen() {
     var fan by remember { mutableFloatStateOf(3f) }
 
     Column {
-        Thermostat(224)
+        Thermostat(initValue = 224)
         Column {
             Slider(
                 modifier = Modifier.fillMaxWidth(),
@@ -127,9 +101,7 @@ private fun M3TempScreen() {
                     activeTrackColor = MaterialTheme.colors.primaryVariant,
                     inactiveTrackColor = MaterialTheme.colors.primaryVariant,
                 ),
-                onValueChangeFinished = {
-
-                }
+                onValueChangeFinished = {}
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -154,12 +126,6 @@ private fun M3TempScreen() {
     }
 }
 
-data class TabWithPage(
-    val title: String,
-    val icon: Int,
-    val screen: @Composable () -> Unit
-)
-
 @Composable
 fun CustomSlider(
     modifier: Modifier = Modifier,
@@ -174,7 +140,8 @@ fun CustomSlider(
     var sliderPosition by remember(value) { mutableFloatStateOf(value) }
 
     Box(
-        modifier = modifier.width(250.dp)
+        modifier = modifier
+            .width(250.dp)
             .pointerInput(Unit) {
                 detectTapGestures { offset ->
                     val newValue = (offset.x / sliderWidth).coerceIn(0f, 1f)
