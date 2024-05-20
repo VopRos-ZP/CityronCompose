@@ -1,18 +1,31 @@
 package ru.cityron.presentation.screens.m3tabs
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
+import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Slider
 import androidx.compose.material.SliderDefaults
@@ -45,23 +58,29 @@ import ru.cityron.presentation.components.TabWithPage
 import ru.cityron.presentation.components.Thermostat
 import ru.cityron.presentation.screens.events.EventsScreen
 import ru.cityron.presentation.screens.metrics.MetricsScreen
+import ru.cityron.ui.theme.Green
 
 @Composable
 fun M3TabsScreen(
     onClick: () -> Unit,
+    onAlertsClick: ()  -> Unit,
     viewModel: M3ViewModel = hiltViewModel()
 ) {
     val pair by viewModel.controller.collectAsState()
     DrawerScaffold(title = pair?.first?.name ?: "", onClick = onClick) {
-        M3TabsScreenContent()
+        M3TabsScreenContent(
+            onAlertsClick = onAlertsClick
+        )
     }
 }
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun M3TabsScreenContent() {
+private fun M3TabsScreenContent(
+    onAlertsClick: () -> Unit
+) {
     val pages = listOf(
-        TabWithPage("Уставка", R.drawable.temp) { M3TempScreen() },
+        TabWithPage("Уставка", R.drawable.temp) { M3TempScreen(onAlertsClick) },
         TabWithPage("События", R.drawable.task) { EventsScreen() },
         TabWithPage("Метрики", R.drawable.metrics) { MetricsScreen() },
     )
@@ -80,13 +99,25 @@ private fun M3TabsScreenContent() {
 }
 
 @Composable
-private fun M3TempScreen() {
+private fun M3TempScreen(
+    onAlertsClick: () -> Unit
+) {
     val viewModel: M3ViewModel = hiltViewModel()
     val state by viewModel.state.collectAsState()
     var fan by remember { mutableFloatStateOf(3f) }
+    val statusOffset = (-5).dp
 
-    Column {
-        Thermostat(initValue = 224)
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = 20.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.SpaceBetween
+    ) {
+        Thermostat(
+            modifier = Modifier.size(275.dp),
+            initValue = 224
+        )
         Column {
             Slider(
                 modifier = Modifier.fillMaxWidth(),
@@ -117,6 +148,91 @@ private fun M3TempScreen() {
                     painter = painterResource(id = R.drawable.fan),
                     contentDescription = null,
                     tint = MaterialTheme.colors.primaryVariant
+                )
+            }
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+
+            Box {
+                Box(
+                    modifier = Modifier
+                        .size(16.dp)
+                        .offset(statusOffset, statusOffset)
+                        .background(
+                            color = Green,
+                            shape = RoundedCornerShape(percent = 100)
+                        )
+                )
+                Button(
+                    shape = RoundedCornerShape(percent = 100),
+                    modifier = Modifier.size(90.dp),
+                    onClick = { /*TODO*/ }
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.on_off),
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize(),
+                        tint = MaterialTheme.colors.primaryVariant
+                    )
+                }
+            }
+            Button(
+                shape = RoundedCornerShape(percent = 100),
+                modifier = Modifier.size(90.dp),
+                onClick = { /*TODO*/ }
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.calendar),
+                    contentDescription = null,
+                    modifier = Modifier.fillMaxSize(),
+                    tint = MaterialTheme.colors.primaryVariant
+                )
+            }
+        }
+        AnimatedVisibility(visible = fan == 3f) {
+
+        }
+        AnimatedContent(targetState = fan, label = "") {
+            val isShow = it == 3f
+            val (bg, content) = when (isShow) {
+                true -> MaterialTheme.colors.error to MaterialTheme.colors.onBackground
+                else -> MaterialTheme.colors.background to Color.Transparent
+            }
+            Button(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 20.dp),
+                onClick = onAlertsClick,
+                enabled = isShow,
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = bg,
+                    contentColor = content,
+                    disabledContentColor = content,
+                    disabledBackgroundColor = bg
+                ),
+                contentPadding = PaddingValues(20.dp),
+                shape = RoundedCornerShape(10.dp),
+                elevation = ButtonDefaults.elevation(defaultElevation = 0.dp)
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.danger),
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Text(text = "Аварии")
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                Icon(
+                    painter = painterResource(id = R.drawable.arrow),
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
                 )
             }
         }

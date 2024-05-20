@@ -19,6 +19,8 @@ import ru.cityron.domain.model.m3.M3State
 import ru.cityron.domain.model.m3.M3Static
 import ru.cityron.domain.repository.M3Repository
 import ru.cityron.domain.repository.NetworkRepository
+import ru.cityron.domain.utils.Path.JSON_STATE
+import ru.cityron.domain.utils.Path.JSON_STATIC
 import javax.inject.Inject
 
 class M3RepositoryImpl @Inject constructor(
@@ -28,7 +30,7 @@ class M3RepositoryImpl @Inject constructor(
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     override val state: Flow<M3State> = flow {
-        sendRequests<JsonState<M3State>, M3State>("static") { state }
+        sendRequests<JsonState<M3State>, M3State>(JSON_STATE) { state }
     }.stateIn(
         scope = coroutineScope,
         started = SharingStarted.Lazily,
@@ -36,7 +38,7 @@ class M3RepositoryImpl @Inject constructor(
     )
 
     override val static: Flow<M3Static> = flow {
-        sendRequests<JsonStatic<M3Static>, M3Static>("static") { static }
+        sendRequests<JsonStatic<M3Static>, M3Static>(JSON_STATIC) { static }
     }.stateIn(
         scope = coroutineScope,
         started = SharingStarted.Lazily,
@@ -61,8 +63,10 @@ class M3RepositoryImpl @Inject constructor(
 
     private suspend inline fun <reified T, R> FlowCollector<R>.sendRequests(path: String, transform: T.() -> R) {
         while (true) {
-            val result = fromJson<T>(networkRepository.get(path)).transform()
-            emit(result)
+            try {
+                val result = fromJson<T>(networkRepository.get(path)).transform()
+                emit(result)
+            } catch (_: Exception) {}
             delay(1000)
         }
     }

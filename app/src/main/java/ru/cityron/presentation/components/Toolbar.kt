@@ -11,6 +11,7 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun DrawerTopBar(
@@ -53,6 +54,7 @@ private fun ToolBar(
                     tint = MaterialTheme.colors.onBackground
                 )
             }
-        }
+        },
+        elevation = 0.dp
     )
 }

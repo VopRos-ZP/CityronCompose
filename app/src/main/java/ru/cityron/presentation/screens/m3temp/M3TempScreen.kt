@@ -9,6 +9,6 @@ import ru.cityron.presentation.components.Thermostat
 @Composable
 fun M3TempScreen() {
     Box(modifier = Modifier.fillMaxSize()) {
-        Thermostat(224)
+
     }
 }

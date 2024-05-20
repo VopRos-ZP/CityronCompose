@@ -113,7 +113,8 @@ fun RootScreen() {
             onDrawer = { scope.launch { drawerState.open() } },
             onBack = { navigationState.navigateUp() },
             onAddClick = { navigationState.navigate(Screen.AddController.route) },
-            onCustomClick = { navigationState.navigate(Screen.AddCustom.route) }
+            onCustomClick = { navigationState.navigate(Screen.AddCustom.route) },
+            onAlertsClick = { navigationState.navigate(Screen.Alerts.route) }
         )
     }
     LaunchedEffect(Unit) {

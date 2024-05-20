@@ -1,6 +1,7 @@
 package ru.cityron.presentation.components
 
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.PagerState
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -9,8 +10,9 @@ import androidx.compose.material.TabRow
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -29,10 +31,11 @@ fun HTabRow(
                 icon = {
                     Icon(
                         painter = painterResource(id = tab.icon),
-                        contentDescription = null
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
                     )
                 },
-                text = { Text(text = tab.title, fontSize = 12.sp) },
+                text = { Text(text = tab.title) },
                 selected = pagerState.currentPage == i,
                 onClick = { scope.launch { pagerState.animateScrollToPage(i) } }
             )

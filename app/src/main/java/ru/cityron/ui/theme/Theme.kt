@@ -38,7 +38,8 @@ private val DarkColorScheme = darkColors(
     primaryVariant = Blue,
     secondary = Orange,
     background = Grey,
-    onPrimary = Color.White
+    onPrimary = Color.White,
+    error = Red
 )
 
 // Если будет светлая тема

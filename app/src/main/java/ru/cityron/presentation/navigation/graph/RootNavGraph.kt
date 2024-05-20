@@ -16,6 +16,7 @@ fun RootNavGraph(
     onBack: () -> Unit,
     onAddClick: (Controller) -> Unit,
     onCustomClick: () -> Unit,
+    onAlertsClick: () -> Unit
 ) {
     NavHost(
         navController = navHostController,
@@ -33,7 +34,8 @@ fun RootNavGraph(
                 m3NavGraph(
                     route = controller.name,
                     onDrawer = onDrawer,
-                    onBack = onBack
+                    onBack = onBack,
+                    onAlertsClick = onAlertsClick
                 )
             }
         }
