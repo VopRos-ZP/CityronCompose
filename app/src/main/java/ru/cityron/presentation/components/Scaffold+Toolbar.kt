@@ -19,12 +19,14 @@ import androidx.compose.ui.Modifier
 fun DrawerScaffold(
     title: String,
     onClick: () -> Unit,
+    fab: @Composable () -> Unit = {},
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     content: @Composable BoxScope.() -> Unit,
 ) {
     ToolbarScaffold(
         topBar = { DrawerTopBar(title = title, onClick = onClick) },
         snackbarHostState = snackbarHostState,
+        fab = fab,
         content = content
     )
 }
@@ -33,12 +35,14 @@ fun DrawerScaffold(
 fun BackScaffold(
     title: String,
     onClick: () -> Unit,
+    fab: @Composable () -> Unit = {},
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     content: @Composable BoxScope.() -> Unit,
 ) {
     ToolbarScaffold(
         topBar = { BackTopBar(title = title, onClick = onClick) },
         snackbarHostState = snackbarHostState,
+        fab = fab,
         content = content
     )
 }
@@ -47,7 +51,8 @@ fun BackScaffold(
 fun ToolbarScaffold(
     topBar: @Composable () -> Unit,
     content: @Composable BoxScope.() -> Unit,
-    snackbarHostState: SnackbarHostState
+    snackbarHostState: SnackbarHostState,
+    fab: @Composable () -> Unit
 ) {
     Scaffold(
         topBar = topBar,
@@ -56,7 +61,8 @@ fun ToolbarScaffold(
                 hostState = snackbarHostState,
                 snackbar = { Snackbar(it) }
             )
-        }
+        },
+        floatingActionButton = fab
     ) {
         Box(
             modifier = Modifier

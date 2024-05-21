@@ -37,6 +37,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -59,6 +61,7 @@ import ru.cityron.presentation.components.Thermostat
 import ru.cityron.presentation.screens.events.EventsScreen
 import ru.cityron.presentation.screens.metrics.MetricsScreen
 import ru.cityron.ui.theme.Green
+import ru.cityron.ui.theme.Red
 
 @Composable
 fun M3TabsScreen(
@@ -104,7 +107,16 @@ private fun M3TempScreen(
 ) {
     val viewModel: M3ViewModel = hiltViewModel()
     val state by viewModel.state.collectAsState()
-    var fan by remember { mutableFloatStateOf(3f) }
+    var fan by remember { mutableFloatStateOf(state.set.fan.toFloat()) }
+    var displayFan by remember { mutableIntStateOf(state.set.fan) }
+    val statusColor by remember(state) {
+        mutableStateOf(
+            when (state.set.power == 1) {
+                true -> Green
+                else -> Red
+            }
+        )
+    }
     val statusOffset = (-5).dp
 
     Column(
@@ -132,7 +144,10 @@ private fun M3TempScreen(
                     activeTrackColor = MaterialTheme.colors.primaryVariant,
                     inactiveTrackColor = MaterialTheme.colors.primaryVariant,
                 ),
-                onValueChangeFinished = {}
+                onValueChangeFinished = {
+                    displayFan = fan.toInt()
+                    // viewModel.conf(displayFan)
+                }
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -140,7 +155,7 @@ private fun M3TempScreen(
                 horizontalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = "$fan",
+                    text = "$displayFan",
                     color = MaterialTheme.colors.primaryVariant,
                     fontSize = 32.sp
                 )
@@ -155,14 +170,13 @@ private fun M3TempScreen(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceEvenly
         ) {
-
             Box {
                 Box(
                     modifier = Modifier
                         .size(16.dp)
                         .offset(statusOffset, statusOffset)
                         .background(
-                            color = Green,
+                            color = statusColor,
                             shape = RoundedCornerShape(percent = 100)
                         )
                 )
@@ -192,11 +206,8 @@ private fun M3TempScreen(
                 )
             }
         }
-        AnimatedVisibility(visible = fan == 3f) {
-
-        }
-        AnimatedContent(targetState = fan, label = "") {
-            val isShow = it == 3f
+        AnimatedContent(targetState = state.alarms, label = "") {
+            val isShow = it != 0
             val (bg, content) = when (isShow) {
                 true -> MaterialTheme.colors.error to MaterialTheme.colors.onBackground
                 else -> MaterialTheme.colors.background to Color.Transparent
@@ -239,54 +250,5 @@ private fun M3TempScreen(
     }
     LaunchedEffect(key1 = Unit) {
         viewModel.fetchState()
-    }
-}
-
-@Composable
-fun CustomSlider(
-    modifier: Modifier = Modifier,
-    value: Float,
-    onValueChange: (Float) -> Unit,
-    trackColor: Color = Color.Gray,
-    thumbColor: Color = Color.Blue,
-    trackWidth: Float = 10f,
-    thumbRadius: Float = 14f
-) {
-    var sliderWidth by remember { mutableFloatStateOf(0f) }
-    var sliderPosition by remember(value) { mutableFloatStateOf(value) }
-
-    Box(
-        modifier = modifier
-            .width(250.dp)
-            .pointerInput(Unit) {
-                detectTapGestures { offset ->
-                    val newValue = (offset.x / sliderWidth).coerceIn(0f, 1f)
-                    onValueChange(newValue)
-                }
-            }
-            .onSizeChanged {
-                sliderWidth = it.width.toFloat()
-            }
-    ) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            // Draw the slider track
-            val trackStart = Offset(0f, size.height / 2)
-            val trackEnd = Offset(size.width, size.height / 2)
-            drawLine(
-                color = trackColor,
-                start = trackStart,
-                end = trackEnd,
-                strokeWidth = trackWidth
-            )
-
-            // Draw the thumb
-            val thumbX = sliderPosition * size.width
-            val thumbCenter = Offset(thumbX, size.height / 2)
-            drawCircle(
-                color = thumbColor,
-                radius = thumbRadius,
-                center = thumbCenter
-            )
-        }
     }
 }

@@ -22,7 +22,7 @@ sealed class Screen(
         const val ROUTE_ADD_CONTROLLER = "add_controller"
         const val ROUTE_ADD_CUSTOM = "add_custom"
         const val ROUTE_ALERTS = "alerts"
-        const val ROUTE_SCHEDULERS = "alerts"
+        const val ROUTE_SCHEDULERS = "schedulers"
 
         const val ROUTE_ATLAS = "atlas"
         const val ROUTE_M3_TABS = "m3_tabs"

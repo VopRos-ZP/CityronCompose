@@ -7,6 +7,7 @@ import ru.cityron.presentation.navigation.Screen
 import ru.cityron.presentation.navigation.slideInOutComposable
 import ru.cityron.presentation.screens.alerts.AlertsScreen
 import ru.cityron.presentation.screens.m3tabs.M3TabsScreen
+import ru.cityron.presentation.screens.scheduler.SchedulersScreen
 
 fun NavGraphBuilder.m3NavGraph(
     route: String,
@@ -24,8 +25,11 @@ fun NavGraphBuilder.m3NavGraph(
                 onAlertsClick = onAlertsClick
             )
         }
-        composable(route = Screen.Schedulers.route) {
-
+        slideInOutComposable(route = Screen.Schedulers.route) {
+            SchedulersScreen(
+                onClick = onBack,
+                onTaskClick = {}
+            )
         }
         slideInOutComposable(route = Screen.Alerts.route) {
             AlertsScreen(onClick = onBack)
