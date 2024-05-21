@@ -16,7 +16,9 @@ fun RootNavGraph(
     onBack: () -> Unit,
     onAddClick: (Controller) -> Unit,
     onCustomClick: () -> Unit,
-    onAlertsClick: () -> Unit
+    onAlertsClick: () -> Unit,
+    onSchedulerClick: () -> Unit,
+    onTaskClick: (Int) -> Unit,
 ) {
     NavHost(
         navController = navHostController,
@@ -35,7 +37,9 @@ fun RootNavGraph(
                     route = controller.name,
                     onDrawer = onDrawer,
                     onBack = onBack,
-                    onAlertsClick = onAlertsClick
+                    onAlertsClick = onAlertsClick,
+                    onSchedulerClick = onSchedulerClick,
+                    onTaskClick = onTaskClick
                 )
             }
         }

@@ -15,8 +15,8 @@ class NetworkRepositoryImpl @Inject constructor(
         return sendControllerRequest(path, httpRepository::get)
     }
 
-    override suspend fun post(path: String, body: String) {
-        sendControllerRequest(path) { httpRepository.post(it, body) }
+    override suspend fun post(path: String, body: String): String {
+        return sendControllerRequest(path) { httpRepository.post(it, body) }
     }
 
     private suspend fun sendControllerRequest(

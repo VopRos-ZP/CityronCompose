@@ -8,22 +8,27 @@ import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Scaffold
 import androidx.compose.material.SnackbarHost
 import androidx.compose.material.SnackbarHostState
+import androidx.compose.material.pullrefresh.PullRefreshState
+import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.swipeable
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusModifier
 
 @Composable
 fun DrawerScaffold(
     title: String,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
     fab: @Composable () -> Unit = {},
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     content: @Composable BoxScope.() -> Unit,
 ) {
     ToolbarScaffold(
+        modifier = modifier,
         topBar = { DrawerTopBar(title = title, onClick = onClick) },
         snackbarHostState = snackbarHostState,
         fab = fab,
@@ -35,11 +40,13 @@ fun DrawerScaffold(
 fun BackScaffold(
     title: String,
     onClick: () -> Unit,
+    modifier: Modifier = Modifier,
     fab: @Composable () -> Unit = {},
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     content: @Composable BoxScope.() -> Unit,
 ) {
     ToolbarScaffold(
+        modifier = modifier,
         topBar = { BackTopBar(title = title, onClick = onClick) },
         snackbarHostState = snackbarHostState,
         fab = fab,
@@ -49,6 +56,7 @@ fun BackScaffold(
 
 @Composable
 fun ToolbarScaffold(
+    modifier: Modifier,
     topBar: @Composable () -> Unit,
     content: @Composable BoxScope.() -> Unit,
     snackbarHostState: SnackbarHostState,
@@ -65,7 +73,7 @@ fun ToolbarScaffold(
         floatingActionButton = fab
     ) {
         Box(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
                 .padding(it),
             contentAlignment = Alignment.Center,

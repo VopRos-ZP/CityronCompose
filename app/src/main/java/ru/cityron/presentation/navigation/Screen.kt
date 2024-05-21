@@ -12,6 +12,7 @@ sealed class Screen(
 
     data object Alerts : Screen(ROUTE_ALERTS)
     data object Schedulers : Screen(ROUTE_SCHEDULERS)
+    data class Task(val id: Int) : Screen("$ROUTE_SCHEDULERS/$id")
 
     data object M3Tabs : Screen(ROUTE_M3_TABS)
 

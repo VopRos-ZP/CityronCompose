@@ -67,12 +67,14 @@ import ru.cityron.ui.theme.Red
 fun M3TabsScreen(
     onClick: () -> Unit,
     onAlertsClick: ()  -> Unit,
+    onSchedulerClick: () -> Unit,
     viewModel: M3ViewModel = hiltViewModel()
 ) {
     val pair by viewModel.controller.collectAsState()
     DrawerScaffold(title = pair?.first?.name ?: "", onClick = onClick) {
         M3TabsScreenContent(
-            onAlertsClick = onAlertsClick
+            onAlertsClick = onAlertsClick,
+            onSchedulerClick = onSchedulerClick
         )
     }
 }
@@ -80,10 +82,11 @@ fun M3TabsScreen(
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun M3TabsScreenContent(
-    onAlertsClick: () -> Unit
+    onAlertsClick: () -> Unit,
+    onSchedulerClick: () -> Unit,
 ) {
     val pages = listOf(
-        TabWithPage("Уставка", R.drawable.temp) { M3TempScreen(onAlertsClick) },
+        TabWithPage("Уставка", R.drawable.temp) { M3TempScreen(onAlertsClick, onSchedulerClick) },
         TabWithPage("События", R.drawable.task) { EventsScreen() },
         TabWithPage("Метрики", R.drawable.metrics) { MetricsScreen() },
     )
@@ -103,12 +106,13 @@ private fun M3TabsScreenContent(
 
 @Composable
 private fun M3TempScreen(
-    onAlertsClick: () -> Unit
+    onAlertsClick: () -> Unit,
+    onSchedulerClick: () -> Unit,
 ) {
     val viewModel: M3ViewModel = hiltViewModel()
     val state by viewModel.state.collectAsState()
-    var fan by remember { mutableFloatStateOf(state.set.fan.toFloat()) }
-    var displayFan by remember { mutableIntStateOf(state.set.fan) }
+    var fan by remember(state) { mutableFloatStateOf(state.set.fan.toFloat()) }
+    var displayFan by remember(state) { mutableIntStateOf(state.set.fan) }
     val statusColor by remember(state) {
         mutableStateOf(
             when (state.set.power == 1) {
@@ -196,7 +200,7 @@ private fun M3TempScreen(
             Button(
                 shape = RoundedCornerShape(percent = 100),
                 modifier = Modifier.size(90.dp),
-                onClick = { /*TODO*/ }
+                onClick = onSchedulerClick
             ) {
                 Icon(
                     painter = painterResource(id = R.drawable.calendar),

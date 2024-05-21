@@ -5,35 +5,52 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.CircularProgressIndicator
+import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Switch
 import androidx.compose.material.SwitchDefaults
+import androidx.compose.material.TabRowDefaults.Divider
 import androidx.compose.material.Text
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ru.cityron.R
 import ru.cityron.domain.model.m3.M3Task
-import ru.cityron.domain.utils.Temp
+import ru.cityron.domain.utils.toTime
 import ru.cityron.presentation.components.BackScaffold
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun SchedulersScreen(
     onClick: () -> Unit,
@@ -41,23 +58,34 @@ fun SchedulersScreen(
     viewModel: SchedulersViewModel = hiltViewModel()
 ) {
     val tasks by viewModel.tasks.collectAsState()
+    val isRefreshing by viewModel.isRefresh.collectAsState()
+
+    val pullToRefreshState = rememberPullRefreshState(refreshing = isRefreshing, onRefresh = { viewModel.refresh() })
+
     BackScaffold(
         title = "Планировщик",
         onClick = onClick,
+        modifier = Modifier.pullRefresh(pullToRefreshState)
     ) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
-            contentPadding = PaddingValues(20.dp)
-        ) {
-            items(tasks) {
-                ScheduleCard(
-                    task = it,
-                    onCheckedChange = {},
-                    onClick = { onTaskClick(it.i) }
-                )
+        if (!isRefreshing) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(20.dp),
+                contentPadding = PaddingValues(20.dp)
+            ) {
+                items(tasks) {
+                    ScheduleCard(
+                        task = it,
+                        onCheckedChange = {},
+                        onClick = { onTaskClick(it.i) }
+                    )
+                }
             }
         }
+        PullRefreshIndicator(isRefreshing, pullToRefreshState, Modifier.align(Alignment.TopCenter))
+    }
+    LaunchedEffect(key1 = Unit) {
+        viewModel.refresh()
     }
 }
 
@@ -67,7 +95,6 @@ fun ScheduleCard(
     onCheckedChange: (Boolean) -> Unit,
     onClick: () -> Unit,
 ) {
-    fun toTime(num: Int): String = if (num < 10) "0$num" else "$num"
     val time = "${toTime(task.hour)}:${toTime(task.min)}"
     // day
     val day = when (task.day) {
@@ -95,29 +122,45 @@ fun ScheduleCard(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .background(
-                color = MaterialTheme.colors.primary,
-                shape = RoundedCornerShape(4.dp)
-            )
-            .clickable { onClick() },
-        horizontalArrangement = Arrangement.SpaceBetween,
+            .clip(RoundedCornerShape(4.dp))
+            .background(color = MaterialTheme.colors.primary)
+            .clickable { onClick() }
+            .padding(15.dp),
+        horizontalArrangement = Arrangement.spacedBy(15.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Column {
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
             Row(
-                horizontalArrangement = Arrangement.SpaceBetween
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
             ) {
-                Text(text = "${Temp.toGrade(task.temp)}°с")
-                Text(text = time)
-                Row {
+                Text(
+                    text = "${task.temp}°с",
+                    fontSize = 32.sp
+                )
+                Text(
+                    text = time,
+                    fontSize = 32.sp
+                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
                         painter = painterResource(id = R.drawable.fan),
-                        contentDescription = null
+                        contentDescription = null,
+                        modifier = Modifier.size(24.dp)
                     )
-                    Text(text = "${task.fan}")
+                    Text(
+                        text = "${task.fan}",
+                        fontSize = 32.sp
+                    )
                 }
             }
             Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(IntrinsicSize.Min),
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(text = day)
@@ -134,22 +177,19 @@ fun ScheduleCard(
                 checkedThumbColor = MaterialTheme.colors.primaryVariant,
                 checkedTrackColor = MaterialTheme.colors.primaryVariant,
                 uncheckedThumbColor = MaterialTheme.colors.onBackground,
-                uncheckedTrackColor = MaterialTheme.colors.primary
+                uncheckedTrackColor = MaterialTheme.colors.background,
+                uncheckedTrackAlpha = 1f
             )
         )
     }
 }
 
 @Composable
-fun VDivider(
-    modifier: Modifier = Modifier,
-    color: Color = MaterialTheme.colors.onBackground,
-    thickness: Dp = 1.dp
-) {
-    Box(
-        modifier
+fun VDivider() {
+    Divider(
+        color = MaterialTheme.colors.onBackground,
+        modifier = Modifier
             .fillMaxHeight()
-            .width(thickness)
-            .background(color = color)
+            .width(1.dp)
     )
 }

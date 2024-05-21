@@ -11,12 +11,14 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.runtime.Composable
+import androidx.navigation.NamedNavArgument
 import androidx.navigation.NavBackStackEntry
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.compose.composable
 
 fun NavGraphBuilder.slideInOutComposable(
     route: String,
+    arguments: List<NamedNavArgument> = emptyList(),
     content: @Composable AnimatedContentScope.(NavBackStackEntry) -> Unit
 ) {
     composable(
@@ -41,6 +43,7 @@ fun NavGraphBuilder.slideInOutComposable(
                 towards = AnimatedContentTransitionScope.SlideDirection.End
             )
         },
+        arguments = arguments,
         content = content
     )
 }

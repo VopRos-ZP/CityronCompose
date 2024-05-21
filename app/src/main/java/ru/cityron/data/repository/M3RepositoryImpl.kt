@@ -19,6 +19,8 @@ import ru.cityron.domain.model.m3.M3State
 import ru.cityron.domain.model.m3.M3Static
 import ru.cityron.domain.repository.M3Repository
 import ru.cityron.domain.repository.NetworkRepository
+import ru.cityron.domain.utils.Path.JSON_SCHED
+import ru.cityron.domain.utils.Path.JSON_SETTINGS
 import ru.cityron.domain.utils.Path.JSON_STATE
 import ru.cityron.domain.utils.Path.JSON_STATIC
 import javax.inject.Inject
@@ -46,7 +48,7 @@ class M3RepositoryImpl @Inject constructor(
     )
 
     override val settings: Flow<M3Settings> = flow {
-        sendRequests<JsonSettings<M3Settings>, M3Settings>("settings") { settings }
+        sendRequests<JsonSettings<M3Settings>, M3Settings>(JSON_SETTINGS) { settings }
     }.stateIn(
         scope = coroutineScope,
         started = SharingStarted.Lazily,
@@ -54,7 +56,7 @@ class M3RepositoryImpl @Inject constructor(
     )
 
     override val sched: Flow<M3Sched> = flow {
-        sendRequests<JsonSched<M3Sched>, M3Sched>("sched") { sched }
+        sendRequests<JsonSched<M3Sched>, M3Sched>(JSON_SCHED) { sched }
     }.stateIn(
         scope = coroutineScope,
         started = SharingStarted.Lazily,
