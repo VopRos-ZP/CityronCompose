@@ -1,5 +1,6 @@
 package ru.cityron.presentation.navigation.graph
 
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
@@ -44,7 +45,10 @@ fun NavGraphBuilder.m3NavGraph(
             route = "${Screen.Schedulers.route}/{id}",
             arguments = listOf(navArgument("id") { type = NavType.IntType })
         ) {
-            EditSchedulerScreen(onClick = onBack)
+            EditSchedulerScreen(
+                onClick = onBack,
+                id = it.arguments?.getInt("id") ?: 0
+                )
         }
     }
 }

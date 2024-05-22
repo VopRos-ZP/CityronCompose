@@ -55,6 +55,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import ru.cityron.R
 import ru.cityron.presentation.components.DrawerScaffold
+import ru.cityron.presentation.components.FanSlider
 import ru.cityron.presentation.components.HTabRow
 import ru.cityron.presentation.components.TabWithPage
 import ru.cityron.presentation.components.Thermostat
@@ -111,7 +112,7 @@ private fun M3TempScreen(
 ) {
     val viewModel: M3ViewModel = hiltViewModel()
     val state by viewModel.state.collectAsState()
-    var fan by remember(state) { mutableFloatStateOf(state.set.fan.toFloat()) }
+    var fan by remember(state) { mutableIntStateOf(state.set.fan) }
     var displayFan by remember(state) { mutableIntStateOf(state.set.fan) }
     val statusColor by remember(state) {
         mutableStateOf(
@@ -135,20 +136,11 @@ private fun M3TempScreen(
             initValue = 224
         )
         Column {
-            Slider(
+            FanSlider(
                 modifier = Modifier.fillMaxWidth(),
-                value = fan,
-                onValueChange = { fan = it },
-                steps = 3,
-                valueRange = 1f..5f,
-                colors = SliderDefaults.colors(
-                    inactiveTickColor = MaterialTheme.colors.primary,
-                    activeTickColor = MaterialTheme.colors.primary,
-                    thumbColor = MaterialTheme.colors.primaryVariant,
-                    activeTrackColor = MaterialTheme.colors.primaryVariant,
-                    inactiveTrackColor = MaterialTheme.colors.primaryVariant,
-                ),
-                onValueChangeFinished = {
+                fan = fan,
+                onFanChange = { fan = it },
+                onFanChangeFinished = {
                     displayFan = fan.toInt()
                     // viewModel.conf(displayFan)
                 }

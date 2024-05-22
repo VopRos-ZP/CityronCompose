@@ -1,6 +1,5 @@
 package ru.cityron.presentation.screens.editScheduler
 
-import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -10,26 +9,19 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import ru.cityron.domain.model.m3.M3Task
 import ru.cityron.domain.repository.ConfRepository
-import ru.cityron.domain.repository.M3Repository
 import ru.cityron.domain.usecase.GetM3SchedUseCase
 import javax.inject.Inject
 
 @HiltViewModel
 class EditSchedulerViewModel @Inject constructor(
-    savedStateHandle: SavedStateHandle,
     private val getM3SchedUseCase: GetM3SchedUseCase,
     private val confRepository: ConfRepository
 ) : ViewModel() {
 
-    private val id: Int = checkNotNull(savedStateHandle["id"])
+    private val _task = MutableStateFlow(M3Task())
+    val localTask = _task.asStateFlow()
 
-    private val _task = MutableStateFlow(M3Task(i = id))
-    val task = _task.asStateFlow()
-
-    private val _localTask = _task
-    val localTask = _localTask.asStateFlow()
-
-    init {
+    fun fetchTask(id: Int) {
         viewModelScope.launch(Dispatchers.IO) {
             val sched = getM3SchedUseCase()
             _task.value = when (id) {
