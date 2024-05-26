@@ -1,5 +1,11 @@
 package ru.cityron.presentation.screens.editScheduler
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -7,17 +13,22 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.BottomAppBar
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -36,21 +47,48 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
+import ru.cityron.domain.utils.Temp
 import ru.cityron.domain.utils.toTime
 import ru.cityron.presentation.components.BackScaffold
 import ru.cityron.presentation.components.FanSlider
-import ru.cityron.presentation.components.Picker
+import ru.cityron.presentation.components.NumberPicker
 
 @Composable
 fun EditSchedulerScreen(
     onClick: () -> Unit, id: Int,
-    viewModel: EditSchedulerViewModel =  hiltViewModel()
+    viewModel: EditSchedulerViewModel = hiltViewModel()
 ) {
     val task by viewModel.localTask.collectAsState()
+    val isChanged by viewModel.isChanged.collectAsState()
 
     BackScaffold(
         title = "Планировщик",
-        onClick = onClick
+        onClick = onClick,
+        bottomBar = {
+            AnimatedContent(targetState = isChanged, label = "") {
+                when (it) {
+                    true -> BottomAppBar(
+                        modifier = Modifier.clip(RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp)),
+                        backgroundColor = MaterialTheme.colors.primary,
+                        contentPadding = PaddingValues(20.dp),
+                    ) {
+                        Button(
+                            modifier = Modifier.fillMaxWidth(),
+                            shape = RoundedCornerShape(4.dp),
+                            contentPadding = PaddingValues(vertical = 14.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                backgroundColor = MaterialTheme.colors.secondary,
+                                contentColor = MaterialTheme.colors.onBackground
+                            ),
+                            onClick = viewModel::onSaveClick
+                        ) {
+                            Text(text = "Сохранить")
+                        }
+                    }
+                    else -> {}
+                }
+            }
+        }
     ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -59,9 +97,9 @@ fun EditSchedulerScreen(
                 TitledContent(title = "Время") {
                     TimePicker(
                         hour = task.hour,
-                        onHourChanged = {},
+                        onHourChanged = viewModel::onHourChanged,
                         min = task.min,
-                        onMinChanged = {}
+                        onMinChanged = viewModel::onMinChanged
                     )
                 }
             }
@@ -69,7 +107,7 @@ fun EditSchedulerScreen(
                 TitledContent(title = "Дата") {
                     DayTabRow(
                         day = task.day,
-                        onDayChanged = {}
+                        onDayChanged = viewModel::onDayChanged
                     )
                 }
             }
@@ -77,15 +115,29 @@ fun EditSchedulerScreen(
                 TitledContent(title = "Режим") {
                     ModeRow(
                         mode = task.mode,
-                        onModeChanged = {}
+                        onModeChanged = viewModel::onModeChanged
                     )
                 }
             }
             item {
                 FanRow(
                     fan = task.fan,
-                    onFanChanged = {}
+                    onFanChanged = viewModel::onFanChanged
                 )
+            }
+            item {
+                TempRow(
+                    value = task.temp,
+                    onValueChanged = viewModel::onTempChanged
+                )
+            }
+            item {
+                TitledContent(title = "Действие") {
+                    PowerRow(
+                        power = task.power,
+                        onPowerChange = viewModel::onPowerChanged
+                    )
+                }
             }
         }
     }
@@ -105,7 +157,7 @@ fun TitledContent(
             .fillMaxWidth()
             .padding(20.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(20.dp)
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Row {
             Text(
@@ -132,26 +184,24 @@ fun TimePicker(
     val hourValues = (0..23).toList()
     val minValues = (0..59).toList()
 
-    Row(modifier = Modifier.fillMaxWidth(0.5f)) {
-        Picker(
-            items = hourValues,
-            value = hour,
-            onValueChange = onHourChanged,
-            format = ::toTime,
-            textModifier = Modifier.padding(8.dp),
+    Row(modifier = Modifier.fillMaxWidth(0.6f)) {
+        NumberPicker(
             modifier = Modifier.fillMaxWidth(0.5f),
-            dividerColor = MaterialTheme.colors.onBackground,
-            textStyle = TextStyle(fontSize = 32.sp),
-        )
-        Picker(
-            items = minValues,
-            value = min,
-            onValueChange = onMinChanged,
+            value = hour,
+            items = hourValues,
             format = ::toTime,
-            textModifier = Modifier.padding(8.dp),
-            modifier = Modifier.fillMaxWidth(),
-            dividerColor = MaterialTheme.colors.onBackground,
+            onValueChanged = onHourChanged,
             textStyle = TextStyle(fontSize = 32.sp),
+            textModifier = Modifier.padding(8.dp),
+        )
+        NumberPicker(
+            modifier = Modifier.fillMaxWidth(),
+            value = min,
+            items = minValues,
+            format = ::toTime,
+            onValueChanged = onMinChanged,
+            textStyle = TextStyle(fontSize = 32.sp),
+            textModifier = Modifier.padding(8.dp),
         )
     }
 }
@@ -162,7 +212,6 @@ fun DayTabRow(
     onDayChanged: (Int) -> Unit
 ) {
     val values = listOf("пн", "вт", "ср", "чт", "пт", "сб", "вс", "", "", "")
-    var selected by remember { mutableIntStateOf(day) }
 
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(
@@ -173,8 +222,8 @@ fun DayTabRow(
                 DayChip(
                     modifier = Modifier.size(67.dp, 44.dp),
                     day = values[i],
-                    isSelected = selected == i,
-                    onClick = { selected = i }
+                    isSelected = day == i,
+                    onClick = { onDayChanged(i) }
                 )
             }
         }
@@ -186,14 +235,11 @@ fun DayTabRow(
                 DayChip(
                     modifier = Modifier.size(67.dp, 44.dp),
                     day = values[i],
-                    isSelected = selected == i,
-                    onClick = { selected = i }
+                    isSelected = day == i,
+                    onClick = { onDayChanged(i) }
                 )
             }
         }
-    }
-    LaunchedEffect(key1 = selected) {
-        onDayChanged(selected)
     }
 }
 
@@ -274,7 +320,7 @@ fun FanRow(
     var float by remember(fan) { mutableIntStateOf(fan) }
     TitledContent(
         title = "Скорость",
-        trailing = { 
+        trailing = {
             Text(text = "$float")
         }
     ) {
@@ -283,5 +329,49 @@ fun FanRow(
             onFanChange = { float = it },
             onFanChangeFinished = onFanChanged
         )
+    }
+}
+
+@Composable
+fun TempRow(
+    value: Int,
+    onValueChanged: (Int) -> Unit
+) {
+    TitledContent(title = "Уставка") {
+        NumberPicker(
+            modifier = Modifier.fillMaxWidth(0.5f),
+            items = (5..40).toList(),
+            value = value,
+            onValueChanged = onValueChanged,
+            format = { t -> "$t°С" },
+            textStyle = TextStyle(fontSize = 32.sp),
+            textModifier = Modifier.padding(8.dp),
+        )
+    }
+}
+
+@Composable
+fun PowerRow(
+    power: Int,
+    onPowerChange: (Int) -> Unit
+) {
+    val values = listOf("отключить", "включить")
+    var selected by remember { mutableIntStateOf(power) }
+
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        values.forEachIndexed { index, s ->
+            DayChip(
+                modifier = Modifier.size(158.dp, 44.dp),
+                day = s,
+                isSelected = selected == index,
+                onClick = { selected = index }
+            )
+        }
+    }
+    LaunchedEffect(key1 = selected) {
+        onPowerChange(selected)
     }
 }

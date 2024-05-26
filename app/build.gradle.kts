@@ -67,7 +67,7 @@ dependencies {
     /** Network **/
     implementation(libs.okhttp)
     implementation(libs.okhttp.logging.interceptor)
-    /**  **/
+    /** Libs **/
     implementation(libs.fingerprint.android)
     implementation(libs.highcharts.android)
     /** Room **/

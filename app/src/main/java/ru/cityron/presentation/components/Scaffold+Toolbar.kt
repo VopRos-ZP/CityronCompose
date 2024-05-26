@@ -24,6 +24,7 @@ fun DrawerScaffold(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     fab: @Composable () -> Unit = {},
+    bottomBar: @Composable () -> Unit = {},
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     content: @Composable BoxScope.() -> Unit,
 ) {
@@ -32,6 +33,7 @@ fun DrawerScaffold(
         topBar = { DrawerTopBar(title = title, onClick = onClick) },
         snackbarHostState = snackbarHostState,
         fab = fab,
+        bottomBar = bottomBar,
         content = content
     )
 }
@@ -42,6 +44,7 @@ fun BackScaffold(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     fab: @Composable () -> Unit = {},
+    bottomBar: @Composable () -> Unit = {},
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
     content: @Composable BoxScope.() -> Unit,
 ) {
@@ -50,6 +53,7 @@ fun BackScaffold(
         topBar = { BackTopBar(title = title, onClick = onClick) },
         snackbarHostState = snackbarHostState,
         fab = fab,
+        bottomBar = bottomBar,
         content = content
     )
 }
@@ -59,6 +63,7 @@ fun ToolbarScaffold(
     modifier: Modifier,
     topBar: @Composable () -> Unit,
     content: @Composable BoxScope.() -> Unit,
+    bottomBar: @Composable () -> Unit = {},
     snackbarHostState: SnackbarHostState,
     fab: @Composable () -> Unit
 ) {
@@ -70,7 +75,8 @@ fun ToolbarScaffold(
                 snackbar = { Snackbar(it) }
             )
         },
-        floatingActionButton = fab
+        floatingActionButton = fab,
+        bottomBar = bottomBar
     ) {
         Box(
             modifier = modifier
