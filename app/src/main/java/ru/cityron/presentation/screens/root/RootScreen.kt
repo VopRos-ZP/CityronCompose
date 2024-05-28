@@ -116,7 +116,8 @@ fun RootScreen() {
             onCustomClick = { navigationState.navigate(Screen.AddCustom.route) },
             onAlertsClick = { navigationState.navigate(Screen.Alerts.route) },
             onSchedulerClick = { navigationState.navigate(Screen.Schedulers.route) },
-            onTaskClick = { navigationState.navigate(Screen.Task(it).route) }
+            onTaskClick = { navigationState.navigate(Screen.Task(it).route) },
+            onSettingsClick = { navigationState.navigate(Screen.Settings.route) }
         )
     }
     LaunchedEffect(Unit) {

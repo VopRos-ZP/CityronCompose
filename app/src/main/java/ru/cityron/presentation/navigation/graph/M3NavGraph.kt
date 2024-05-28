@@ -12,6 +12,7 @@ import ru.cityron.presentation.screens.alerts.AlertsScreen
 import ru.cityron.presentation.screens.editScheduler.EditSchedulerScreen
 import ru.cityron.presentation.screens.m3tabs.M3TabsScreen
 import ru.cityron.presentation.screens.scheduler.SchedulersScreen
+import ru.cityron.presentation.screens.settings.SettingsScreen
 
 fun NavGraphBuilder.m3NavGraph(
     route: String,
@@ -20,6 +21,7 @@ fun NavGraphBuilder.m3NavGraph(
     onAlertsClick: () -> Unit,
     onSchedulerClick: () -> Unit,
     onTaskClick: (Int) -> Unit,
+    onSettingsClick: () -> Unit,
 ) {
     navigation(
         startDestination = Screen.M3Tabs.route,
@@ -29,7 +31,8 @@ fun NavGraphBuilder.m3NavGraph(
             M3TabsScreen(
                 onClick = onDrawer,
                 onAlertsClick = onAlertsClick,
-                onSchedulerClick = onSchedulerClick
+                onSchedulerClick = onSchedulerClick,
+                onSettingsClick = onSettingsClick
             )
         }
         slideInOutComposable(route = Screen.Schedulers.route) {
@@ -48,7 +51,10 @@ fun NavGraphBuilder.m3NavGraph(
             EditSchedulerScreen(
                 onClick = onBack,
                 id = it.arguments?.getInt("id") ?: 0
-                )
+            )
+        }
+        slideInOutComposable(route = Screen.Settings.route) {
+            SettingsScreen(onClick = onBack)
         }
     }
 }

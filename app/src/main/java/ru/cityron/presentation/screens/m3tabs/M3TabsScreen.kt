@@ -69,10 +69,15 @@ fun M3TabsScreen(
     onClick: () -> Unit,
     onAlertsClick: ()  -> Unit,
     onSchedulerClick: () -> Unit,
+    onSettingsClick: () -> Unit,
     viewModel: M3ViewModel = hiltViewModel()
 ) {
     val pair by viewModel.controller.collectAsState()
-    DrawerScaffold(title = pair?.first?.name ?: "", onClick = onClick) {
+    DrawerScaffold(
+        title = pair?.first?.name ?: "",
+        onClick = onClick,
+        onSettingsClick = onSettingsClick
+    ) {
         M3TabsScreenContent(
             onAlertsClick = onAlertsClick,
             onSchedulerClick = onSchedulerClick

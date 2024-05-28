@@ -14,6 +14,8 @@ sealed class Screen(
     data object Schedulers : Screen(ROUTE_SCHEDULERS)
     data class Task(val id: Int) : Screen("$ROUTE_SCHEDULERS/$id")
 
+    data object Settings : Screen(ROUTE_SETTINGS)
+
     data object M3Tabs : Screen(ROUTE_M3_TABS)
 
     companion object {
@@ -24,6 +26,7 @@ sealed class Screen(
         const val ROUTE_ADD_CUSTOM = "add_custom"
         const val ROUTE_ALERTS = "alerts"
         const val ROUTE_SCHEDULERS = "schedulers"
+        const val ROUTE_SETTINGS = "settings"
 
         const val ROUTE_ATLAS = "atlas"
         const val ROUTE_M3_TABS = "m3_tabs"
