@@ -1,6 +1,5 @@
 package ru.cityron.presentation.navigation.graph
 
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavType
 import androidx.navigation.compose.composable
@@ -22,6 +21,11 @@ fun NavGraphBuilder.m3NavGraph(
     onSchedulerClick: () -> Unit,
     onTaskClick: (Int) -> Unit,
     onSettingsClick: () -> Unit,
+    onChangeName: () -> Unit,
+    onAuthClick: () -> Unit,
+    onAlgoClick: () -> Unit,
+    onAlarmClick: () -> Unit,
+    onControllerClick: () -> Unit,
 ) {
     navigation(
         startDestination = Screen.M3Tabs.route,
@@ -54,7 +58,14 @@ fun NavGraphBuilder.m3NavGraph(
             )
         }
         slideInOutComposable(route = Screen.Settings.route) {
-            SettingsScreen(onClick = onBack)
+            SettingsScreen(
+                onClick = onBack,
+                onChangeName = onChangeName,
+                onAuthClick = onAuthClick,
+                onAlgoClick = onAlgoClick,
+                onAlarmClick = onAlarmClick,
+                onControllerClick = onControllerClick
+            )
         }
     }
 }
