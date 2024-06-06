@@ -138,7 +138,11 @@ private fun M3TempScreen(
     ) {
         Thermostat(
             modifier = Modifier.size(275.dp),
-            initValue = 224
+            initValue = 224,
+            value = 224,
+            minValue = 50,
+            maxValue = 400,
+            step = 5
         )
         Column {
             FanSlider(
@@ -163,7 +167,8 @@ private fun M3TempScreen(
                 Icon(
                     painter = painterResource(id = R.drawable.fan),
                     contentDescription = null,
-                    tint = MaterialTheme.colors.primaryVariant
+                    tint = MaterialTheme.colors.primaryVariant,
+                    modifier = Modifier.size(24.dp)
                 )
             }
         }

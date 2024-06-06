@@ -2,10 +2,10 @@ package ru.cityron.presentation.navigation.graph
 
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import ru.cityron.domain.model.Controller
 import ru.cityron.presentation.navigation.Screen
+import ru.cityron.presentation.navigation.slideInOutComposable
+import ru.cityron.presentation.navigation.SlideInOutNavHost
 import ru.cityron.presentation.screens.blank.BlankScreen
 
 @Composable
@@ -26,11 +26,11 @@ fun RootNavGraph(
     onAlarmClick: () -> Unit,
     onControllerClick: () -> Unit,
 ) {
-    NavHost(
+    SlideInOutNavHost(
         navController = navHostController,
         startDestination = Screen.Blank.route
     ) {
-        composable(Screen.Blank.route) { BlankScreen(onDrawer) }
+        slideInOutComposable(Screen.Blank.route) { BlankScreen(onDrawer) }
         findNavGraph(
             onDrawer = onDrawer,
             onBack = onBack,

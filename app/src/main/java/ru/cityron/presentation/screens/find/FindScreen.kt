@@ -51,7 +51,11 @@ fun FindScreen(
 ) {
     val viewModel: FindViewModel = hiltViewModel()
     val infoList by viewModel.infoList.collectAsState()
-    DrawerScaffold(title = "Поиск контроллеров", onClick = onClick) {
+    DrawerScaffold(
+        title = "Поиск контроллеров",
+        onClick = onClick,
+        onSettingsClick = null
+    ) {
         FindScreenContent(infoList, viewModel::addController, onCustomClick)
     }
     LaunchedEffect(key1 = Unit) {
@@ -69,38 +73,35 @@ private fun FindScreenContent(
         contentAlignment = Alignment.Center,
         modifier = Modifier.background(MaterialTheme.colors.background)
     ) {
-        when (infoList) {
-            emptyMap<Controller, Boolean>() -> Text(text = "Контроллеры не найдены")
-            else -> LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(20.dp),
-                contentPadding = PaddingValues(20.dp),
-            ) {
-                infoList.map { (controller, added) ->
-                    item {
-                        ControllerItem(
-                            controller = controller,
-                            added = added
-                        ) { onClick(controller) }
-                    }
-                }
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
+            contentPadding = PaddingValues(20.dp),
+        ) {
+            infoList.map { (controller, added) ->
                 item {
-                    OutlinedButton(
-                        modifier = Modifier.fillMaxWidth(),
-                        onClick = onCustomClick,
-                        shape = RoundedCornerShape(4.dp),
-                        border = BorderStroke(width = 1.dp, color = MaterialTheme.colors.secondary),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            backgroundColor = Color.Transparent,
-                            contentColor = MaterialTheme.colors.onPrimary
-                        )
-                    ) {
-                        Text(
-                            modifier = Modifier.fillMaxSize().padding(vertical = 14.dp),
-                            text = "Добавить контроллер вручную",
-                            textAlign = TextAlign.Center
-                        )
-                    }
+                    ControllerItem(
+                        controller = controller,
+                        added = added
+                    ) { onClick(controller) }
+                }
+            }
+            item {
+                OutlinedButton(
+                    modifier = Modifier.fillMaxWidth(),
+                    onClick = onCustomClick,
+                    shape = RoundedCornerShape(4.dp),
+                    border = BorderStroke(width = 1.dp, color = MaterialTheme.colors.secondary),
+                    colors = ButtonDefaults.outlinedButtonColors(
+                        backgroundColor = Color.Transparent,
+                        contentColor = MaterialTheme.colors.onPrimary
+                    )
+                ) {
+                    Text(
+                        modifier = Modifier.fillMaxSize().padding(vertical = 14.dp),
+                        text = "Добавить контроллер вручную",
+                        textAlign = TextAlign.Center
+                    )
                 }
             }
         }

@@ -8,6 +8,7 @@ import androidx.navigation.navigation
 import ru.cityron.presentation.navigation.Screen
 import ru.cityron.presentation.navigation.slideInOutComposable
 import ru.cityron.presentation.screens.alerts.AlertsScreen
+import ru.cityron.presentation.screens.changeName.ChangeNameScreen
 import ru.cityron.presentation.screens.editScheduler.EditSchedulerScreen
 import ru.cityron.presentation.screens.m3tabs.M3TabsScreen
 import ru.cityron.presentation.screens.scheduler.SchedulersScreen
@@ -65,6 +66,11 @@ fun NavGraphBuilder.m3NavGraph(
                 onAlgoClick = onAlgoClick,
                 onAlarmClick = onAlarmClick,
                 onControllerClick = onControllerClick
+            )
+        }
+        slideInOutComposable(route = Screen.ChangeName.route) {
+            ChangeNameScreen(
+                onClick = onBack
             )
         }
     }

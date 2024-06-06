@@ -1,16 +1,17 @@
 package ru.cityron.presentation.components
 
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
-import androidx.compose.material.contentColorFor
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -20,17 +21,19 @@ import ru.cityron.R
 fun DrawerTopBar(
     title: String,
     onClick: () -> Unit,
-    onSettingsClick: () -> Unit,
+    onSettingsClick: (() -> Unit)? = null,
 ) {
     ToolBar(
         title = title,
         icon = Icons.Default.Menu,
         onClick = onClick,
         actions = {
+            if (onSettingsClick != null)
             IconButton(onClick = onSettingsClick) {
                 Icon(
                     painter = painterResource(id = R.drawable.settings),
-                    contentDescription = null
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp)
                 )
             }
         }
@@ -58,7 +61,9 @@ private fun ToolBar(
 ) {
     TopAppBar(
         backgroundColor = MaterialTheme.colors.primary,
-        title = { Text(text = title) },
+        title = {
+            Text(text = title)
+        },
         navigationIcon = {
             IconButton(onClick = onClick) {
                 Icon(

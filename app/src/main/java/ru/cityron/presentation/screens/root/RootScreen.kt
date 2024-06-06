@@ -56,6 +56,7 @@ fun RootScreen() {
     val drawerState = rememberDrawerState(DrawerValue.Open)
     val viewModel: RootViewModel = hiltViewModel()
     val controllers by viewModel.controllers.collectAsState()
+    val navBackStackEntry by navigationState.navHostController.currentBackStackEntryAsState()
 
     ModalDrawer(
         drawerState = drawerState,
@@ -63,7 +64,7 @@ fun RootScreen() {
         scrimColor = Color.Transparent,
         drawerBackgroundColor = MaterialTheme.colors.primary,
         drawerElevation = 1.dp,
-        gesturesEnabled = false,
+        gesturesEnabled = navBackStackEntry?.destination?.route != Screen.Blank.route,
         drawerContent = {
             Column(
                 modifier = Modifier
@@ -76,7 +77,6 @@ fun RootScreen() {
                     fontSize = 36.sp,
                     color = MaterialTheme.colors.secondary
                 )
-                val navBackStackEntry by navigationState.navHostController.currentBackStackEntryAsState()
                 controllers.forEach { (controller, source) ->
                     ControllerDrawerItem(
                         controller = controller,
@@ -118,11 +118,11 @@ fun RootScreen() {
             onSchedulerClick = { navigationState.navigate(Screen.Schedulers.route) },
             onTaskClick = { navigationState.navigate(Screen.Task(it).route) },
             onSettingsClick = { navigationState.navigate(Screen.Settings.route) },
-            onChangeName = {},
-            onAuthClick = {},
-            onAlgoClick = {},
-            onAlarmClick = {},
-            onControllerClick = {}
+            onChangeName = { navigationState.navigate(Screen.ChangeName.route) },
+            onAuthClick = { navigationState.navigate(Screen.Auth.route) },
+            onAlgoClick = { navigationState.navigate(Screen.Algo.route) },
+            onAlarmClick = { navigationState.navigate(Screen.Alarms.route) },
+            onControllerClick = { navigationState.navigate(Screen.Controller.route) }
         )
     }
     LaunchedEffect(Unit) {

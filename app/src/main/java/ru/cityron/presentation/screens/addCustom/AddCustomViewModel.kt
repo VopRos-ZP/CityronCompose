@@ -39,8 +39,7 @@ class AddCustomViewModel @Inject constructor(
             }
             _state.value = state.value.copy(
                 isErrorChecked = isSuccess.not(),
-                isShowSnackbar = isSuccess.not(),
-
+                isShowSnackbar = isSuccess.not()
             )
         }
     }

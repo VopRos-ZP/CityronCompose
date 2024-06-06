@@ -22,8 +22,8 @@ import androidx.compose.ui.focus.focusModifier
 fun DrawerScaffold(
     title: String,
     onClick: () -> Unit,
-    onSettingsClick: () -> Unit,
     modifier: Modifier = Modifier,
+    onSettingsClick: (() -> Unit)? = null,
     fab: @Composable () -> Unit = {},
     bottomBar: @Composable () -> Unit = {},
     snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
