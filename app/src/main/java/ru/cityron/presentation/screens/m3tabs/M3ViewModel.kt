@@ -24,7 +24,7 @@ class M3ViewModel @Inject constructor(
     private val _controller = MutableStateFlow<Pair<Controller, DataSource>?>(null)
     val controller = _controller.asStateFlow()
 
-    private val _state = MutableStateFlow(M3State())
+    private val _state = MutableStateFlow<M3State?>(null)
     val state = _state.asStateFlow()
 
     fun fetchState() {

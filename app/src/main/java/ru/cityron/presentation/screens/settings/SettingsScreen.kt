@@ -78,8 +78,7 @@ fun Category(
             .clip(RoundedCornerShape(4.dp))
             .background(color = MaterialTheme.colors.primary)
             .clickable { onClick() }
-            .padding(horizontal = 16.dp, vertical = 20.dp)
-        ,
+            .padding(horizontal = 16.dp, vertical = 20.dp),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -90,7 +89,7 @@ fun Category(
         )
         Text(
             text = text,
-            fontSize = 13.sp
+            fontSize = 12.sp
         )
     }
 }

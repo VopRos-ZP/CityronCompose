@@ -54,6 +54,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import kotlinx.coroutines.launch
 import ru.cityron.R
+import ru.cityron.domain.utils.Temp
 import ru.cityron.presentation.components.DrawerScaffold
 import ru.cityron.presentation.components.FanSlider
 import ru.cityron.presentation.components.HTabRow
@@ -67,7 +68,7 @@ import ru.cityron.ui.theme.Red
 @Composable
 fun M3TabsScreen(
     onClick: () -> Unit,
-    onAlertsClick: ()  -> Unit,
+    onAlertsClick: () -> Unit,
     onSchedulerClick: () -> Unit,
     onSettingsClick: () -> Unit,
     viewModel: M3ViewModel = hiltViewModel()
@@ -117,140 +118,149 @@ private fun M3TempScreen(
 ) {
     val viewModel: M3ViewModel = hiltViewModel()
     val state by viewModel.state.collectAsState()
-    var fan by remember(state) { mutableIntStateOf(state.set.fan) }
-    var displayFan by remember(state) { mutableIntStateOf(state.set.fan) }
-    val statusColor by remember(state) {
-        mutableStateOf(
-            when (state.set.power == 1) {
-                true -> Green
-                else -> Red
-            }
-        )
-    }
-    val statusOffset = (-5).dp
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(bottom = 20.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween
-    ) {
-        Thermostat(
-            modifier = Modifier.size(275.dp),
-            initValue = 224,
-            value = 224,
-            minValue = 50,
-            maxValue = 400,
-            step = 5
-        )
-        Column {
-            FanSlider(
-                modifier = Modifier.fillMaxWidth(),
-                fan = fan,
-                onFanChange = { fan = it },
-                onFanChangeFinished = {
-                    displayFan = fan.toInt()
-                    // viewModel.conf(displayFan)
+    if (state != null) {
+        var fan by remember(state) { mutableIntStateOf(state!!.set.fan) }
+        var displayFan by remember(state) { mutableIntStateOf(state!!.set.fan) }
+        val statusColor by remember(state) {
+            mutableStateOf(
+                when (state!!.set.power == 1) {
+                    true -> Green
+                    else -> Red
                 }
             )
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = "$displayFan",
-                    color = MaterialTheme.colors.primaryVariant,
-                    fontSize = 32.sp
+        }
+        val statusOffset = (-5).dp
+
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(bottom = 20.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
+        ) {
+            Box(contentAlignment = Alignment.Center) {
+                Thermostat(
+                    modifier = Modifier.size(275.dp),
+                    value = state!!.set.temp,
+                    minValue = 50,
+                    maxValue = 450,
+                    step = 50,
+                    onPositionChange = {}
                 )
-                Icon(
-                    painter = painterResource(id = R.drawable.fan),
-                    contentDescription = null,
-                    tint = MaterialTheme.colors.primaryVariant,
-                    modifier = Modifier.size(24.dp)
+                Text(
+                    text = Temp.toGrade(state!!.algo.tempPv),
+                    color = MaterialTheme.colors.primaryVariant,
+                    fontSize = 62.sp
                 )
             }
-        }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
-        ) {
-            Box {
-                Box(
-                    modifier = Modifier
-                        .size(16.dp)
-                        .offset(statusOffset, statusOffset)
-                        .background(
-                            color = statusColor,
-                            shape = RoundedCornerShape(percent = 100)
-                        )
+            Column {
+                FanSlider(
+                    modifier = Modifier.fillMaxWidth(),
+                    fan = fan,
+                    onFanChange = { fan = it },
+                    onFanChangeFinished = {
+                        displayFan = fan.toInt()
+                        // viewModel.conf(displayFan)
+                    }
                 )
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = "$displayFan",
+                        color = MaterialTheme.colors.primaryVariant,
+                        fontSize = 32.sp
+                    )
+                    Icon(
+                        painter = painterResource(id = R.drawable.fan),
+                        contentDescription = null,
+                        tint = MaterialTheme.colors.primaryVariant,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                Box {
+                    Box(
+                        modifier = Modifier
+                            .size(16.dp)
+                            .offset(statusOffset, statusOffset)
+                            .background(
+                                color = statusColor,
+                                shape = RoundedCornerShape(percent = 100)
+                            )
+                    )
+                    Button(
+                        shape = RoundedCornerShape(percent = 100),
+                        modifier = Modifier.size(90.dp),
+                        onClick = { /*TODO*/ }
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.on_off),
+                            contentDescription = null,
+                            modifier = Modifier.fillMaxSize(),
+                            tint = MaterialTheme.colors.primaryVariant
+                        )
+                    }
+                }
                 Button(
                     shape = RoundedCornerShape(percent = 100),
                     modifier = Modifier.size(90.dp),
-                    onClick = { /*TODO*/ }
+                    onClick = onSchedulerClick
                 ) {
                     Icon(
-                        painter = painterResource(id = R.drawable.on_off),
+                        painter = painterResource(id = R.drawable.calendar),
                         contentDescription = null,
                         modifier = Modifier.fillMaxSize(),
                         tint = MaterialTheme.colors.primaryVariant
                     )
                 }
             }
-            Button(
-                shape = RoundedCornerShape(percent = 100),
-                modifier = Modifier.size(90.dp),
-                onClick = onSchedulerClick
-            ) {
-                Icon(
-                    painter = painterResource(id = R.drawable.calendar),
-                    contentDescription = null,
-                    modifier = Modifier.fillMaxSize(),
-                    tint = MaterialTheme.colors.primaryVariant
-                )
-            }
-        }
-        AnimatedContent(targetState = state.alarms, label = "") {
-            val isShow = it != 0
-            val (bg, content) = when (isShow) {
-                true -> MaterialTheme.colors.error to MaterialTheme.colors.onBackground
-                else -> MaterialTheme.colors.background to Color.Transparent
-            }
-            Button(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp),
-                onClick = onAlertsClick,
-                enabled = isShow,
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = bg,
-                    contentColor = content,
-                    disabledContentColor = content,
-                    disabledBackgroundColor = bg
-                ),
-                contentPadding = PaddingValues(20.dp),
-                shape = RoundedCornerShape(10.dp),
-                elevation = ButtonDefaults.elevation(defaultElevation = 0.dp)
-            ) {
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(5.dp),
-                    verticalAlignment = Alignment.CenterVertically
+            AnimatedContent(targetState = state!!.alarms, label = "") {
+                val isShow = it != 0
+                val (bg, content) = when (isShow) {
+                    true -> MaterialTheme.colors.error to MaterialTheme.colors.onBackground
+                    else -> MaterialTheme.colors.background to Color.Transparent
+                }
+                Button(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 20.dp),
+                    onClick = onAlertsClick,
+                    enabled = isShow,
+                    colors = ButtonDefaults.buttonColors(
+                        backgroundColor = bg,
+                        contentColor = content,
+                        disabledContentColor = content,
+                        disabledBackgroundColor = bg
+                    ),
+                    contentPadding = PaddingValues(20.dp),
+                    shape = RoundedCornerShape(10.dp),
+                    elevation = ButtonDefaults.elevation(defaultElevation = 0.dp)
                 ) {
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(5.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.danger),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Text(text = "Аварии")
+                    }
+                    Spacer(modifier = Modifier.weight(1f))
                     Icon(
-                        painter = painterResource(id = R.drawable.danger),
+                        painter = painterResource(id = R.drawable.arrow),
                         contentDescription = null,
                         modifier = Modifier.size(24.dp)
                     )
-                    Text(text = "Аварии")
                 }
-                Spacer(modifier = Modifier.weight(1f))
-                Icon(
-                    painter = painterResource(id = R.drawable.arrow),
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp)
-                )
             }
         }
     }
