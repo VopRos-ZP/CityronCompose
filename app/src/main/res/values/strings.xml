@@ -1,3 +1,41 @@
 <resources>
     <string name="app_name">Cityron</string>
+
+    <string-array name="sources">
+        <item>Журнал контроллера</item>
+        <item>Журнал сервера</item>
+    </string-array>
+
+    <string-array name="types">
+        <item>Все типы</item>
+        <item>Авария</item>
+        <item>Конфигурация</item>
+        <item>Сервис</item>
+        <item>Работа</item>
+    </string-array>
+
+    <string-array name="reasons">
+        <item>Все причины</item>
+        <item>Неизвестно</item>
+        <item>Авария / Ошибка</item>
+        <item>Алгоритм</item>
+        <item>Планировщик</item>
+        <item>SNMP</item>
+        <item>Modbus</item>
+        <item>Сервер</item>
+        <item>Меню</item>
+        <item>Веб-интерфейс</item>
+        <item>Панель управления</item>
+        <item>Прочее</item>
+    </string-array>
+
+    <string-array name="count">
+        <item>Все</item>
+        <item>Последние 50</item>
+        <item>Последние 100</item>
+        <item>Последние 500</item>
+        <item>Последние 1000</item>
+        <item>Последние 1500</item>
+    </string-array>
+
 </resources>

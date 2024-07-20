@@ -1,5 +1,6 @@
 package ru.cityron.presentation.screens.m3tabs
 
+import android.util.Log
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.Canvas
@@ -71,6 +72,7 @@ fun M3TabsScreen(
     onAlertsClick: () -> Unit,
     onSchedulerClick: () -> Unit,
     onSettingsClick: () -> Unit,
+    onFilterClick: () -> Unit,
     viewModel: M3ViewModel = hiltViewModel()
 ) {
     val pair by viewModel.controller.collectAsState()
@@ -81,7 +83,8 @@ fun M3TabsScreen(
     ) {
         M3TabsScreenContent(
             onAlertsClick = onAlertsClick,
-            onSchedulerClick = onSchedulerClick
+            onSchedulerClick = onSchedulerClick,
+            onFilterClick = onFilterClick
         )
     }
 }
@@ -91,10 +94,11 @@ fun M3TabsScreen(
 private fun M3TabsScreenContent(
     onAlertsClick: () -> Unit,
     onSchedulerClick: () -> Unit,
+    onFilterClick: () -> Unit
 ) {
     val pages = listOf(
         TabWithPage("Уставка", R.drawable.temp) { M3TempScreen(onAlertsClick, onSchedulerClick) },
-        TabWithPage("События", R.drawable.task) { EventsScreen() },
+        TabWithPage("События", R.drawable.task) { EventsScreen(onFilterClick = onFilterClick) },
         TabWithPage("Метрики", R.drawable.metrics) { MetricsScreen() },
     )
     val pagerState = rememberPagerState { pages.size }
@@ -145,12 +149,22 @@ private fun M3TempScreen(
                     minValue = 50,
                     maxValue = 450,
                     step = 50,
-                    onPositionChange = {}
+                    onPositionChange = {
+                        viewModel.setTemp(it)
+                    }
                 )
                 Text(
                     text = Temp.toGrade(state!!.algo.tempPv),
                     color = MaterialTheme.colors.primaryVariant,
                     fontSize = 62.sp
+                )
+                Icon(
+                    painter = painterResource(id = R.drawable.grade),
+                    contentDescription = null,
+                    modifier = Modifier
+                        .size(35.dp)
+                        .offset(x = 75.dp, y = (-35).dp),
+                    tint = MaterialTheme.colors.primaryVariant
                 )
             }
             Column {
@@ -159,8 +173,8 @@ private fun M3TempScreen(
                     fan = fan,
                     onFanChange = { fan = it },
                     onFanChangeFinished = {
-                        displayFan = fan.toInt()
-                        // viewModel.conf(displayFan)
+                        displayFan = fan
+                        viewModel.setFan(fan)
                     }
                 )
                 Row(

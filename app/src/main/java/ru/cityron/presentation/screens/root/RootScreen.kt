@@ -122,7 +122,8 @@ fun RootScreen() {
             onAuthClick = { navigationState.navigate(Screen.Auth.route) },
             onAlgoClick = { navigationState.navigate(Screen.Algo.route) },
             onAlarmClick = { navigationState.navigate(Screen.Alarms.route) },
-            onControllerClick = { navigationState.navigate(Screen.Controller.route) }
+            onControllerClick = { navigationState.navigate(Screen.Controller.route) },
+            onFilterClick = { navigationState.navigate(Screen.Filters.route) }
         )
     }
     LaunchedEffect(Unit) {

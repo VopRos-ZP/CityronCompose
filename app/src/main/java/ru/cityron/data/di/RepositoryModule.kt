@@ -9,6 +9,7 @@ import ru.cityron.data.repository.ConfRepositoryImpl
 import ru.cityron.data.repository.ConnectivityRepositoryImpl
 import ru.cityron.data.repository.ControllerRepositoryImpl
 import ru.cityron.data.repository.CurrentRepositoryImpl
+import ru.cityron.data.repository.EventsRepositoryImpl
 import ru.cityron.data.repository.HttpRepositoryImpl
 import ru.cityron.data.repository.IpRepositoryImpl
 import ru.cityron.data.repository.M3RepositoryImpl
@@ -20,6 +21,7 @@ import ru.cityron.domain.repository.ConfRepository
 import ru.cityron.domain.repository.ConnectivityRepository
 import ru.cityron.domain.repository.ControllerRepository
 import ru.cityron.domain.repository.CurrentRepository
+import ru.cityron.domain.repository.EventsRepository
 import ru.cityron.domain.repository.HttpRepository
 import ru.cityron.domain.repository.IpRepository
 import ru.cityron.domain.repository.M3Repository
@@ -75,5 +77,9 @@ interface RepositoryModule {
     @Binds
     @Singleton
     fun bindConfRepository(confRepositoryImpl: ConfRepositoryImpl): ConfRepository
+
+    @Binds
+    @Singleton
+    fun bindEventsRepository(eventsRepositoryImpl: EventsRepositoryImpl): EventsRepository
 
 }

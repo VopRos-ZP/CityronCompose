@@ -10,6 +10,7 @@ import kotlinx.coroutines.launch
 import ru.cityron.domain.model.Controller
 import ru.cityron.domain.model.DataSource
 import ru.cityron.domain.model.m3.M3State
+import ru.cityron.domain.repository.ConfRepository
 import ru.cityron.domain.repository.CurrentRepository
 import ru.cityron.domain.repository.M3Repository
 import java.net.SocketTimeoutException
@@ -18,7 +19,8 @@ import javax.inject.Inject
 @HiltViewModel
 class M3ViewModel @Inject constructor(
     private val currentRepository: CurrentRepository,
-    private val m3Repository: M3Repository
+    private val m3Repository: M3Repository,
+    private val confRepository: ConfRepository,
 ) : ViewModel() {
 
     private val _controller = MutableStateFlow<Pair<Controller, DataSource>?>(null)
@@ -37,6 +39,18 @@ class M3ViewModel @Inject constructor(
                     _state.value = it
                 }
             }
+        }
+    }
+
+    fun setTemp(temp: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            confRepository.conf("set-temp", temp)
+        }
+    }
+
+    fun setFan(fan: Int) {
+        viewModelScope.launch(Dispatchers.IO) {
+            confRepository.conf("set-fan", fan)
         }
     }
 

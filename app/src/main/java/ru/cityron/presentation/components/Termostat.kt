@@ -1,13 +1,18 @@
 package ru.cityron.presentation.components
 
 import android.graphics.Paint
+import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -24,14 +29,19 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.center
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toOffset
+import ru.cityron.R
 import ru.cityron.domain.utils.Temp
+import ru.cityron.domain.utils.roundToFive
 import kotlin.math.PI
+import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.cos
+import kotlin.math.roundToInt
 import kotlin.math.sin
 
 @Composable
@@ -48,12 +58,15 @@ fun Thermostat(
 
     var circleCenter by remember { mutableStateOf(Offset.Zero) }
     var positionValue by remember { mutableIntStateOf(value) }
+    var isDragging by remember { mutableStateOf(false) }
 
-    LaunchedEffect(key1 = Unit) {
+    LaunchedEffect(key1 = value) {
         positionValue = value
     }
-    LaunchedEffect(key1 = positionValue) {
-        onPositionChange(positionValue)
+    LaunchedEffect(key1 = isDragging) {
+        if (!isDragging) {
+            onPositionChange(positionValue)
+        }
     }
 
     val startAngle = 210f
@@ -67,13 +80,26 @@ fun Thermostat(
             modifier = Modifier
                 .fillMaxSize()
                 .pointerInput(Unit) {
-                    detectDragGestures { change, _ ->
-                        val offset = change.position - size.center.toOffset()
-                        val angle = (atan2(offset.y, offset.x) * (180 / PI).toFloat() + 360) % 360
-                        if (angle in 0f..210f || angle >= 330) {
-
+                    detectDragGestures(
+                        onDragStart = { isDragging = true },
+                        onDragEnd = { isDragging = false },
+                        onDrag = { change, _ ->
+                            val offset = change.position - size.center.toOffset()
+                            val angle =
+                                (atan2(offset.x, offset.y) * (180 / PI).toFloat() + 360) % 360
+                            if (angle in 180f..240f) {
+                                positionValue = 50
+                            } else if (angle in 120f..179f) {
+                                positionValue = 450
+                            }
+                            if (angle in 240f..360f) {
+                                positionValue =
+                                    roundToFive((((199 * (angle - 240)) / 120) + 50).toDouble())
+                            } else if (angle in 0f..120f) {
+                                positionValue = roundToFive(((200 * angle) / 120 + 250).toDouble())
+                            }
                         }
-                    }
+                    )
                 }
         ) {
             val width = size.width
@@ -142,12 +168,22 @@ fun Thermostat(
                 modifier = Modifier.weight(1f),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Spacer(modifier = Modifier.weight(0.5f))
-                Text(
-                    text = Temp.toGrade(value),
-                    color = MaterialTheme.colors.secondary,
-                    fontSize = 31.sp
-                )
+                Spacer(modifier = Modifier.weight(1f))
+                Box(contentAlignment = Alignment.Center) {
+                    Text(
+                        text = Temp.toGrade(positionValue),
+                        color = MaterialTheme.colors.secondary,
+                        fontSize = 31.sp
+                    )
+                    Icon(
+                        painter = painterResource(id = R.drawable.grade),
+                        contentDescription = null,
+                        modifier = Modifier
+                            .size(20.dp)
+                            .offset(x = 45.dp, y = (-17).dp),
+                        tint = MaterialTheme.colors.secondary
+                    )
+                }
                 Spacer(modifier = Modifier.weight(1f))
             }
         }

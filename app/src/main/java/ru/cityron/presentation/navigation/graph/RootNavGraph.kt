@@ -25,6 +25,7 @@ fun RootNavGraph(
     onAlgoClick: () -> Unit,
     onAlarmClick: () -> Unit,
     onControllerClick: () -> Unit,
+    onFilterClick: () -> Unit,
 ) {
     SlideInOutNavHost(
         navController = navHostController,
@@ -52,6 +53,7 @@ fun RootNavGraph(
                     onAlgoClick = onAlgoClick,
                     onAlarmClick = onAlarmClick,
                     onControllerClick = onControllerClick,
+                    onFilterClick = onFilterClick
                 )
             }
         }

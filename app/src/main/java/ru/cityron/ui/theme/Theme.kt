@@ -37,6 +37,7 @@ private val DarkColorScheme = darkColors(
     primary = Black,
     primaryVariant = Blue,
     secondary = Orange,
+    secondaryVariant = Blue3,
     background = Grey,
     onPrimary = Color.White,
     error = Red

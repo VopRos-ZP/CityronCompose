@@ -14,6 +14,7 @@ sealed class Screen(
     data object Algo : Screen(ROUTE_CHANGE_NAME)
     data object Alarms : Screen(ROUTE_CHANGE_NAME)
     data object Controller : Screen(ROUTE_CHANGE_NAME)
+    data object Filters : Screen(ROUTE_FILTERS)
 
     data object Alerts : Screen(ROUTE_ALERTS)
     data object Schedulers : Screen(ROUTE_SCHEDULERS)
@@ -33,6 +34,7 @@ sealed class Screen(
         const val ROUTE_ALERTS = "alerts"
         const val ROUTE_SCHEDULERS = "schedulers"
         const val ROUTE_SETTINGS = "settings"
+        const val ROUTE_FILTERS = "filters"
 
         const val ROUTE_ATLAS = "atlas"
         const val ROUTE_M3_TABS = "m3_tabs"
