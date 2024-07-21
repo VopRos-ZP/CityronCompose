@@ -7,6 +7,7 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import ru.cityron.data.local.EventsStore
 import ru.cityron.data.room.controller.ControllerDatabase
 import ru.cityron.data.room.ip.IpDatabase
 import javax.inject.Singleton
@@ -34,5 +35,11 @@ object RoomModule {
         klass = IpDatabase::class.java,
         name = "ip"
     ).fallbackToDestructiveMigration().build()
+
+    @Provides
+    @Singleton
+    fun provideEventsStore(
+        @ApplicationContext context: Context
+    ): EventsStore = EventsStore(context)
 
 }

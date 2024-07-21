@@ -14,6 +14,7 @@ room = "2.6.1"
 fingerprint = "2.1.0"
 okhttp = "4.12.0"
 hilt-work = "1.2.0"
+datastore = "1.1.1"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -38,6 +39,8 @@ okhttp-logging-interceptor = { module = "com.squareup.okhttp3:logging-intercepto
 room-ktx = { module = "androidx.room:room-ktx", version.ref = "room" }
 room-runtime = { module = "androidx.room:room-runtime", version.ref = "room" }
 room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+# Datastore
+datastore = { module = "androidx.datastore:datastore-preferences", version.ref = "datastore" }
 # Fingerprint
 fingerprint-android = { module = "com.github.fingerprintjs:fingerprint-android", version.ref = "fingerprint" }
 # Charts

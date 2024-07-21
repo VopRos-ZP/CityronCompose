@@ -17,6 +17,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.focusModifier
+import androidx.compose.ui.graphics.Color
 
 @Composable
 fun DrawerScaffold(
@@ -77,7 +78,8 @@ fun ToolbarScaffold(
             )
         },
         floatingActionButton = fab,
-        bottomBar = bottomBar
+        bottomBar = bottomBar,
+        backgroundColor = Color.Transparent
     ) {
         Box(
             modifier = modifier

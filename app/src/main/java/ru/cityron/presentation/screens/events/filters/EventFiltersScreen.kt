@@ -1,13 +1,10 @@
 package ru.cityron.presentation.screens.events.filters
 
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,14 +13,12 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.selection.selectableGroup
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.BottomAppBar
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.RadioButton
 import androidx.compose.material.RadioButtonDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -51,21 +46,20 @@ fun EventFiltersScreen(
         title = "Фильтры",
         onClick = onClick,
         bottomBar = {
-            AnimatedVisibility(
-                visible = isChanged,
-            ) {
+            if (isChanged) {
                 BottomSaveButton(onClick = viewModel::onSaveClick)
             }
         }
     ) {
         LeftMenu(viewModel = viewModel)
     }
+    LaunchedEffect(key1 = Unit) {
+        viewModel.fetchEventsFromStore()
+    }
 }
 
 @Composable
-fun LeftMenu(
-    viewModel: EventsScreenViewModel
-) {
+fun LeftMenu(viewModel: EventsScreenViewModel) {
     val count by viewModel.count.collectAsState()
     val types by viewModel.types.collectAsState()
     val sources by viewModel.sources.collectAsState()
@@ -134,7 +128,11 @@ fun LeftMenu(
                 val isSelected = value == i
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(10.dp))
+                        .clickable { onClick(i) }
                 ) {
                     RadioButton(
                         selected = isSelected,

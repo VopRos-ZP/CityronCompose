@@ -15,12 +15,14 @@ import androidx.compose.ui.unit.dp
 
 @Composable
 fun BottomSaveButton(
+    modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     BottomAppBar(
-        modifier = Modifier.clip(RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp)),
+        modifier = modifier.clip(RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp)),
         backgroundColor = MaterialTheme.colors.primary,
         contentPadding = PaddingValues(20.dp),
+        elevation = 10.dp
     ) {
         Button(
             modifier = Modifier.fillMaxWidth(),

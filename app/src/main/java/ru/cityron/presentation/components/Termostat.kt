@@ -1,7 +1,6 @@
 package ru.cityron.presentation.components
 
 import android.graphics.Paint
-import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -26,8 +25,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.center
@@ -38,10 +39,8 @@ import ru.cityron.R
 import ru.cityron.domain.utils.Temp
 import ru.cityron.domain.utils.roundToFive
 import kotlin.math.PI
-import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.cos
-import kotlin.math.roundToInt
 import kotlin.math.sin
 
 @Composable
@@ -59,18 +58,41 @@ fun Thermostat(
     var circleCenter by remember { mutableStateOf(Offset.Zero) }
     var positionValue by remember { mutableIntStateOf(value) }
     var isDragging by remember { mutableStateOf(false) }
+    var isTap by remember { mutableStateOf(false) }
 
     LaunchedEffect(key1 = value) {
         positionValue = value
     }
-    LaunchedEffect(key1 = isDragging) {
-        if (!isDragging) {
+    LaunchedEffect(key1 = isDragging, key2 = positionValue) {
+        if (!isDragging && positionValue != value) {
+            onPositionChange(positionValue)
+        }
+    }
+    LaunchedEffect(key1 = isTap, key2 = positionValue) {
+        if (isTap && positionValue != value) {
             onPositionChange(positionValue)
         }
     }
 
     val startAngle = 210f
     val angleRange = -240f
+
+    val calcPositionValueByOffset: PointerInputScope.(Offset) -> Unit = {
+        val offset = it - size.center.toOffset()
+        val angle =
+            (atan2(offset.x, offset.y) * (180 / PI).toFloat() + 360) % 360
+        if (angle in 180f..240f) {
+            positionValue = 50
+        } else if (angle in 120f..179f) {
+            positionValue = 450
+        }
+        if (angle in 240f..360f) {
+            positionValue =
+                roundToFive((((199 * (angle - 240)) / 120) + 50).toDouble())
+        } else if (angle in 0f..120f) {
+            positionValue = roundToFive(((200 * angle) / 120 + 250).toDouble())
+        }
+    }
 
     Box(
         modifier = modifier.width(335.dp),
@@ -80,24 +102,18 @@ fun Thermostat(
             modifier = Modifier
                 .fillMaxSize()
                 .pointerInput(Unit) {
+                    detectTapGestures {
+                        isTap = false
+                        calcPositionValueByOffset(it)
+                        isTap = true
+                    }
+                }
+                .pointerInput(Unit) {
                     detectDragGestures(
                         onDragStart = { isDragging = true },
                         onDragEnd = { isDragging = false },
-                        onDrag = { change, _ ->
-                            val offset = change.position - size.center.toOffset()
-                            val angle =
-                                (atan2(offset.x, offset.y) * (180 / PI).toFloat() + 360) % 360
-                            if (angle in 180f..240f) {
-                                positionValue = 50
-                            } else if (angle in 120f..179f) {
-                                positionValue = 450
-                            }
-                            if (angle in 240f..360f) {
-                                positionValue =
-                                    roundToFive((((199 * (angle - 240)) / 120) + 50).toDouble())
-                            } else if (angle in 0f..120f) {
-                                positionValue = roundToFive(((200 * angle) / 120 + 250).toDouble())
-                            }
+                        onDrag = { offset, _ ->
+                            calcPositionValueByOffset(offset.position)
                         }
                     )
                 }
@@ -116,7 +132,7 @@ fun Thermostat(
                 startAngle = startAngle,
                 sweepAngle = angleRange,
                 useCenter = false,
-                style = Stroke(width = arcStrokeWidth)
+                style = Stroke(width = arcStrokeWidth, cap = StrokeCap.Round)
             )
 
             drawArc(
@@ -124,7 +140,7 @@ fun Thermostat(
                 startAngle = startAngle,
                 sweepAngle = (positionValue - minValue) * angleRange / (maxValue - minValue),
                 useCenter = false,
-                style = Stroke(width = arcStrokeWidth)
+                style = Stroke(width = arcStrokeWidth, cap = StrokeCap.Round)
             )
 
             val indicatorAngle = startAngle + ((positionValue - minValue) * angleRange / (maxValue - minValue))
@@ -136,6 +152,13 @@ fun Thermostat(
                 radius = thumbRadius,
                 center = Offset(indicatorX, indicatorY)
             )
+            if (isDragging) {
+                drawCircle(
+                    color = Color(0x40FFA826),
+                    radius = thumbRadius * 2f,
+                    center = Offset(indicatorX, indicatorY)
+                )
+            }
             // Draw the temperature values
             for (i in minValue..maxValue step step) {
                 val angle = startAngle + (i - minValue) * angleRange / (maxValue - minValue)
