@@ -50,6 +50,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import ru.cityron.domain.utils.Temp
 import ru.cityron.domain.utils.toTime
 import ru.cityron.presentation.components.BackScaffold
+import ru.cityron.presentation.components.BottomSaveButton
 import ru.cityron.presentation.components.FanSlider
 import ru.cityron.presentation.components.NumberPicker
 
@@ -67,24 +68,7 @@ fun EditSchedulerScreen(
         bottomBar = {
             AnimatedContent(targetState = isChanged, label = "") {
                 when (it) {
-                    true -> BottomAppBar(
-                        modifier = Modifier.clip(RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp)),
-                        backgroundColor = MaterialTheme.colors.primary,
-                        contentPadding = PaddingValues(20.dp),
-                    ) {
-                        Button(
-                            modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(4.dp),
-                            contentPadding = PaddingValues(vertical = 14.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                backgroundColor = MaterialTheme.colors.secondary,
-                                contentColor = MaterialTheme.colors.onBackground
-                            ),
-                            onClick = viewModel::onSaveClick
-                        ) {
-                            Text(text = "Сохранить")
-                        }
-                    }
+                    true -> BottomSaveButton(onClick = viewModel::onSaveClick)
                     else -> {}
                 }
             }

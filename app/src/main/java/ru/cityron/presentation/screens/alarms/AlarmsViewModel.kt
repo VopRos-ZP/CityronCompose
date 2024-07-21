@@ -2,6 +2,7 @@ package ru.cityron.presentation.screens.alarms
 
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import ru.cityron.domain.model.Alarm
 import ru.cityron.domain.repository.ConfRepository
 import ru.cityron.domain.repository.M3Repository
@@ -15,7 +16,10 @@ class AlarmsViewModel @Inject constructor(
 ) : ConfViewModel(confRepository) {
 
     private val _alarms = MutableStateFlow(emptyList<Alarm>())
+    val alarms = _alarms.asStateFlow()
 
+    fun fetchAlarms() {
 
+    }
 
 }

@@ -27,6 +27,12 @@ class EditSchedulerViewModel @Inject constructor(
 
     fun fetchTask(id: Int) {
         viewModelScope.launch(Dispatchers.IO) {
+            launch {
+                localTask.collect {
+                    _isChanged.emit(_task.value != it)
+                }
+            }
+
             val sched = getM3SchedUseCase()
             val task = when (id) {
                 0 -> sched.task0
@@ -41,11 +47,8 @@ class EditSchedulerViewModel @Inject constructor(
                 9 -> sched.task9
                 else -> throw RuntimeException()
             }
-            _task.value = task
-            _localTask.value = task
-            localTask.collect {
-                _isChanged.value = _task.value != it
-            }
+            _task.emit(task)
+            _localTask.emit(task)
         }
     }
 
