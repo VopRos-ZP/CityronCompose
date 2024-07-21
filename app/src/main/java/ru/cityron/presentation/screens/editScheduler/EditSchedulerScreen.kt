@@ -286,17 +286,16 @@ fun FanRow(
     fan: Int,
     onFanChanged: (Int) -> Unit
 ) {
-    var float by remember(fan) { mutableIntStateOf(fan) }
     TitledContent(
         title = "Скорость",
         trailing = {
-            Text(text = "$float")
+            Text(text = "$fan")
         }
     ) {
         FanSlider(
-            fan = float,
-            onFanChange = { float = it },
-            onFanChangeFinished = onFanChanged
+            value = fan,
+            onFinishChange = onFanChanged,
+            values = listOf(1, 2, 3, 4, 5)
         )
     }
 }

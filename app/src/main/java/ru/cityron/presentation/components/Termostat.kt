@@ -154,9 +154,10 @@ fun Thermostat(
             )
             if (isDragging) {
                 drawCircle(
-                    color = Color(0x40FFA826),
+                    color = secondary,
                     radius = thumbRadius * 2f,
-                    center = Offset(indicatorX, indicatorY)
+                    center = Offset(indicatorX, indicatorY),
+                    alpha = 0.25f
                 )
             }
             // Draw the temperature values
