@@ -18,8 +18,8 @@ class EditSchedulerViewModel @Inject constructor(
     private val confRepository: ConfRepository
 ) : ViewModel() {
 
-    private val _task = MutableStateFlow(M3Task())
-    private val _localTask = MutableStateFlow(M3Task())
+    private val _task = MutableStateFlow<M3Task?>(null)
+    private val _localTask = MutableStateFlow<M3Task?>(null)
     val localTask = _localTask.asStateFlow()
 
     private val _isChanged = MutableStateFlow(false)
@@ -53,31 +53,31 @@ class EditSchedulerViewModel @Inject constructor(
     }
 
     fun onHourChanged(hour: Int) {
-        _localTask.value = localTask.value.copy(hour = hour)
+        _localTask.value = localTask.value?.copy(hour = hour)
     }
 
     fun onMinChanged(min: Int) {
-        _localTask.value = localTask.value.copy(min = min)
+        _localTask.value = localTask.value?.copy(min = min)
     }
 
     fun onDayChanged(day: Int) {
-        _localTask.value = localTask.value.copy(day = day)
+        _localTask.value = localTask.value?.copy(day = day)
     }
 
     fun onModeChanged(mode: Int) {
-        _localTask.value = localTask.value.copy(mode = mode)
+        _localTask.value = localTask.value?.copy(mode = mode)
     }
 
     fun onFanChanged(fan: Int) {
-        _localTask.value = localTask.value.copy(fan = fan)
+        _localTask.value = localTask.value?.copy(fan = fan)
     }
 
     fun onTempChanged(temp: Int) {
-        _localTask.value = localTask.value.copy(temp = temp)
+        _localTask.value = localTask.value?.copy(temp = temp)
     }
 
     fun onPowerChanged(power: Int) {
-        _localTask.value = localTask.value.copy(power = power)
+        _localTask.value = localTask.value?.copy(power = power)
     }
 
     fun onSaveClick() {

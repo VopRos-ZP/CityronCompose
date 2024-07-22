@@ -12,13 +12,14 @@ sealed class Screen(
     data object ChangeName : Screen(ROUTE_CHANGE_NAME)
     data object Auth : Screen(ROUTE_CHANGE_NAME)
     data object Algo : Screen(ROUTE_CHANGE_NAME)
-    data object Alarms : Screen(ROUTE_CHANGE_NAME)
+    data object Alarms : Screen(ROUTE_ALARMS)
     data object Controller : Screen(ROUTE_CHANGE_NAME)
     data object Filters : Screen(ROUTE_FILTERS)
 
     data object Alerts : Screen(ROUTE_ALERTS)
     data object Schedulers : Screen(ROUTE_SCHEDULERS)
     data class Task(val id: Int) : Screen("$ROUTE_SCHEDULERS/$id")
+    data class EditAlarm(val id: Int) : Screen("$ROUTE_ALARMS/$id")
 
     data object Settings : Screen(ROUTE_SETTINGS)
 
@@ -32,6 +33,7 @@ sealed class Screen(
         const val ROUTE_ADD_CUSTOM = "add_custom"
         const val ROUTE_CHANGE_NAME = "change_name"
         const val ROUTE_ALERTS = "alerts"
+        const val ROUTE_ALARMS = "alarms"
         const val ROUTE_SCHEDULERS = "schedulers"
         const val ROUTE_SETTINGS = "settings"
         const val ROUTE_FILTERS = "filters"

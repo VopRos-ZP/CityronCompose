@@ -7,8 +7,10 @@ import androidx.navigation.navArgument
 import androidx.navigation.navigation
 import ru.cityron.presentation.navigation.Screen
 import ru.cityron.presentation.navigation.slideInOutComposable
+import ru.cityron.presentation.screens.alarms.AlarmsScreen
 import ru.cityron.presentation.screens.alerts.AlertsScreen
 import ru.cityron.presentation.screens.changeName.ChangeNameScreen
+import ru.cityron.presentation.screens.editAlarm.EditAlarmScreen
 import ru.cityron.presentation.screens.editScheduler.EditSchedulerScreen
 import ru.cityron.presentation.screens.events.filters.EventFiltersScreen
 import ru.cityron.presentation.screens.m3tabs.M3TabsScreen
@@ -29,6 +31,7 @@ fun NavGraphBuilder.m3NavGraph(
     onAlarmClick: () -> Unit,
     onControllerClick: () -> Unit,
     onFilterClick: () -> Unit,
+    onEditAlarmClick: (Int) -> Unit,
 ) {
     navigation(
         startDestination = Screen.M3Tabs.route,
@@ -61,6 +64,15 @@ fun NavGraphBuilder.m3NavGraph(
                 id = it.arguments?.getInt("id") ?: 0
             )
         }
+        slideInOutComposable(
+            route = "${Screen.Alarms.route}/{id}",
+            arguments = listOf(navArgument("id") { type = NavType.IntType })
+        ) {
+            EditAlarmScreen(
+                onClick = onBack,
+                id = it.arguments?.getInt("id") ?: 0
+            )
+        }
         slideInOutComposable(route = Screen.Settings.route) {
             SettingsScreen(
                 onClick = onBack,
@@ -72,13 +84,15 @@ fun NavGraphBuilder.m3NavGraph(
             )
         }
         slideInOutComposable(route = Screen.ChangeName.route) {
-            ChangeNameScreen(
-                onClick = onBack
-            )
+            ChangeNameScreen(onClick = onBack)
         }
         slideInOutComposable(route = Screen.Filters.route) {
-            EventFiltersScreen(
-                onClick = onBack
+            EventFiltersScreen(onClick = onBack)
+        }
+        slideInOutComposable(route = Screen.Alarms.route) {
+            AlarmsScreen(
+                onClick = onBack,
+                onEditAlarmClick = onEditAlarmClick
             )
         }
     }

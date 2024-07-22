@@ -40,7 +40,7 @@ import ru.cityron.domain.utils.toTime
 import ru.cityron.presentation.components.BackScaffold
 import ru.cityron.presentation.components.BottomSaveButton
 import ru.cityron.presentation.components.FanSlider
-import ru.cityron.presentation.components.NumberPicker
+import ru.cityron.presentation.components.Picker
 
 @Composable
 fun EditSchedulerScreen(
@@ -59,53 +59,55 @@ fun EditSchedulerScreen(
             }
         }
     ) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-        ) {
-            item {
-                TitledContent(title = "Время") {
-                    TimePicker(
-                        hour = task.hour,
-                        onHourChanged = viewModel::onHourChanged,
-                        min = task.min,
-                        onMinChanged = viewModel::onMinChanged
+        if (task != null) {
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+            ) {
+                item {
+                    TitledContent(title = "Время") {
+                        TimePicker(
+                            hour = task!!.hour,
+                            onHourChanged = viewModel::onHourChanged,
+                            min = task!!.min,
+                            onMinChanged = viewModel::onMinChanged
+                        )
+                    }
+                }
+                item {
+                    TitledContent(title = "Дата") {
+                        DayTabRow(
+                            day = task!!.day,
+                            onDayChanged = viewModel::onDayChanged
+                        )
+                    }
+                }
+                item {
+                    TitledContent(title = "Режим") {
+                        ModeRow(
+                            mode = task!!.mode,
+                            onModeChanged = viewModel::onModeChanged
+                        )
+                    }
+                }
+                item {
+                    FanRow(
+                        fan = task!!.fan,
+                        onFanChanged = viewModel::onFanChanged
                     )
                 }
-            }
-            item {
-                TitledContent(title = "Дата") {
-                    DayTabRow(
-                        day = task.day,
-                        onDayChanged = viewModel::onDayChanged
+                item {
+                    TempRow(
+                        value = task!!.temp,
+                        onValueChanged = viewModel::onTempChanged
                     )
                 }
-            }
-            item {
-                TitledContent(title = "Режим") {
-                    ModeRow(
-                        mode = task.mode,
-                        onModeChanged = viewModel::onModeChanged
-                    )
-                }
-            }
-            item {
-                FanRow(
-                    fan = task.fan,
-                    onFanChanged = viewModel::onFanChanged
-                )
-            }
-            item {
-                TempRow(
-                    value = task.temp,
-                    onValueChanged = viewModel::onTempChanged
-                )
-            }
-            item {
-                TitledContent(title = "Действие") {
-                    PowerRow(
-                        power = task.power,
-                        onPowerChange = viewModel::onPowerChanged
-                    )
+                item {
+                    TitledContent(title = "Действие") {
+                        PowerRow(
+                            power = task!!.power,
+                            onPowerChange = viewModel::onPowerChanged
+                        )
+                    }
                 }
             }
         }
@@ -132,7 +134,7 @@ fun TitledContent(
             Text(
                 text = title,
                 fontWeight = FontWeight.Bold,
-                fontSize = 18.sp
+                fontSize = 14.sp
             )
             Spacer(modifier = Modifier.weight(1f))
             if (trailing != null) {
@@ -154,7 +156,7 @@ fun TimePicker(
     val minValues = (0..59).toList()
 
     Row(modifier = Modifier.fillMaxWidth(0.6f)) {
-        NumberPicker(
+        Picker(
             modifier = Modifier.fillMaxWidth(0.5f),
             value = hour,
             items = hourValues,
@@ -163,7 +165,7 @@ fun TimePicker(
             textStyle = TextStyle(fontSize = 32.sp),
             textModifier = Modifier.padding(8.dp),
         )
-        NumberPicker(
+        Picker(
             modifier = Modifier.fillMaxWidth(),
             value = min,
             items = minValues,
@@ -189,7 +191,7 @@ fun DayTabRow(
         ) {
             (0..4).forEach { i ->
                 DayChip(
-                    modifier = Modifier.size(67.dp, 44.dp),
+                    modifier = Modifier.width(67.dp),
                     day = values[i],
                     isSelected = day == i,
                     onClick = { onDayChanged(i) }
@@ -202,7 +204,7 @@ fun DayTabRow(
         ) {
             (5..9).forEach { i ->
                 DayChip(
-                    modifier = Modifier.size(67.dp, 44.dp),
+                    modifier = Modifier.width(67.dp),
                     day = values[i],
                     isSelected = day == i,
                     onClick = { onDayChanged(i) }
@@ -226,7 +228,7 @@ fun ModeRow(
     ) {
         values.forEachIndexed { index, s ->
             DayChip(
-                modifier = Modifier.size(158.dp, 44.dp),
+                modifier = Modifier.width(158.dp),
                 day = s,
                 isSelected = selected == index,
                 onClick = { selected = index }
@@ -252,6 +254,7 @@ fun DayChip(
     ) {
         Box(
             modifier = modifier
+                .height(44.dp)
                 .clip(RoundedCornerShape(4.dp))
                 .background(
                     if (isEnabled) MaterialTheme.colors.primary
@@ -306,7 +309,7 @@ fun TempRow(
     onValueChanged: (Int) -> Unit
 ) {
     TitledContent(title = "Уставка") {
-        NumberPicker(
+        Picker(
             modifier = Modifier.fillMaxWidth(0.5f),
             items = (5..40).toList(),
             value = value,
@@ -332,7 +335,7 @@ fun PowerRow(
     ) {
         values.forEachIndexed { index, s ->
             DayChip(
-                modifier = Modifier.size(158.dp, 44.dp),
+                modifier = Modifier.width(158.dp),
                 day = s,
                 isSelected = selected == index,
                 onClick = { selected = index }
