@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
@@ -61,7 +62,7 @@ fun EditSchedulerScreen(
     ) {
         if (task != null) {
             LazyColumn(
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize().padding(top = 20.dp),
             ) {
                 item {
                     TitledContent(title = "Время") {
@@ -120,13 +121,14 @@ fun EditSchedulerScreen(
 @Composable
 fun TitledContent(
     title: String,
+    paddingValues: PaddingValues = PaddingValues(start = 20.dp, end = 20.dp, bottom = 20.dp),
     trailing: (@Composable RowScope.() -> Unit)? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(20.dp),
+            .padding(paddingValues),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
@@ -134,7 +136,7 @@ fun TitledContent(
             Text(
                 text = title,
                 fontWeight = FontWeight.Bold,
-                fontSize = 14.sp
+                fontSize = 16.sp
             )
             Spacer(modifier = Modifier.weight(1f))
             if (trailing != null) {

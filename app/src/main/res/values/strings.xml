@@ -50,4 +50,30 @@
         <item>Температура больше допустимой</item>
     </string-array>
 
+    <string-array name="algo_types_m3">
+        <item>Тайминги</item>
+        <item>Приточный вентилятор</item>
+        <item>Вытяжной вентилятор</item>
+        <item>ПИ регулятор</item>
+        <item>ПИ регулятор 2</item>
+        <item>Водяной нагрев</item>
+        <item>Электрический нагрев</item>
+        <item>Прочее</item>
+    </string-array>
+
+    <string-array name="mode_zima_leto_source">
+        <item>Пользовательское</item>
+        <item>По датчику</item>
+    </string-array>
+
+    <string-array name="mode_zima_leto_user">
+        <item>Зима</item>
+        <item>Лето</item>
+    </string-array>
+
+    <string-array name="temp_control">
+        <item>По датчику канала</item>
+        <item>Каскадное</item>
+    </string-array>
+
 </resources>

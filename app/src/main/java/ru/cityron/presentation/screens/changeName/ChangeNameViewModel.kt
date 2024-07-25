@@ -1,57 +1,79 @@
 package ru.cityron.presentation.screens.changeName
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import ru.cityron.domain.repository.ConfRepository
+import ru.cityron.domain.repository.ControllerRepository
 import ru.cityron.domain.repository.CurrentRepository
+import ru.cityron.presentation.components.MviViewModel
 import javax.inject.Inject
 
 @HiltViewModel
 class ChangeNameViewModel @Inject constructor(
+    private val confRepository: ConfRepository,
     private val currentRepository: CurrentRepository,
-    private val confRepository: ConfRepository
-) : ViewModel() {
+    private val controllerRepository: ControllerRepository,
+) : MviViewModel<ChangeNameViewState, ChangeNameViewIntent>() {
 
-    private val _state = MutableStateFlow(ChangeName.State())
-    val state = _state.asStateFlow()
+    override fun intent(intent: ChangeNameViewIntent) {
+        when (intent) {
+            is ChangeNameViewIntent.Launch -> launch()
+            is ChangeNameViewIntent.OnSaveClick -> onSaveClick()
+            is ChangeNameViewIntent.OnNameChange -> updateState {
+                copy(
+                    name = intent.value,
+                    isChanged = intent.value != oldName
+                )
+            }
 
-    fun fetchOldName() {
-        val oldName = currentRepository.current?.first?.name
-            ?.split(" (")?.get(1)
-            ?.replace(")", "") ?: ""
-        _state.value = when (oldName.all { it.isUpperCase() }) {
-            true -> state.value.copy(oldName = "")
-            else -> state.value.copy(oldName = oldName)
+            is ChangeNameViewIntent.OnIsErrorCheckedChange -> updateState {
+                copy(isErrorChecked = intent.value)
+            }
+
+            is ChangeNameViewIntent.OnIsShowSnakbarChange -> updateState {
+                copy(isShowSnackbar = intent.value)
+            }
         }
     }
 
-    fun closeSnackbar() {
-        _state.value = state.value.copy(isShowSnackbar = false)
+    private fun launch() {
+        updateState({ copy() }, ChangeNameViewState())
+
+        val oldName = currentRepository.current?.first?.name
+            ?.split(" (")?.get(1)
+            ?.replace(")", "") ?: ""
+
+        updateState {
+            when (oldName.all { it.isUpperCase() }) {
+                true -> copy(oldName = "")
+                else -> copy(oldName = oldName)
+            }
+        }
     }
 
-    fun onNameChange(name: String) {
-        _state.value = state.value.copy(name = name)
-    }
-
-    fun onSaveClick() {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                confRepository.conf("name", state.value.name)
-                //And save new name locally
-                _state.value = state.value.copy(
-                    isErrorChecked = false,
-                    isShowSnackbar = false
-                )
-            } catch (_: Exception) {
-                _state.value = state.value.copy(
-                    isErrorChecked = true,
-                    isShowSnackbar = true
-                )
+    private fun onSaveClick() {
+        scope.launch {
+            state.value?.let {
+                try {
+                    confRepository.conf("others-loc", it.name)
+                    //And save new name locally
+                    val controller = currentRepository.current!!.first
+                    val devName = controller.name.split(" ")[0]
+                    controllerRepository.upsert(controller.copy(name = "$devName (${it.name})"))
+                    updateState {
+                        copy(
+                            isErrorChecked = false,
+                            isShowSnackbar = false
+                        )
+                    }
+                } catch (_: Exception) {
+                    updateState {
+                        copy(
+                            isErrorChecked = true,
+                            isShowSnackbar = true
+                        )
+                    }
+                }
             }
         }
     }

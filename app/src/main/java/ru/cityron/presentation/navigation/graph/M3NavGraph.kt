@@ -9,6 +9,15 @@ import ru.cityron.presentation.navigation.Screen
 import ru.cityron.presentation.navigation.slideInOutComposable
 import ru.cityron.presentation.screens.alarms.AlarmsScreen
 import ru.cityron.presentation.screens.alerts.AlertsScreen
+import ru.cityron.presentation.screens.algo.AlgoScreen
+import ru.cityron.presentation.screens.algo.electric.AlgoElectricScreen
+import ru.cityron.presentation.screens.algo.fan1.AlgoFan1Screen
+import ru.cityron.presentation.screens.algo.fan2.AlgoFan2Screen
+import ru.cityron.presentation.screens.algo.other.AlgoOtherScreen
+import ru.cityron.presentation.screens.algo.pi1.AlgoPi1Screen
+import ru.cityron.presentation.screens.algo.pi2.AlgoPi2Screen
+import ru.cityron.presentation.screens.algo.timings.AlgoTimingsScreen
+import ru.cityron.presentation.screens.algo.water.AlgoWaterScreen
 import ru.cityron.presentation.screens.changeName.ChangeNameScreen
 import ru.cityron.presentation.screens.editAlarm.EditAlarmScreen
 import ru.cityron.presentation.screens.editScheduler.EditSchedulerScreen
@@ -32,6 +41,14 @@ fun NavGraphBuilder.m3NavGraph(
     onControllerClick: () -> Unit,
     onFilterClick: () -> Unit,
     onEditAlarmClick: (Int) -> Unit,
+    onTimingsClick: () -> Unit,
+    onFan1Click: () -> Unit,
+    onFan2Click: () -> Unit,
+    onPi1Click: () -> Unit,
+    onPi2Click: () -> Unit,
+    onElectricClick: () -> Unit,
+    onWaterClick: () -> Unit,
+    onOtherClick: () -> Unit,
 ) {
     navigation(
         startDestination = Screen.M3Tabs.route,
@@ -94,6 +111,44 @@ fun NavGraphBuilder.m3NavGraph(
                 onClick = onBack,
                 onEditAlarmClick = onEditAlarmClick
             )
+        }
+
+        slideInOutComposable(route = Screen.Algo.route) {
+            AlgoScreen(
+                onClick = onBack,
+                onTimingsClick = onTimingsClick,
+                onFan1Click = onFan1Click,
+                onFan2Click = onFan2Click,
+                onPi1Click = onPi1Click,
+                onPi2Click = onPi2Click,
+                onElectricClick = onElectricClick,
+                onWaterClick = onWaterClick,
+                onOtherClick = onOtherClick
+            )
+        }
+        slideInOutComposable(route = Screen.AlgoTimings.route) {
+            AlgoTimingsScreen(onClick = onBack)
+        }
+        slideInOutComposable(route = Screen.AlgoFan1.route) {
+            AlgoFan1Screen(onClick = onBack)
+        }
+        slideInOutComposable(route = Screen.AlgoFan2.route) {
+            AlgoFan2Screen(onClick = onBack)
+        }
+        slideInOutComposable(route = Screen.AlgoPi1.route) {
+            AlgoPi1Screen(onClick = onBack)
+        }
+        slideInOutComposable(route = Screen.AlgoPi2.route) {
+            AlgoPi2Screen(onClick = onBack)
+        }
+        slideInOutComposable(route = Screen.AlgoWater.route) {
+            AlgoWaterScreen(onClick = onBack)
+        }
+        slideInOutComposable(route = Screen.AlgoElectric.route) {
+            AlgoElectricScreen(onClick = onBack)
+        }
+        slideInOutComposable(route = Screen.AlgoOther.route) {
+            AlgoOtherScreen(onClick = onBack)
         }
     }
 }

@@ -1,6 +1,6 @@
 package ru.cityron.presentation.components
 
-import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -12,8 +12,10 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ru.cityron.R
 
@@ -27,16 +29,7 @@ fun DrawerTopBar(
         title = title,
         icon = Icons.Default.Menu,
         onClick = onClick,
-        actions = {
-            if (onSettingsClick != null)
-            IconButton(onClick = onSettingsClick) {
-                Icon(
-                    painter = painterResource(id = R.drawable.settings),
-                    contentDescription = null,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-        }
+        onActionClick = onSettingsClick
     )
 }
 
@@ -48,7 +41,7 @@ fun BackTopBar(
     ToolBar(
         title = title,
         icon = Icons.AutoMirrored.Default.ArrowBack,
-        onClick = onClick
+        onClick = onClick,
     )
 }
 
@@ -57,23 +50,43 @@ private fun ToolBar(
     title: String,
     icon: ImageVector,
     onClick: () -> Unit,
-    actions: @Composable RowScope.() -> Unit = {}
+    onActionClick: (() -> Unit)? = null
 ) {
     TopAppBar(
         backgroundColor = MaterialTheme.colors.primary,
         title = {
-            Text(text = title)
+            Row(modifier = Modifier) {
+                Text(
+                    text = title,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.weight(1f)
+                )
+            }
         },
         navigationIcon = {
             IconButton(onClick = onClick) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = MaterialTheme.colors.onBackground
+                    tint = MaterialTheme.colors.onBackground,
+                    modifier = Modifier.size(24.dp)
                 )
             }
         },
-        actions = actions,
+        actions = {
+            val enabled = onActionClick != null
+            IconButton(
+                onClick = onActionClick ?: {},
+                enabled = enabled
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.settings),
+                    contentDescription = null,
+                    modifier = Modifier.size(24.dp),
+                    tint = if (enabled) MaterialTheme.colors.onPrimary else Color.Transparent
+                )
+            }
+        },
         elevation = 0.dp
     )
 }

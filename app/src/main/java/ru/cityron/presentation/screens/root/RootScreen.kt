@@ -124,7 +124,15 @@ fun RootScreen() {
             onAlarmClick = { navigationState.navigate(Screen.Alarms.route) },
             onControllerClick = { navigationState.navigate(Screen.Controller.route) },
             onFilterClick = { navigationState.navigate(Screen.Filters.route) },
-            onEditAlarmClick = { navigationState.navigate(Screen.EditAlarm(it).route) }
+            onEditAlarmClick = { navigationState.navigate(Screen.EditAlarm(it).route) },
+            onTimingsClick = { navigationState.navigate(Screen.AlgoTimings.route) },
+            onFan1Click = { navigationState.navigate(Screen.AlgoFan1.route) },
+            onFan2Click = { navigationState.navigate(Screen.AlgoFan2.route) },
+            onPi1Click = { navigationState.navigate(Screen.AlgoPi1.route) },
+            onPi2Click = { navigationState.navigate(Screen.AlgoPi2.route) },
+            onElectricClick = { navigationState.navigate(Screen.AlgoElectric.route) },
+            onWaterClick = { navigationState.navigate(Screen.AlgoWater.route) },
+            onOtherClick = { navigationState.navigate(Screen.AlgoOther.route) }
         )
     }
     LaunchedEffect(Unit) {

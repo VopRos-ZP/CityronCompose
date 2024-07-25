@@ -27,6 +27,14 @@ fun RootNavGraph(
     onControllerClick: () -> Unit,
     onFilterClick: () -> Unit,
     onEditAlarmClick: (Int) -> Unit,
+    onTimingsClick: () -> Unit,
+    onFan1Click: () -> Unit,
+    onFan2Click: () -> Unit,
+    onPi1Click: () -> Unit,
+    onPi2Click: () -> Unit,
+    onElectricClick: () -> Unit,
+    onWaterClick: () -> Unit,
+    onOtherClick: () -> Unit,
 ) {
     SlideInOutNavHost(
         navController = navHostController,
@@ -55,7 +63,15 @@ fun RootNavGraph(
                     onAlarmClick = onAlarmClick,
                     onControllerClick = onControllerClick,
                     onFilterClick = onFilterClick,
-                    onEditAlarmClick = onEditAlarmClick
+                    onEditAlarmClick = onEditAlarmClick,
+                    onTimingsClick = onTimingsClick,
+                    onFan1Click = onFan1Click,
+                    onFan2Click = onFan2Click,
+                    onPi1Click = onPi1Click,
+                    onPi2Click = onPi2Click,
+                    onElectricClick = onElectricClick,
+                    onWaterClick = onWaterClick,
+                    onOtherClick = onOtherClick
                 )
             }
         }

@@ -19,6 +19,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringArrayResource
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -27,6 +28,7 @@ import ru.cityron.R
 import ru.cityron.presentation.components.BackScaffold
 import ru.cityron.presentation.components.BottomSaveButton
 import ru.cityron.presentation.components.Loader
+import ru.cityron.presentation.components.Picker
 import ru.cityron.presentation.screens.editScheduler.DayChip
 import ru.cityron.presentation.screens.editScheduler.TitledContent
 
@@ -35,16 +37,16 @@ fun EditAlarmScreen(
     onClick: () -> Unit, id: Int,
     viewModel: EditAlarmViewModel = hiltViewModel()
 ) {
-    val isChanged by viewModel.isChanged.collectAsState()
+    val state by viewModel.state.collectAsState()
     BackScaffold(
         title = "Аварии / Настройки",
         onClick = onClick,
         bottomBar = {
-            if (isChanged) {
+            if (state.isChanged) {
                 BottomSaveButton(onClick = viewModel::onSaveClick)
             }
         },
-        content = { EditAlarmScreenContent(viewModel = viewModel) }
+        content = { EditAlarmScreenContent(viewModel = viewModel, state = state) }
     )
     LaunchedEffect(Unit) {
         viewModel.fetchAlarm(id)
@@ -53,13 +55,15 @@ fun EditAlarmScreen(
 
 @Composable
 private fun EditAlarmScreenContent(
-    viewModel: EditAlarmViewModel
+    viewModel: EditAlarmViewModel,
+    state: EditAlarmViewState,
 ) {
     val alarmsString = stringArrayResource(id = R.array.alarms_m3)
-    val alarmState = viewModel.alarm.collectAsState()
-    when (val alarm = alarmState.value) {
+    when (val alarm = state.localAlarm) {
         null -> Loader()
-        else -> Column {
+        else -> Column(
+            verticalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
             Text(
                 text = alarmsString[alarm.i - 1],
                 fontWeight = FontWeight.Bold,
@@ -72,10 +76,24 @@ private fun EditAlarmScreenContent(
                 verticalArrangement = Arrangement.spacedBy(20.dp),
             ) {
                 item {
-                    TitledContent(title = "Действие") {
-                        ActionRow(
-                            action = alarm.action,
-                            onActionChanged = viewModel::onActionChanged
+                    ActionRow(
+                        action = alarm.action,
+                        onActionChanged = viewModel::onActionChanged
+                    )
+                }
+                item {
+                    DelayRow(
+                        delay = alarm.delay,
+                        values = state.delayValues,
+                        onDelayChanged = viewModel::onDelayChanged
+                    )
+                }
+                if (state.valueValues.all { it != 0 }) {
+                    item {
+                        ValueRow(
+                            value = alarm.value,
+                            values = state.valueValues,
+                            onValueChanged = viewModel::onValueChanged
                         )
                     }
                 }
@@ -91,20 +109,59 @@ fun ActionRow(
 ) {
     val labels = listOf("НЕТ", "СТОП", "РЕСТАРТ")
     var selected by remember { mutableIntStateOf(action) }
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        labels.mapIndexed { i, label ->
-            DayChip(
-                modifier = Modifier.width(110.dp),
-                day = label,
-                isSelected = selected == i,
-                onClick = { selected = i }
-            )
+    TitledContent(title = "Действие") {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            labels.mapIndexed { i, label ->
+                DayChip(
+                    modifier = Modifier.width(110.dp),
+                    day = label,
+                    isSelected = selected == i,
+                    onClick = { selected = i }
+                )
+            }
         }
     }
     LaunchedEffect(key1 = selected) {
         onActionChanged(selected)
+    }
+}
+
+@Composable
+fun DelayRow(
+    delay: Int,
+    values: List<Int>,
+    onDelayChanged: (Int) -> Unit
+) {
+    TitledContent(title = "Задержка, сек") {
+        Picker(
+            modifier = Modifier.fillMaxWidth(0.5f),
+            items = values,
+            value = delay,
+            onValueChanged = onDelayChanged,
+            textStyle = TextStyle(fontSize = 32.sp),
+            textModifier = Modifier.padding(8.dp),
+        )
+    }
+}
+
+@Composable
+fun ValueRow(
+    value: Int,
+    values: List<Int>,
+    onValueChanged: (Int) -> Unit
+) {
+    TitledContent(title = "Уставка") {
+        Picker(
+            modifier = Modifier.fillMaxWidth(0.5f),
+            items = values,
+            value = value,
+            onValueChanged = onValueChanged,
+            format = { t -> "$t°С" },
+            textStyle = TextStyle(fontSize = 32.sp),
+            textModifier = Modifier.padding(8.dp),
+        )
     }
 }
