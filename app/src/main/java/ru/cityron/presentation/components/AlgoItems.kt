@@ -114,7 +114,7 @@ fun AlgoBooleanItem(
     ) {
         Text(
             text = text,
-            modifier = Modifier.fillMaxWidth(0.5f)
+            modifier = Modifier.fillMaxWidth(0.7f)
         )
         Switch(
             modifier = Modifier.height(30.dp),

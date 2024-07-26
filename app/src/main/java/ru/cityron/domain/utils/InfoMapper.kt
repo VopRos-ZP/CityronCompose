@@ -5,7 +5,8 @@ import ru.cityron.domain.model.Info
 
 fun Info.toController() = Controller(
     id = 0,
-    name = "${devName.replaceFirstChar(Char::uppercaseChar)} (${name.ifEmpty { idUsr }.uppercase()})",
+    name = "${devName.replaceFirstChar(Char::uppercaseChar)} (${name.ifEmpty { idUsr.uppercase() }})",
     ipAddress = ip,
-    idCpu = idCpu
+    idCpu = idCpu,
+    idUsr = idUsr,
 )

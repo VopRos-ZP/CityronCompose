@@ -1,5 +1,6 @@
 package ru.cityron.data.repository
 
+import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.RequestBody.Companion.toRequestBody
@@ -24,7 +25,7 @@ class HttpRepositoryImpl @Inject constructor(
 
     override suspend fun post(url: String, body: String): String {
         val request = Request.Builder()
-            .post(body.toRequestBody())
+            .post(body.toRequestBody("text/plain".toMediaType()))
             .url(url)
             .build()
         return try {

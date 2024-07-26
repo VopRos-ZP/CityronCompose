@@ -11,9 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ru.cityron.presentation.components.AlgoNumberItem
-import ru.cityron.presentation.components.BackScaffold
+import ru.cityron.presentation.components.BackScaffoldWithState
 import ru.cityron.presentation.components.BottomSaveButton
-import ru.cityron.presentation.components.Loader
 
 @Composable
 fun AlgoPi2Screen(
@@ -21,9 +20,10 @@ fun AlgoPi2Screen(
     viewModel: AlgoPi2ViewModel = hiltViewModel(),
 ) {
     val stateState = viewModel.state.collectAsState()
-    BackScaffold(
+    BackScaffoldWithState(
         title = "ПИ регулятор 2",
         onClick = onClick,
+        state = stateState,
         bottomBar = {
             if (stateState.value?.isChanged == true) {
                 BottomSaveButton(
@@ -31,33 +31,28 @@ fun AlgoPi2Screen(
                 )
             }
         }
-    ) {
-        when (val state = stateState.value) {
-            null -> Loader()
-            else -> {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(20.dp)
-                ) {
-                    AlgoNumberItem(
-                        text = "Пропорциональный коэффициент",
-                        value = state.pi2KofP,
-                        onValueChange = { viewModel.intent(AlgoPi2ViewIntent.OnPi2KofPChange(it)) }
-                    )
-                    AlgoNumberItem(
-                        text = "Интегральный коэффициент",
-                        value = state.pi2KofI,
-                        onValueChange = { viewModel.intent(AlgoPi2ViewIntent.OnPi2KofIChange(it)) }
-                    )
-                    AlgoNumberItem(
-                        text = "Зона нечувствительности",
-                        value = state.pi2Err,
-                        onValueChange = { viewModel.intent(AlgoPi2ViewIntent.OnPi2ErrChange(it)) }
-                    )
-                }
-            }
+    ) { state ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            AlgoNumberItem(
+                text = "Пропорциональный коэффициент",
+                value = state.pi2KofP,
+                onValueChange = { viewModel.intent(AlgoPi2ViewIntent.OnPi2KofPChange(it)) }
+            )
+            AlgoNumberItem(
+                text = "Интегральный коэффициент",
+                value = state.pi2KofI,
+                onValueChange = { viewModel.intent(AlgoPi2ViewIntent.OnPi2KofIChange(it)) }
+            )
+            AlgoNumberItem(
+                text = "Зона нечувствительности",
+                value = state.pi2Err,
+                onValueChange = { viewModel.intent(AlgoPi2ViewIntent.OnPi2ErrChange(it)) }
+            )
         }
     }
     LaunchedEffect(stateState.value) {

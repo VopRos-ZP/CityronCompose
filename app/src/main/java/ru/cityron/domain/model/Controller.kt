@@ -7,5 +7,6 @@ data class Controller(
     val id: Int,
     val name: String,
     val ipAddress: String,
-    val idCpu: String
+    val idCpu: String,
+    val idUsr: String,
 )

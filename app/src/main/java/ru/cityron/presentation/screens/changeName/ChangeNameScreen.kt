@@ -20,9 +20,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import ru.cityron.presentation.components.BackScaffold
+import ru.cityron.presentation.components.BackScaffoldWithState
 import ru.cityron.presentation.components.BottomSaveButton
-import ru.cityron.presentation.components.Loader
 
 @Composable
 fun ChangeNameScreen(
@@ -31,56 +30,52 @@ fun ChangeNameScreen(
 ) {
     val stateState = viewModel.state.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
-    BackScaffold(
+    BackScaffoldWithState(
         title = "Имя контроллера",
         onClick = onClick,
         snackbarHostState = snackbarHostState,
+        state = stateState,
         bottomBar = {
-            if (stateState.value?.name?.isNotEmpty() == true) {
+            if (stateState.value?.name != stateState.value?.oldName) {
                 BottomSaveButton(
                     onClick = { viewModel.intent(ChangeNameViewIntent.OnSaveClick) }
                 )
             }
         }
-    ) {
-        when (val state = stateState.value) {
-            null -> Loader()
-            else -> {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(20.dp)
-                ) {
-                    OutlinedTextField(
-                        value = state.name,
-                        onValueChange = { viewModel.intent(ChangeNameViewIntent.OnNameChange(it)) },
-                        singleLine = true,
-                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                        placeholder = { Text(text = "Введите имя контроллера") },
-                        colors = TextFieldDefaults.outlinedTextFieldColors(
-                            textColor = MaterialTheme.colors.onPrimary,
-                            backgroundColor = MaterialTheme.colors.primary,
-                            placeholderColor = MaterialTheme.colors.onPrimary.copy(alpha = 0.3f),
-                            focusedBorderColor = Color.Transparent,
-                            unfocusedBorderColor = Color.Transparent,
-                            cursorColor = MaterialTheme.colors.onPrimary
-                        ),
-                        modifier = Modifier.fillMaxWidth()
-                    )
-                }
-                LaunchedEffect(key1 = state) {
-                    if (state.isErrorChecked == true && state.isShowSnackbar) {
-                        snackbarHostState.showSnackbar(message = "Устройство не было найдено.")
-                        viewModel.intent(ChangeNameViewIntent.OnIsShowSnakbarChange(false))
-                    }
-                    if (state.isErrorChecked == false) {
-                        snackbarHostState.showSnackbar(
-                            message = "Устройство успешно добавлено в список.",
-                            duration = SnackbarDuration.Short
-                        )
-                        onClick()
-                    }
-                }
+    ) { state ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(20.dp)
+        ) {
+            OutlinedTextField(
+                value = state.name,
+                onValueChange = { viewModel.intent(ChangeNameViewIntent.OnNameChange(it)) },
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
+                placeholder = { Text(text = "Введите имя контроллера") },
+                colors = TextFieldDefaults.outlinedTextFieldColors(
+                    textColor = MaterialTheme.colors.onPrimary,
+                    backgroundColor = MaterialTheme.colors.primary,
+                    placeholderColor = MaterialTheme.colors.onPrimary.copy(alpha = 0.3f),
+                    focusedBorderColor = Color.Transparent,
+                    unfocusedBorderColor = Color.Transparent,
+                    cursorColor = MaterialTheme.colors.onPrimary
+                ),
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+        LaunchedEffect(key1 = state) {
+            if (state.isErrorChecked == true && state.isShowSnackbar) {
+                snackbarHostState.showSnackbar(message = "Устройство не было найдено.")
+                viewModel.intent(ChangeNameViewIntent.OnIsShowSnakbarChange(false))
+            }
+            if (state.isErrorChecked == false) {
+                snackbarHostState.showSnackbar(
+                    message = "Устройство успешно добавлено в список.",
+                    duration = SnackbarDuration.Short
+                )
+                onClick()
             }
         }
     }

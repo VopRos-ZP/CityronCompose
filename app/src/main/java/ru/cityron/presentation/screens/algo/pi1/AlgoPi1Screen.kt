@@ -12,9 +12,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ru.cityron.presentation.components.AlgoBooleanItem
 import ru.cityron.presentation.components.AlgoNumberItem
-import ru.cityron.presentation.components.BackScaffold
+import ru.cityron.presentation.components.BackScaffoldWithState
 import ru.cityron.presentation.components.BottomSaveButton
-import ru.cityron.presentation.components.Loader
 
 @Composable
 fun AlgoPi1Screen(
@@ -22,9 +21,10 @@ fun AlgoPi1Screen(
     viewModel: AlgoPi1ViewModel = hiltViewModel(),
 ) {
     val stateState = viewModel.state.collectAsState()
-    BackScaffold(
+    BackScaffoldWithState(
         title = "ПИ регулятор",
         onClick = onClick,
+        state = stateState,
         bottomBar = {
             if (stateState.value?.isChanged == true) {
                 BottomSaveButton(
@@ -32,38 +32,33 @@ fun AlgoPi1Screen(
                 )
             }
         }
-    ) {
-        when (val state = stateState.value) {
-            null -> Loader()
-            else -> {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(20.dp)
-                ) {
-                    AlgoBooleanItem(
-                        text = "Авто",
-                        value = state.piAutoEn,
-                        onValueChange = { viewModel.intent(AlgoPi1ViewIntent.OnPiAutoEnChange(it)) }
-                    )
-                    AlgoNumberItem(
-                        text = "Пропорциональный коэффициент",
-                        value = state.piKofP,
-                        onValueChange = { viewModel.intent(AlgoPi1ViewIntent.OnPi1KofPChange(it)) }
-                    )
-                    AlgoNumberItem(
-                        text = "Интегральный коэффициент",
-                        value = state.piKofI,
-                        onValueChange = { viewModel.intent(AlgoPi1ViewIntent.OnPi1KofIChange(it)) }
-                    )
-                    AlgoNumberItem(
-                        text = "Зона нечувствительности",
-                        value = state.piErr,
-                        onValueChange = { viewModel.intent(AlgoPi1ViewIntent.OnPi1ErrChange(it)) }
-                    )
-                }
-            }
+    ) { state ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            AlgoBooleanItem(
+                text = "Авто",
+                value = state.piAutoEn,
+                onValueChange = { viewModel.intent(AlgoPi1ViewIntent.OnPiAutoEnChange(it)) }
+            )
+            AlgoNumberItem(
+                text = "Пропорциональный коэффициент",
+                value = state.piKofP,
+                onValueChange = { viewModel.intent(AlgoPi1ViewIntent.OnPi1KofPChange(it)) }
+            )
+            AlgoNumberItem(
+                text = "Интегральный коэффициент",
+                value = state.piKofI,
+                onValueChange = { viewModel.intent(AlgoPi1ViewIntent.OnPi1KofIChange(it)) }
+            )
+            AlgoNumberItem(
+                text = "Зона нечувствительности",
+                value = state.piErr,
+                onValueChange = { viewModel.intent(AlgoPi1ViewIntent.OnPi1ErrChange(it)) }
+            )
         }
     }
     LaunchedEffect(stateState.value) {

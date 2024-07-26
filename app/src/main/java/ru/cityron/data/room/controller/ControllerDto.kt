@@ -12,5 +12,7 @@ data class ControllerDto(
     @ColumnInfo(name = "ip_address")
     val ipAddress: String,
     @ColumnInfo(name = "id_cpu")
-    val idCpu: String
+    val idCpu: String,
+    @ColumnInfo(name = "id_usr")
+    val idUsr: String,
 )

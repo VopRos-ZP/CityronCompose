@@ -21,7 +21,7 @@ class ChangeNameViewModel @Inject constructor(
             is ChangeNameViewIntent.OnSaveClick -> onSaveClick()
             is ChangeNameViewIntent.OnNameChange -> updateState {
                 copy(
-                    name = intent.value,
+                    name = intent.value.trim(),
                     isChanged = intent.value != oldName
                 )
             }
@@ -44,9 +44,9 @@ class ChangeNameViewModel @Inject constructor(
             ?.replace(")", "") ?: ""
 
         updateState {
-            when (oldName.all { it.isUpperCase() }) {
-                true -> copy(oldName = "")
-                else -> copy(oldName = oldName)
+            when (oldName == currentRepository.current?.first?.idUsr) {
+                true -> copy(oldName = "", name = "")
+                else -> copy(oldName = oldName, name = oldName)
             }
         }
     }
@@ -55,8 +55,7 @@ class ChangeNameViewModel @Inject constructor(
         scope.launch {
             state.value?.let {
                 try {
-                    confRepository.conf("others-loc", it.name)
-                    //And save new name locally
+                    confRepository.conf("others-loc", it.name.plus("\n"))// Перенос строки обязателен!!!
                     val controller = currentRepository.current!!.first
                     val devName = controller.name.split(" ")[0]
                     controllerRepository.upsert(controller.copy(name = "$devName (${it.name})"))

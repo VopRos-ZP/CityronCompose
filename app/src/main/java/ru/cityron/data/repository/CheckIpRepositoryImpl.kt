@@ -20,7 +20,8 @@ class CheckIpRepositoryImpl @Inject constructor(
                 id = 0,
                 name = "",
                 ipAddress = ip,
-                idCpu = ""
+                idCpu = "",
+                idUsr = ""
             ) to DataSource.Local(Status.ONLINE)
             val body = networkRepository.get(JSON_STATE)
             return body.contains("error").not()

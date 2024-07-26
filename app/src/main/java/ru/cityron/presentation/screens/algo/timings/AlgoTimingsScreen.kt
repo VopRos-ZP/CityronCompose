@@ -11,9 +11,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ru.cityron.presentation.components.AlgoNumberItem
-import ru.cityron.presentation.components.BackScaffold
+import ru.cityron.presentation.components.BackScaffoldWithState
 import ru.cityron.presentation.components.BottomSaveButton
-import ru.cityron.presentation.components.Loader
 
 @Composable
 fun AlgoTimingsScreen(
@@ -21,9 +20,10 @@ fun AlgoTimingsScreen(
     viewModel: AlgoTimingsViewModel = hiltViewModel()
 ) {
     val stateState = viewModel.state.collectAsState()
-    BackScaffold(
+    BackScaffoldWithState(
         title = "Тайминги",
         onClick = onClick,
+        state = stateState,
         bottomBar = {
             if (stateState.value?.isChanged == true) {
                 BottomSaveButton(
@@ -31,36 +31,31 @@ fun AlgoTimingsScreen(
                 )
             }
         }
-    ) {
-        when (val state = stateState.value) {
-            null -> Loader()
-            else -> {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(20.dp)
-                ) {
-                    AlgoNumberItem(
-                        text = "Открытие заслонки",
-                        textUnit = "сек",
-                        value = state.timeOpenDamper,
-                        onValueChange = { viewModel.intent(AlgoTimingsViewIntent.OnTimeOpenDamperChange(it)) }
-                    )
-                    AlgoNumberItem(
-                        text = "Разгон вентилятора",
-                        textUnit = "сек",
-                        value = state.timeAccelerFan,
-                        onValueChange = { viewModel.intent(AlgoTimingsViewIntent.OnTimeAccelerFanChange(it)) }
-                    )
-                    AlgoNumberItem(
-                        text = "Продува ТЭНа",
-                        textUnit = "сек",
-                        value = state.timeBlowHeat,
-                        onValueChange = { viewModel.intent(AlgoTimingsViewIntent.OnTimeBlowHeatChange(it)) }
-                    )
-                }
-            }
+    ) { state ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            AlgoNumberItem(
+                text = "Открытие заслонки",
+                textUnit = "сек",
+                value = state.timeOpenDamper,
+                onValueChange = { viewModel.intent(AlgoTimingsViewIntent.OnTimeOpenDamperChange(it)) }
+            )
+            AlgoNumberItem(
+                text = "Разгон вентилятора",
+                textUnit = "сек",
+                value = state.timeAccelerFan,
+                onValueChange = { viewModel.intent(AlgoTimingsViewIntent.OnTimeAccelerFanChange(it)) }
+            )
+            AlgoNumberItem(
+                text = "Продува ТЭНа",
+                textUnit = "сек",
+                value = state.timeBlowHeat,
+                onValueChange = { viewModel.intent(AlgoTimingsViewIntent.OnTimeBlowHeatChange(it)) }
+            )
         }
     }
     LaunchedEffect(stateState.value) {

@@ -14,9 +14,8 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import ru.cityron.R
 import ru.cityron.presentation.components.AlgoBooleanItem
 import ru.cityron.presentation.components.AlgoNumberItem
-import ru.cityron.presentation.components.BackScaffold
+import ru.cityron.presentation.components.BackScaffoldWithState
 import ru.cityron.presentation.components.BottomSaveButton
-import ru.cityron.presentation.components.Loader
 import ru.cityron.presentation.screens.algo.water.TitledSelectionRow
 
 @Composable
@@ -25,9 +24,10 @@ fun AlgoOtherScreen(
     viewModel: AlgoOtherViewModel = hiltViewModel()
 ) {
     val stateState = viewModel.state.collectAsState()
-    BackScaffold(
+    BackScaffoldWithState(
         title = "Прочее",
         onClick = onClick,
+        state = stateState,
         bottomBar = {
             if (stateState.value?.isChanged == true) {
                 BottomSaveButton(
@@ -35,44 +35,39 @@ fun AlgoOtherScreen(
                 )
             }
         }
-    ) {
-        when (val state = stateState.value) {
-            null -> Loader()
-            else -> {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(20.dp)
-                ) {
-                    TitledSelectionRow(
-                        labels = stringArrayResource(id = R.array.temp_control),
-                        title = "Регулирование температуры",
-                        value = state.tempControl,
-                        onValueChange = { viewModel.intent(AlgoOtherViewIntent.OnTempControlChange(it)) }
-                    )
-                    AlgoBooleanItem(
-                        text = "Наличие фильтра",
-                        value = state.filterEn,
-                        onValueChange = { viewModel.intent(AlgoOtherViewIntent.OnFilterEnChange(it)) }
-                    )
-                    AlgoBooleanItem(
-                        text = "Автостарт",
-                        value = state.autoStartEn,
-                        onValueChange = { viewModel.intent(AlgoOtherViewIntent.OnAutoStartEnChange(it)) }
-                    )
-                    AlgoBooleanItem(
-                        text = "Дистанционное управление",
-                        value = state.isDistPower,
-                        onValueChange = { viewModel.intent(AlgoOtherViewIntent.OnIsDistPowerChange(it)) }
-                    )
-                    AlgoNumberItem(
-                        text = "Колличество аварийных перезапусков",
-                        value = state.alarmRestartCount,
-                        onValueChange = { viewModel.intent(AlgoOtherViewIntent.OnAlarmRestartCountChange(it)) }
-                    )
-                }
-            }
+    ) { state ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            TitledSelectionRow(
+                labels = stringArrayResource(id = R.array.temp_control),
+                title = "Регулирование температуры",
+                value = state.tempControl,
+                onValueChange = { viewModel.intent(AlgoOtherViewIntent.OnTempControlChange(it)) }
+            )
+            AlgoBooleanItem(
+                text = "Наличие фильтра",
+                value = state.filterEn,
+                onValueChange = { viewModel.intent(AlgoOtherViewIntent.OnFilterEnChange(it)) }
+            )
+            AlgoBooleanItem(
+                text = "Автостарт",
+                value = state.autoStartEn,
+                onValueChange = { viewModel.intent(AlgoOtherViewIntent.OnAutoStartEnChange(it)) }
+            )
+            AlgoBooleanItem(
+                text = "Дистанционное управление",
+                value = state.isDistPower,
+                onValueChange = { viewModel.intent(AlgoOtherViewIntent.OnIsDistPowerChange(it)) }
+            )
+            AlgoNumberItem(
+                text = "Колличество аварийных перезапусков",
+                value = state.alarmRestartCount,
+                onValueChange = { viewModel.intent(AlgoOtherViewIntent.OnAlarmRestartCountChange(it)) }
+            )
         }
     }
     LaunchedEffect(stateState.value) {

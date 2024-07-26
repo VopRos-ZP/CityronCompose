@@ -3,7 +3,6 @@ package ru.cityron.presentation.screens.scheduler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
@@ -18,74 +17,55 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Switch
-import androidx.compose.material.SwitchDefaults
 import androidx.compose.material.TabRowDefaults.Divider
 import androidx.compose.material.Text
-import androidx.compose.material.pullrefresh.PullRefreshIndicator
-import androidx.compose.material.pullrefresh.pullRefresh
-import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ru.cityron.R
 import ru.cityron.domain.model.m3.M3Task
+import ru.cityron.domain.utils.toInt
 import ru.cityron.domain.utils.toTime
-import ru.cityron.presentation.components.BackScaffold
+import ru.cityron.presentation.components.BackScaffoldWithState
+import ru.cityron.presentation.components.Switch
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun SchedulersScreen(
     onClick: () -> Unit,
     onTaskClick: (Int) -> Unit,
     viewModel: SchedulersViewModel = hiltViewModel()
 ) {
-    val tasks by viewModel.tasks.collectAsState()
-    val isRefreshing by viewModel.isRefresh.collectAsState()
-
-    val pullToRefreshState = rememberPullRefreshState(refreshing = isRefreshing, onRefresh = { viewModel.refresh() })
-
-    BackScaffold(
+    val stateState = viewModel.state.collectAsState()
+    BackScaffoldWithState(
         title = "Планировщик",
         onClick = onClick,
-        modifier = Modifier.pullRefresh(pullToRefreshState)
-    ) {
-        if (!isRefreshing) {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize(),
-                verticalArrangement = Arrangement.spacedBy(20.dp),
-                contentPadding = PaddingValues(20.dp)
-            ) {
-                items(tasks) {
-                    ScheduleCard(
-                        task = it,
-                        onCheckedChange = {},
-                        onClick = { onTaskClick(it.i) }
-                    )
-                }
+        state = stateState
+    ) { state ->
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.spacedBy(20.dp),
+            contentPadding = PaddingValues(20.dp)
+        ) {
+            items(state.tasks) { task ->
+                ScheduleCard(
+                    task = task,
+                    onCheckedChange = { viewModel.intent(SchedulersViewIntent.OnCheckedChange(task.i, it.toInt())) },
+                    onClick = { onTaskClick(task.i) }
+                )
             }
         }
-        PullRefreshIndicator(isRefreshing, pullToRefreshState, Modifier.align(Alignment.TopCenter))
     }
-    LaunchedEffect(key1 = Unit) {
-        viewModel.refresh()
+    LaunchedEffect(Unit) {
+        viewModel.intent(SchedulersViewIntent.Launch)
     }
 }
 
@@ -173,13 +153,6 @@ fun ScheduleCard(
         Switch(
             checked = task.on == 1,
             onCheckedChange = onCheckedChange,
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = MaterialTheme.colors.primaryVariant,
-                checkedTrackColor = MaterialTheme.colors.primaryVariant,
-                uncheckedThumbColor = MaterialTheme.colors.onBackground,
-                uncheckedTrackColor = MaterialTheme.colors.background,
-                uncheckedTrackAlpha = 1f
-            )
         )
     }
 }

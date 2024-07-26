@@ -6,12 +6,14 @@ fun ControllerDto.toController() = Controller(
     id = id,
     name = name,
     ipAddress = ipAddress,
-    idCpu = idCpu
+    idCpu = idCpu,
+    idUsr = idUsr,
 )
 
 fun Controller.toDto() = ControllerDto(
     id = id,
     name = name,
     ipAddress = ipAddress,
-    idCpu = idCpu
+    idCpu = idCpu,
+    idUsr = idUsr,
 )

@@ -11,7 +11,7 @@ class ConfRepositoryImpl @Inject constructor(
 
     override suspend fun conf(key: String, value: Any): Boolean {
         val body = networkRepository.post(CONF, body = "$key=$value")
-        return !body.contains("error")
+        return !body.contains("error") || !body.contains("wrong")
     }
 
 }

@@ -18,9 +18,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ru.cityron.R
 import ru.cityron.presentation.components.AlgoNumberItem
-import ru.cityron.presentation.components.BackScaffold
+import ru.cityron.presentation.components.BackScaffoldWithState
 import ru.cityron.presentation.components.BottomSaveButton
-import ru.cityron.presentation.components.Loader
 import ru.cityron.presentation.screens.editScheduler.DayChip
 import ru.cityron.presentation.screens.editScheduler.TitledContent
 
@@ -30,9 +29,10 @@ fun AlgoWaterScreen(
     viewModel: AlgoWaterViewModel = hiltViewModel()
 ) {
     val stateState = viewModel.state.collectAsState()
-    BackScaffold(
+    BackScaffoldWithState(
         title = "Водяной нагрев",
         onClick = onClick,
+        state = stateState,
         bottomBar = {
             if (stateState.value?.isChanged == true) {
                 BottomSaveButton(
@@ -40,42 +40,37 @@ fun AlgoWaterScreen(
                 )
             }
         }
-    ) {
-        when (val state = stateState.value) {
-            null -> Loader()
-            else -> {
-                Column(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(20.dp)
-                ) {
-                    TitledSelectionRow(
-                        labels = stringArrayResource(id = R.array.mode_zima_leto_source),
-                        title = "Управление режимом",
-                        value = state.modeZimaLetoSource,
-                        onValueChange = { viewModel.intent(AlgoWaterViewIntent.OnModeZimaLetoSourceChange(it)) }
-                    )
-                    TitledSelectionRow(
-                        labels = stringArrayResource(id = R.array.mode_zima_leto_user),
-                        title = "Режим работы",
-                        value = state.modeZimaLetoUser,
-                        onValueChange = { viewModel.intent(AlgoWaterViewIntent.OnModeZimaLetoUserChange(it)) }
-                    )
-                    AlgoNumberItem(
-                        text = "Время прогрева",
-                        textUnit = "мин",
-                        value = state.timeWarmUp,
-                        onValueChange = { viewModel.intent(AlgoWaterViewIntent.OnTimeWarmUpChange(it)) }
-                    )
-                    AlgoNumberItem(
-                        text = "Время разморозки",
-                        textUnit = "мин",
-                        value = state.timeDefrost,
-                        onValueChange = { viewModel.intent(AlgoWaterViewIntent.OnTimeDefrostChange(it)) }
-                    )
-                }
-            }
+    ) { state ->
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(20.dp),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            TitledSelectionRow(
+                labels = stringArrayResource(id = R.array.mode_zima_leto_source),
+                title = "Управление режимом",
+                value = state.modeZimaLetoSource,
+                onValueChange = { viewModel.intent(AlgoWaterViewIntent.OnModeZimaLetoSourceChange(it)) }
+            )
+            TitledSelectionRow(
+                labels = stringArrayResource(id = R.array.mode_zima_leto_user),
+                title = "Режим работы",
+                value = state.modeZimaLetoUser,
+                onValueChange = { viewModel.intent(AlgoWaterViewIntent.OnModeZimaLetoUserChange(it)) }
+            )
+            AlgoNumberItem(
+                text = "Время прогрева",
+                textUnit = "мин",
+                value = state.timeWarmUp,
+                onValueChange = { viewModel.intent(AlgoWaterViewIntent.OnTimeWarmUpChange(it)) }
+            )
+            AlgoNumberItem(
+                text = "Время разморозки",
+                textUnit = "мин",
+                value = state.timeDefrost,
+                onValueChange = { viewModel.intent(AlgoWaterViewIntent.OnTimeDefrostChange(it)) }
+            )
         }
     }
     LaunchedEffect(stateState.value) {

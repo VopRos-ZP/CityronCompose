@@ -271,7 +271,7 @@ fun DayChip(
             Text(
                 text = day.uppercase(),
                 color = MaterialTheme.colors.onBackground,
-                fontSize = 14.sp,
+                fontSize = 12.sp,
             )
         }
         if (isSelected) {

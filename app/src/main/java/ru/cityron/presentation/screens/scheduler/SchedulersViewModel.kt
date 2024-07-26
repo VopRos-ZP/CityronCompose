@@ -1,40 +1,51 @@
 package ru.cityron.presentation.screens.scheduler
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import ru.cityron.domain.model.m3.M3Task
+import ru.cityron.domain.repository.ConfRepository
 import ru.cityron.domain.usecase.GetM3SchedUseCase
+import ru.cityron.presentation.components.MviViewModel
 import javax.inject.Inject
 
 @HiltViewModel
 class SchedulersViewModel @Inject constructor(
+    private val confRepository: ConfRepository,
     private val getM3SchedUseCase: GetM3SchedUseCase
-) : ViewModel() {
+) : MviViewModel<SchedulersViewState, SchedulersViewIntent>() {
 
-    private val _isRefresh = MutableStateFlow(false)
-    val isRefresh = _isRefresh.asStateFlow()
+    override fun intent(intent: SchedulersViewIntent) {
+        when (intent) {
+            is SchedulersViewIntent.Launch -> launch()
+            is SchedulersViewIntent.OnCheckedChange -> onCheckedChange(intent.sched, intent.value)
+        }
+    }
 
-    private val _tasks = MutableStateFlow(emptyList<M3Task>())
-    val tasks = _tasks.asStateFlow()
-
-    fun refresh() {
-        viewModelScope.launch(Dispatchers.IO) {
-            _isRefresh.value = true
-            delay(500)
-            _tasks.value = getM3SchedUseCase().let {
-                listOf(
-                    it.task0, it.task1, it.task2, it.task3,
-                    it.task4, it.task5, it.task6, it.task7,
-                    it.task8, it.task9
-                ).mapIndexed { i, t -> t.copy(i = i) }
+    private fun launch() {
+        updateState({ copy() }, SchedulersViewState())
+        scope.launch {
+            while (true) {
+                try {
+                    val sched = getM3SchedUseCase()
+                    updateState {
+                        copy(
+                            tasks = listOf(
+                                sched.task0, sched.task1, sched.task2, sched.task3,
+                                sched.task4, sched.task5, sched.task6, sched.task7,
+                                sched.task8, sched.task9
+                            ).mapIndexed { i, t -> t.copy(i = i) }
+                        )
+                    }
+                } catch (_: Exception) {
+                }
             }
-            _isRefresh.value = false
+        }
+    }
+
+    private fun onCheckedChange(sched: Int, value: Int) {
+        scope.launch {
+            try {
+                confRepository.conf("task$sched-on", value)
+            } catch (_: Exception) {}
         }
     }
 
