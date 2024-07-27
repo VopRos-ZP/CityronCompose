@@ -4,7 +4,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
@@ -30,9 +29,9 @@ private val json = Json {
 @Singleton
 class GetInfoListUseCase @Inject constructor(
     private val udpRepository: UdpRepository,
-    private val controllersUseCase: GetControllersUseCase,
     private val httpRepository: HttpRepository,
-    private val ipRepository: IpRepository
+    private val ipRepository: IpRepository,
+    private val controllerRepository: ControllerRepository
 ) {
 
     private val atlasTestInfo = Info(
@@ -52,31 +51,28 @@ class GetInfoListUseCase @Inject constructor(
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
     val infoList: Flow<Map<Info, Boolean>> = flow {
-        controllersUseCase.controllers.collect {
-            val list = mutableListOf<Info>()
-            val added = it.map(Controller::idCpu)
-            try {
-                while (true) {
-                    list.clear()
+        val list = mutableListOf<Info>()
+        try {
+            while (true) {
+                list.clear()
 
-                    list.add(atlasTestInfo)
-                    val infoList = getInfoListByIps(ipRepository.fetchAll())
-                    try {
-                        infoList.add(udpRepository.receive())
-                    } catch (_: SocketTimeoutException) {}
+                list.add(atlasTestInfo)
+                val infoList = getInfoListByIps(ipRepository.fetchAll())
+                try {
+                    infoList.add(udpRepository.receive())
+                } catch (_: SocketTimeoutException) {}
 
-                    for (info in infoList) {
-                        if (!list.contains(info)) {
-                            list.add(info)
-                        }
+                for (info in infoList) {
+                    if (!list.contains(info)) {
+                        list.add(info)
                     }
-                    emit(list.associateWith { i -> added.contains(i.idCpu) })
-                    udpRepository.close()
-                    delay(1000)
                 }
-            } catch (e: Exception) {
-                e.printStackTrace()
+                emit(list.associateWith { i -> controllerRepository.fetchAll().map(Controller::idCpu).contains(i.idCpu) })
+                udpRepository.close()
+                delay(1000)
             }
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
     }.stateIn(
         scope = coroutineScope,

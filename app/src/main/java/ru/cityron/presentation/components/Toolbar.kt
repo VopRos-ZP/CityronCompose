@@ -1,6 +1,6 @@
 package ru.cityron.presentation.components
 
-import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -15,7 +15,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ru.cityron.R
 
@@ -54,16 +53,7 @@ private fun ToolBar(
 ) {
     TopAppBar(
         backgroundColor = MaterialTheme.colors.primary,
-        title = {
-            Row(modifier = Modifier) {
-                Text(
-                    text = title,
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-        },
-        navigationIcon = {
+        content = {
             IconButton(onClick = onClick) {
                 Icon(
                     imageVector = icon,
@@ -72,8 +62,13 @@ private fun ToolBar(
                     modifier = Modifier.size(24.dp)
                 )
             }
-        },
-        actions = {
+            Spacer(modifier = Modifier.weight(1f))
+            Text(
+                text = title,
+                style = MaterialTheme.typography.subtitle2,
+                color = MaterialTheme.colors.onPrimary
+            )
+            Spacer(modifier = Modifier.weight(1f))
             val enabled = onActionClick != null
             IconButton(
                 onClick = onActionClick ?: {},

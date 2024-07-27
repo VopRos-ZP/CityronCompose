@@ -1,19 +1,17 @@
 package ru.cityron.presentation.screens.m3tabs
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import ru.cityron.domain.model.Controller
 import ru.cityron.domain.model.DataSource
-import ru.cityron.domain.model.m3.M3State
 import ru.cityron.domain.repository.ConfRepository
 import ru.cityron.domain.repository.CurrentRepository
 import ru.cityron.domain.repository.M3Repository
-import java.net.SocketTimeoutException
+import ru.cityron.presentation.components.MviViewModel
+import ru.cityron.presentation.screens.m3temp.M3TempViewIntent
+import ru.cityron.presentation.screens.m3temp.M3TempViewState
 import javax.inject.Inject
 
 @HiltViewModel
@@ -21,41 +19,55 @@ class M3ViewModel @Inject constructor(
     private val currentRepository: CurrentRepository,
     private val m3Repository: M3Repository,
     private val confRepository: ConfRepository,
-) : ViewModel() {
+) : MviViewModel<M3TempViewState, M3TempViewIntent>() {
 
     private val _controller = MutableStateFlow<Pair<Controller, DataSource>?>(null)
     val controller = _controller.asStateFlow()
 
-    private val _state = MutableStateFlow<M3State?>(null)
-    val state = _state.asStateFlow()
+    override fun intent(intent: M3TempViewIntent) {
+        when (intent) {
+            is M3TempViewIntent.Launch -> launch()
+            is M3TempViewIntent.OnTempChange -> setTemp(intent.value)
+            is M3TempViewIntent.OnFanChange -> setFan(intent.value)
+            is M3TempViewIntent.OnIsShowOnOffDialogChange -> updateState {
+                copy(isShowOnOffDialog = intent.value)
+            }
+            is M3TempViewIntent.OnConfirmOnOffClick -> {}
+        }
+    }
 
-    fun fetchState() {
-        viewModelScope.launch(Dispatchers.IO) {
+    private fun launch() {
+        updateState({ copy() }, M3TempViewState())
+        scope.launch {
             launch {
                 _controller.value = currentRepository.current
             }
             launch {
                 m3Repository.state.collect {
-                    _state.value = it
+                    updateState {
+                        copy(
+                            temp = it.set.temp,
+                            tempPv = it.algo.tempPv,
+                            fan = it.set.fan,
+                            isPowerOn = it.set.power == 1,
+                            isShowAlarms = it.alarms != 0,
+                        )
+                    }
                 }
             }
         }
     }
 
-    fun setTemp(temp: Int) {
-        viewModelScope.launch(Dispatchers.IO) {
+    private fun setTemp(temp: Int) {
+        scope.launch {
             confRepository.conf("set-temp", temp)
         }
     }
 
-    fun setFan(fan: Int) {
-        viewModelScope.launch(Dispatchers.IO) {
+    private fun setFan(fan: Int) {
+        scope.launch {
             confRepository.conf("set-fan", fan)
         }
-    }
-
-    fun closeError() {
-
     }
 
 }

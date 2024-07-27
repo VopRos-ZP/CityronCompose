@@ -31,9 +31,11 @@ import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.input.pointer.PointerInputScope
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.center
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.toOffset
 import ru.cityron.R
 import ru.cityron.domain.utils.Temp
@@ -163,7 +165,7 @@ fun Thermostat(
             // Draw the temperature values
             for (i in minValue..maxValue step step) {
                 val angle = startAngle + (i - minValue) * angleRange / (maxValue - minValue)
-                val textRadius = radius + 30.dp.toPx()
+                val textRadius = radius + 25.dp.toPx()
                 val textX = center.x + cos(Math.toRadians(angle.toDouble())).toFloat() * textRadius
                 val textY = center.y + sin(Math.toRadians(angle.toDouble())).toFloat() * textRadius
                 drawContext.canvas.nativeCanvas.drawText(
@@ -186,7 +188,7 @@ fun Thermostat(
             Text(
                 text = "",//Temp.toGrade(value),
                 color = Color.Transparent,
-                fontSize = 62.sp
+                style = MaterialTheme.typography.h2
             )
             Column(
                 modifier = Modifier.weight(1f),
@@ -195,9 +197,17 @@ fun Thermostat(
                 Spacer(modifier = Modifier.weight(1f))
                 Box(contentAlignment = Alignment.Center) {
                     Text(
-                        text = Temp.toGrade(positionValue),
+                        buildAnnotatedString {
+                            val (div, mod) = Temp.toGrade(positionValue).split(".")
+                            withStyle(SpanStyle(fontSize = MaterialTheme.typography.h3.fontSize)) {
+                                append(div)
+                            }
+                            withStyle(SpanStyle(fontSize = MaterialTheme.typography.h3.fontSize / 2)) {
+                                append(".$mod")
+                            }
+                        },
                         color = MaterialTheme.colors.secondary,
-                        fontSize = 31.sp
+                        style = MaterialTheme.typography.h3
                     )
                     Icon(
                         painter = painterResource(id = R.drawable.grade),

@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -33,7 +32,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -42,6 +40,7 @@ import ru.cityron.presentation.components.BackScaffold
 import ru.cityron.presentation.components.BottomSaveButton
 import ru.cityron.presentation.components.FanSlider
 import ru.cityron.presentation.components.Picker
+import ru.cityron.ui.theme.LightGrey
 
 @Composable
 fun EditSchedulerScreen(
@@ -135,8 +134,7 @@ fun TitledContent(
         Row {
             Text(
                 text = title,
-                fontWeight = FontWeight.Bold,
-                fontSize = 16.sp
+                style = MaterialTheme.typography.h3.copy(fontSize = 18.sp)
             )
             Spacer(modifier = Modifier.weight(1f))
             if (trailing != null) {
@@ -164,7 +162,6 @@ fun TimePicker(
             items = hourValues,
             format = ::toTime,
             onValueChanged = onHourChanged,
-            textStyle = TextStyle(fontSize = 32.sp),
             textModifier = Modifier.padding(8.dp),
         )
         Picker(
@@ -173,7 +170,6 @@ fun TimePicker(
             items = minValues,
             format = ::toTime,
             onValueChanged = onMinChanged,
-            textStyle = TextStyle(fontSize = 32.sp),
             textModifier = Modifier.padding(8.dp),
         )
     }
@@ -270,8 +266,8 @@ fun DayChip(
         ) {
             Text(
                 text = day.uppercase(),
-                color = MaterialTheme.colors.onBackground,
-                fontSize = 12.sp,
+                color = if (isSelected) MaterialTheme.colors.onBackground else LightGrey,
+                style = MaterialTheme.typography.h3.copy(fontSize = 14.sp)
             )
         }
         if (isSelected) {
@@ -317,7 +313,6 @@ fun TempRow(
             value = value,
             onValueChanged = onValueChanged,
             format = { t -> "$t°С" },
-            textStyle = TextStyle(fontSize = 32.sp),
             textModifier = Modifier.padding(8.dp),
         )
     }

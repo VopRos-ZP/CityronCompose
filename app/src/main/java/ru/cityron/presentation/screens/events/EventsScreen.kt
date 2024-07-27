@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -29,9 +28,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.loader.content.Loader
 import kotlinx.coroutines.delay
 import ru.cityron.R
 import ru.cityron.domain.model.Event
@@ -117,7 +114,10 @@ fun FilterButton(
                 )
             }
         }
-        Text(text = "Фильтры")
+        Text(
+            text = "Фильтры",
+            style = MaterialTheme.typography.caption
+        )
     }
 }
 
@@ -130,6 +130,7 @@ fun DateWithEventListItem(eventWithDate: EventWithDate) {
         Text(
             text = eventWithDate.day,
             fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.h5
         )
         eventWithDate.event.map {
             EventTextItem(it)
@@ -159,7 +160,7 @@ fun EventTextItem(event: Event) {
         )
         Text(
             text = "${event.time} ${event.result}",
-            fontSize = 12.sp
+            style = MaterialTheme.typography.body1
         )
     }
 }

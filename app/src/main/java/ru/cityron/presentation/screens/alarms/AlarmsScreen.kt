@@ -8,14 +8,13 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Chip
 import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Switch
-import androidx.compose.material.SwitchDefaults
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -30,6 +29,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ru.cityron.R
 import ru.cityron.presentation.components.BackScaffold
+import ru.cityron.presentation.components.Switch
 
 @Composable
 fun AlarmsScreen(
@@ -76,23 +76,19 @@ fun AlarmScreenItem(
             .clip(RoundedCornerShape(4.dp))
             .background(MaterialTheme.colors.primary)
             .clickable { onClick() }
-            .padding(16.dp),
+            .padding(horizontal = 16.dp, vertical = 20.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Text(
             text = text,
-            fontSize = 16.sp,
-            modifier = Modifier.weight(1f)
+            modifier = Modifier.weight(1f),
+            style = MaterialTheme.typography.h4.copy(letterSpacing = 0.sp)
         )
-        Spacer(modifier = Modifier.weight(0.05f))
+        Spacer(modifier = Modifier.width(13.dp))
         Switch(
+            modifier = Modifier.height(30.dp),
             checked = isChecked,
             onCheckedChange = onCheckedChange,
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = MaterialTheme.colors.primaryVariant,
-                uncheckedThumbColor = MaterialTheme.colors.secondaryVariant,
-                uncheckedTrackColor = MaterialTheme.colors.secondaryVariant,
-            )
         )
     }
 }

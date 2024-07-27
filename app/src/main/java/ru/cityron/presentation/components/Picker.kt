@@ -10,7 +10,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Divider
 import androidx.compose.material.LocalContentColor
-import androidx.compose.material.LocalTextStyle
+import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,8 +27,9 @@ import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
@@ -42,7 +43,6 @@ fun Picker(
     onValueChanged: (Int) -> Unit,
     visibleItemsCount: Int = 5,
     textModifier: Modifier = Modifier,
-    textStyle: TextStyle = LocalTextStyle.current,
     dividerColor: Color = LocalContentColor.current,
 ) {
 
@@ -89,7 +89,12 @@ fun Picker(
                     text = format(getItem(index)),
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    style = textStyle,
+                    style = MaterialTheme.typography.body1.copy(
+                        fontSize = 32.sp,
+                        lineHeight = 18.sp,
+                        letterSpacing = 0.sp,
+                        textAlign = TextAlign.Center
+                    ),
                     modifier = Modifier
                         .onSizeChanged { size -> itemHeightPixels.intValue = size.height }
                         .then(textModifier)

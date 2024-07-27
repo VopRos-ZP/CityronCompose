@@ -34,7 +34,10 @@ fun BottomSaveButton(
             ),
             onClick = onClick
         ) {
-            Text(text = "Сохранить")
+            Text(
+                text = "Сохранить",
+                style = MaterialTheme.typography.body2
+            )
         }
     }
 }

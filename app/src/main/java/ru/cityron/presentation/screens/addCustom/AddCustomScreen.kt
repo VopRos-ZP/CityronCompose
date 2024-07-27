@@ -20,15 +20,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import kotlinx.coroutines.delay
 import ru.cityron.presentation.components.BackScaffold
 
 @Composable
@@ -55,7 +52,11 @@ fun AddCustomScreen(
                 onValueChange = { viewModel.ipChanged(it) },
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                placeholder = { Text(text = "Введите IP-адрес устройства") },
+                textStyle = MaterialTheme.typography.h4,
+                placeholder = { Text(
+                    text = "Введите IP-адрес устройства",
+                    style = MaterialTheme.typography.h4
+                ) },
                 colors = TextFieldDefaults.outlinedTextFieldColors(
                     textColor = MaterialTheme.colors.onPrimary,
                     backgroundColor = MaterialTheme.colors.primary,
@@ -81,7 +82,10 @@ fun AddCustomScreen(
                 enabled = state.isCorrect,
                 contentPadding = PaddingValues(vertical = 14.dp),
             ) {
-                Text(text = "Далее")
+                Text(
+                    text = "Далее",
+                    style = MaterialTheme.typography.body2
+                )
             }
         }
     }

@@ -37,8 +37,8 @@ fun HTabRow(
             Spacer(
                 Modifier
                     .tabIndicatorOffset(it[pagerState.currentPage])
-                    .requiredWidth(60.dp)
-                    .requiredHeight(5.dp)
+                    .requiredWidth(53.dp)
+                    .requiredHeight(4.dp)
                     .background(
                         color = MaterialTheme.colors.primaryVariant,
                         shape = RoundedCornerShape(topStart = 4.dp, topEnd = 4.dp)
@@ -55,15 +55,16 @@ fun HTabRow(
                         painter = painterResource(id = tab.icon),
                         contentDescription = null,
                         modifier = Modifier.size(24.dp),
-                        tint = if (selected) MaterialTheme.colors.onBackground
+                        tint = if (selected) MaterialTheme.colors.onPrimary
                         else LightGrey
                     )
                 },
                 text = {
                     Text(
                         text = tab.title,
-                        color = if (selected) MaterialTheme.colors.onBackground
-                        else LightGrey
+                        color = if (selected) MaterialTheme.colors.onPrimary
+                        else LightGrey,
+                        style = MaterialTheme.typography.button
                     )
                 },
                 selected = selected,

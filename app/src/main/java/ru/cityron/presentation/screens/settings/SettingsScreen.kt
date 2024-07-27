@@ -19,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import ru.cityron.R
 import ru.cityron.presentation.components.BackScaffold
 
@@ -89,7 +88,7 @@ fun Category(
         )
         Text(
             text = text,
-            fontSize = 12.sp
+            style = MaterialTheme.typography.body1
         )
     }
 }

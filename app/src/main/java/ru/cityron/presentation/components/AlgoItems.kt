@@ -28,11 +28,9 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import ru.cityron.domain.utils.toInt
 
 @Composable
@@ -54,7 +52,8 @@ fun AlgoNumberItem(
     ) {
         Text(
             text = text,
-            modifier = Modifier.fillMaxWidth(0.5f)
+            modifier = Modifier.fillMaxWidth(0.5f),
+            style = MaterialTheme.typography.body1
         )
         Spacer(modifier = Modifier.weight(0.1f))
         Box(
@@ -75,10 +74,9 @@ fun AlgoNumberItem(
             contentAlignment = Alignment.Center
         ) {
             BasicTextField(
-                textStyle = TextStyle(
+                textStyle = MaterialTheme.typography.h6.copy(
                     color = MaterialTheme.colors.onPrimary,
                     textAlign = TextAlign.Center,
-                    fontSize = 22.sp
                 ),
                 singleLine = true,
                 cursorBrush = SolidColor(MaterialTheme.colors.onPrimary),
@@ -89,7 +87,10 @@ fun AlgoNumberItem(
         }
         if (textUnit != null) {
             Spacer(modifier = Modifier.weight(0.1f))
-            Text(text = textUnit)
+            Text(
+                text = textUnit,
+                style = MaterialTheme.typography.body1
+            )
         }
     }
     LaunchedEffect(textValue) {
@@ -114,7 +115,8 @@ fun AlgoBooleanItem(
     ) {
         Text(
             text = text,
-            modifier = Modifier.fillMaxWidth(0.7f)
+            modifier = Modifier.fillMaxWidth(0.7f),
+            style = MaterialTheme.typography.body1
         )
         Switch(
             modifier = Modifier.height(30.dp),

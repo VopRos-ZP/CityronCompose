@@ -82,9 +82,16 @@ class EditAlarmViewModel @Inject constructor(
         updateIsChanged()
     }
 
-    fun onSaveClick() {
+    fun onSaveClick(id: Int) {
         viewModelScope.launch(Dispatchers.IO) {
-
+            state.value.localAlarm?.let {
+                try {
+                    confRepository.conf("alarm$id-delay", "${it.delay}\n")
+                    confRepository.conf("alarm$id-value", "${it.value}\n")
+                    confRepository.conf("alarm$id-action", "${it.action}\n")
+                    _state.value = state.value.copy(isChanged = false)
+                } catch (_: Exception) {}
+            }
         }
     }
 

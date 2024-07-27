@@ -52,8 +52,12 @@ fun ChangeNameScreen(
                 value = state.name,
                 onValueChange = { viewModel.intent(ChangeNameViewIntent.OnNameChange(it)) },
                 singleLine = true,
+                textStyle = MaterialTheme.typography.h4,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                placeholder = { Text(text = "Введите имя контроллера") },
+                placeholder = { Text(
+                    text = "Введите имя контроллера",
+                    style = MaterialTheme.typography.h4,
+                ) },
                 colors = TextFieldDefaults.outlinedTextFieldColors(
                     textColor = MaterialTheme.colors.onPrimary,
                     backgroundColor = MaterialTheme.colors.primary,

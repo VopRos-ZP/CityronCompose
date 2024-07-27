@@ -24,6 +24,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import ru.cityron.R
 import ru.cityron.presentation.components.BackScaffold
 
@@ -83,7 +84,10 @@ fun AlgoItem(
             .padding(20.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = text)
+        Text(
+            text = text,
+            style = MaterialTheme.typography.h3.copy(fontSize = 18.sp)
+        )
         Spacer(modifier = Modifier.weight(1f))
         Icon(
             painter = painterResource(id = R.drawable.arrow),

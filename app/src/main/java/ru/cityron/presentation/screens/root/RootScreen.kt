@@ -34,7 +34,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -74,8 +73,8 @@ fun RootScreen() {
             ) {
                 Text(
                     text = "M3 - cити",
-                    fontSize = 36.sp,
-                    color = MaterialTheme.colors.secondary
+                    color = MaterialTheme.colors.secondary,
+                    style = MaterialTheme.typography.h1
                 )
                 controllers.forEach { (controller, source) ->
                     ControllerDrawerItem(
@@ -186,7 +185,11 @@ fun DrawerItem(
             .padding(22.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(text = text, color = textColor)
+        Text(
+            text = text,
+            color = textColor,
+            style = MaterialTheme.typography.subtitle1
+        )
         Spacer(modifier = Modifier.weight(1f))
         Box(
             modifier = Modifier

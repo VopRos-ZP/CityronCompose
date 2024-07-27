@@ -29,7 +29,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ru.cityron.R
 import ru.cityron.presentation.components.BackScaffold
@@ -112,7 +111,7 @@ fun LeftMenu(viewModel: EventsScreenViewModel) {
                     Text(
                         text = it,
                         color = MaterialTheme.colors.onPrimary,
-                        fontSize = 12.sp
+                        style = MaterialTheme.typography.body1
                     )
                 }
             }
@@ -121,7 +120,7 @@ fun LeftMenu(viewModel: EventsScreenViewModel) {
             modifier = Modifier
                 .weight(1f)
                 .padding(24.dp)
-                .selectableGroup()
+                .selectableGroup(),
         ) {
             val (value, values, onClick) = menuItems[menuItems.keys.toList()[selectedTab]]!!
             values.mapIndexed { i, it ->
@@ -135,6 +134,7 @@ fun LeftMenu(viewModel: EventsScreenViewModel) {
                         .clickable { onClick(i) }
                 ) {
                     RadioButton(
+                        modifier = Modifier,
                         selected = isSelected,
                         onClick = { onClick(i) },
                         colors = RadioButtonDefaults.colors(
@@ -145,7 +145,7 @@ fun LeftMenu(viewModel: EventsScreenViewModel) {
                     Text(
                         text = it,
                         color = MaterialTheme.colors.onPrimary,
-                        fontSize = 12.sp
+                        style = MaterialTheme.typography.caption
                     )
                 }
             }
