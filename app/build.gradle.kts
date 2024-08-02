@@ -12,7 +12,7 @@ android {
 
     defaultConfig {
         applicationId = "ru.cityron"
-        minSdk = 26
+        minSdk = 28
         versionCode = 1
         versionName = "1.0"
 

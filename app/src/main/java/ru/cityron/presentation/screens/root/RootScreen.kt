@@ -131,7 +131,8 @@ fun RootScreen() {
             onPi2Click = { navigationState.navigate(Screen.AlgoPi2.route) },
             onElectricClick = { navigationState.navigate(Screen.AlgoElectric.route) },
             onWaterClick = { navigationState.navigate(Screen.AlgoWater.route) },
-            onOtherClick = { navigationState.navigate(Screen.AlgoOther.route) }
+            onOtherClick = { navigationState.navigate(Screen.AlgoOther.route) },
+            onDatetimeClick = { navigationState.navigate(Screen.ControllerDatetime.route) }
         )
     }
     LaunchedEffect(Unit) {

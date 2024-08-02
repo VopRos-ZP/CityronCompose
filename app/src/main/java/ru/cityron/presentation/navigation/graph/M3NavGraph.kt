@@ -19,6 +19,8 @@ import ru.cityron.presentation.screens.algo.pi2.AlgoPi2Screen
 import ru.cityron.presentation.screens.algo.timings.AlgoTimingsScreen
 import ru.cityron.presentation.screens.algo.water.AlgoWaterScreen
 import ru.cityron.presentation.screens.changeName.ChangeNameScreen
+import ru.cityron.presentation.screens.controller.ControllerSettingsScreen
+import ru.cityron.presentation.screens.controller.datetime.ControllerDatetimeScreen
 import ru.cityron.presentation.screens.editAlarm.EditAlarmScreen
 import ru.cityron.presentation.screens.editScheduler.EditSchedulerScreen
 import ru.cityron.presentation.screens.events.filters.EventFiltersScreen
@@ -49,6 +51,7 @@ fun NavGraphBuilder.m3NavGraph(
     onElectricClick: () -> Unit,
     onWaterClick: () -> Unit,
     onOtherClick: () -> Unit,
+    onDatetimeClick: () -> Unit,
 ) {
     navigation(
         startDestination = Screen.M3Tabs.route,
@@ -149,6 +152,16 @@ fun NavGraphBuilder.m3NavGraph(
         }
         slideInOutComposable(route = Screen.AlgoOther.route) {
             AlgoOtherScreen(onClick = onBack)
+        }
+
+        slideInOutComposable(route = Screen.Controller.route) {
+            ControllerSettingsScreen(
+                onClick = onBack,
+                onDatetimeClick = onDatetimeClick
+            )
+        }
+        slideInOutComposable(route = Screen.ControllerDatetime.route) {
+            ControllerDatetimeScreen(onClick = onBack)
         }
     }
 }

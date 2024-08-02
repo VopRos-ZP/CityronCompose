@@ -6,16 +6,20 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
+import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -40,8 +44,6 @@ fun AlgoNumberItem(
     value: Int,
     onValueChange: (Int) -> Unit,
 ) {
-    var textValue by remember { mutableStateOf("$value") }
-    var isFocused by remember { mutableStateOf(false) }
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -55,36 +57,16 @@ fun AlgoNumberItem(
             modifier = Modifier.fillMaxWidth(0.5f),
             style = MaterialTheme.typography.body1
         )
-        Spacer(modifier = Modifier.weight(0.1f))
-        Box(
+        Spacer(modifier = Modifier.width(24.dp))
+        OutlinedTextFieldItem(
             modifier = Modifier
                 .widthIn(max = 96.dp)
-                .heightIn(min = 44.dp)
-                .background(
-                    color = if (isFocused) MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.background,
-                    shape = RoundedCornerShape(4.dp)
-                )
-                .border(
-                    width = 1.dp,
-                    color = if (isFocused) MaterialTheme.colors.primaryVariant else Color.Transparent,
-                    shape = RoundedCornerShape(4.dp)
-                )
-                .onFocusChanged { isFocused = it.isFocused }
-                .padding(12.dp),
-            contentAlignment = Alignment.Center
-        ) {
-            BasicTextField(
-                textStyle = MaterialTheme.typography.h6.copy(
-                    color = MaterialTheme.colors.onPrimary,
-                    textAlign = TextAlign.Center,
-                ),
-                singleLine = true,
-                cursorBrush = SolidColor(MaterialTheme.colors.onPrimary),
-                value = textValue,
-                onValueChange = { textValue = it },
-                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-            )
-        }
+                .heightIn(min = 44.dp),
+            value = value,
+            onValueChange = onValueChange,
+            transform = { it.toInt() },
+            keyboardType = KeyboardType.Number
+        )
         if (textUnit != null) {
             Spacer(modifier = Modifier.weight(0.1f))
             Text(
@@ -92,9 +74,6 @@ fun AlgoNumberItem(
                 style = MaterialTheme.typography.body1
             )
         }
-    }
-    LaunchedEffect(textValue) {
-        onValueChange(textValue.toInt())
     }
 }
 
@@ -126,3 +105,95 @@ fun AlgoBooleanItem(
     }
 }
 
+@Composable
+fun <T> TextFieldItem(
+    modifier: Modifier = Modifier,
+    value: T,
+    onValueChange: (T) -> Unit,
+    transform: (String) -> T,
+    keyboardType: KeyboardType,
+    placeholder: String? = null
+) {
+    var textValue by remember { mutableStateOf("$value") }
+    var isFocused by remember { mutableStateOf(false) }
+    Box(
+        modifier = modifier
+            .background(
+                color = if (isFocused) MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.background,
+                shape = RoundedCornerShape(4.dp)
+            )
+            .border(
+                width = 1.dp,
+                color = if (isFocused) MaterialTheme.colors.primaryVariant else Color.Transparent,
+                shape = RoundedCornerShape(4.dp)
+            )
+            .onFocusChanged { isFocused = it.isFocused }
+            .padding(12.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Box(modifier = Modifier) {
+            BasicTextField(
+                textStyle = MaterialTheme.typography.h6.copy(
+                    color = MaterialTheme.colors.onPrimary,
+                    textAlign = TextAlign.Center,
+                ),
+                singleLine = true,
+                cursorBrush = SolidColor(MaterialTheme.colors.onPrimary),
+                value = textValue,
+                onValueChange = { textValue = it },
+                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = keyboardType),
+            )
+            if (placeholder != null) {
+                Text(
+                    text = placeholder,
+                    color = MaterialTheme.colors.onPrimary.copy(alpha = 0.1f),
+                    style = MaterialTheme.typography.h6
+                )
+            }
+        }
+    }
+    LaunchedEffect(textValue) {
+        onValueChange(transform(textValue))
+    }
+}
+
+@Composable
+fun <T> OutlinedTextFieldItem(
+    modifier: Modifier = Modifier,
+    value: T,
+    onValueChange: (T) -> Unit,
+    transform: (String) -> T,
+    keyboardType: KeyboardType,
+    placeholder: String? = null
+) {
+    var textValue by remember { mutableStateOf("$value") }
+    var isFocused by remember { mutableStateOf(false) }
+    OutlinedTextField(
+        modifier = modifier.onFocusChanged { isFocused = it.isFocused },
+        value = textValue,
+        onValueChange = { textValue = it },
+        textStyle = MaterialTheme.typography.h6.copy(
+            color = MaterialTheme.colors.onPrimary,
+            textAlign = TextAlign.Center,
+        ),
+        shape = RoundedCornerShape(4.dp),
+        placeholder = { Text(
+            modifier = Modifier.fillMaxSize(),
+            text = placeholder ?: "",
+            textAlign = TextAlign.Center
+        ) },
+        singleLine = true,
+        keyboardOptions = KeyboardOptions.Default.copy(keyboardType = keyboardType),
+        colors = TextFieldDefaults.outlinedTextFieldColors(
+            textColor = MaterialTheme.colors.onPrimary,
+            backgroundColor = if (isFocused) MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.background,
+            cursorColor = MaterialTheme.colors.onPrimary,
+            unfocusedBorderColor = Color.Transparent,
+            focusedBorderColor = MaterialTheme.colors.primaryVariant,
+            placeholderColor = MaterialTheme.colors.primary
+        )
+    )
+    LaunchedEffect(textValue) {
+        onValueChange(transform(textValue))
+    }
+}

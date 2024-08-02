@@ -1,5 +1,7 @@
 package ru.cityron.domain.utils
 
+import kotlinx.serialization.json.Json
+
 fun toTime(num: Int): String = if (num < 10) "0$num" else "$num"
 
 fun Boolean.toInt() = if (this) 1 else 0
@@ -14,3 +16,7 @@ fun roundToFive(num: Double): Int {
         else -> result + 5
     }.toInt()
 }
+
+fun Int.toTimeZone(): String = "${if (this > 0) "+" else ""}$this"
+
+inline fun <reified T> fromJson(string: String): T = Json.decodeFromString(string)

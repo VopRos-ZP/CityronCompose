@@ -13,12 +13,14 @@ import ru.cityron.domain.model.JsonSched
 import ru.cityron.domain.model.JsonSettings
 import ru.cityron.domain.model.JsonState
 import ru.cityron.domain.model.JsonStatic
+import ru.cityron.domain.model.m3.M3All
 import ru.cityron.domain.model.m3.M3Sched
 import ru.cityron.domain.model.m3.M3Settings
 import ru.cityron.domain.model.m3.M3State
 import ru.cityron.domain.model.m3.M3Static
 import ru.cityron.domain.repository.M3Repository
 import ru.cityron.domain.repository.NetworkRepository
+import ru.cityron.domain.utils.Path.JSON_ALL
 import ru.cityron.domain.utils.Path.JSON_SCHED
 import ru.cityron.domain.utils.Path.JSON_SETTINGS
 import ru.cityron.domain.utils.Path.JSON_STATE
@@ -30,6 +32,14 @@ class M3RepositoryImpl @Inject constructor(
 ) : M3Repository {
 
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
+
+    override val all: Flow<M3All> = flow {
+        sendRequests<M3All, M3All>(JSON_ALL) { this }
+    }.stateIn(
+        scope = coroutineScope,
+        started = SharingStarted.Lazily,
+        initialValue = M3All()
+    )
 
     override val state: Flow<M3State> = flow {
         sendRequests<JsonState<M3State>, M3State>(JSON_STATE) { state }

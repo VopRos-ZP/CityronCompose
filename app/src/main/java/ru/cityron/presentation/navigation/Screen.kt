@@ -11,7 +11,7 @@ sealed class Screen(val route: String) {
     data object Auth : Screen(ROUTE_CHANGE_NAME)
     data object Algo : Screen(ROUTE_ALGO)
     data object Alarms : Screen(ROUTE_ALARMS)
-    data object Controller : Screen(ROUTE_CHANGE_NAME)
+    data object Controller : Screen(ROUTE_CONTROLLER)
     data object Filters : Screen(ROUTE_FILTERS)
 
     data object Alerts : Screen(ROUTE_ALERTS)
@@ -32,6 +32,8 @@ sealed class Screen(val route: String) {
     data object AlgoWater : Screen(ROUTE_ALGO_WATER)
     data object AlgoOther : Screen(ROUTE_ALGO_OTHER)
 
+    data object ControllerDatetime : Screen(ROUTE_CONTROLLER_DATETIME)
+
     companion object {
         const val ROUTE_BLANK = "blank"
         const val ROUTE_FIND_FLOW = "find_flow"
@@ -43,6 +45,7 @@ sealed class Screen(val route: String) {
         const val ROUTE_ALARMS = "alarms"
         const val ROUTE_ALGO = "algo"
         const val ROUTE_SCHEDULERS = "schedulers"
+        const val ROUTE_CONTROLLER = "controller"
         const val ROUTE_SETTINGS = "settings"
         const val ROUTE_FILTERS = "filters"
 
@@ -54,6 +57,8 @@ sealed class Screen(val route: String) {
         const val ROUTE_ALGO_ELECTRIC = "electric"
         const val ROUTE_ALGO_WATER = "water"
         const val ROUTE_ALGO_OTHER = "other"
+
+        const val ROUTE_CONTROLLER_DATETIME = "datetime"
 
         const val ROUTE_ATLAS = "atlas"
         const val ROUTE_M3_TABS = "m3_tabs"

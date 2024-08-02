@@ -35,6 +35,7 @@ fun RootNavGraph(
     onElectricClick: () -> Unit,
     onWaterClick: () -> Unit,
     onOtherClick: () -> Unit,
+    onDatetimeClick: () -> Unit,
 ) {
     SlideInOutNavHost(
         navController = navHostController,
@@ -71,7 +72,8 @@ fun RootNavGraph(
                     onPi2Click = onPi2Click,
                     onElectricClick = onElectricClick,
                     onWaterClick = onWaterClick,
-                    onOtherClick = onOtherClick
+                    onOtherClick = onOtherClick,
+                    onDatetimeClick = onDatetimeClick
                 )
             }
         }

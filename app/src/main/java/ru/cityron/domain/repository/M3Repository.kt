@@ -12,4 +12,5 @@ interface M3Repository {
     val static: Flow<M3Static>
     val settings: Flow<M3Settings>
     val sched: Flow<M3Sched>
+    val all: Flow<M3All>
 }
