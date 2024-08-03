@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
+import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,6 +24,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ru.cityron.presentation.components.AlgoBooleanItem
 import ru.cityron.presentation.components.BackScaffoldWithState
+import ru.cityron.presentation.components.OutlinedTextFieldItem
 import ru.cityron.presentation.components.TextFieldItem
 
 @Composable
@@ -70,7 +72,7 @@ fun ControllerDatetimeScreen(
                         value = state.timeIp,
                         onValueChange = { viewModel.intent(ControllerDatetimeViewIntent.OnTimeIpChange(it)) },
                         transform = { it },
-                        keyboardType = KeyboardType.Text,
+                        keyboardType = KeyboardType.Number,
                         placeholder = state.timeIpOld
                     )
                 }
@@ -88,7 +90,7 @@ fun ControllerDatetimeScreen(
                         value = state.date,
                         onValueChange = { viewModel.intent(ControllerDatetimeViewIntent.OnTimeIpChange(it)) },
                         transform = { it },
-                        keyboardType = KeyboardType.Text,
+                        keyboardType = KeyboardType.Number,
                         placeholder = state.dateOld
                     )
                 }

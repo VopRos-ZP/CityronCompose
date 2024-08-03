@@ -131,7 +131,10 @@ fun <T> TextFieldItem(
             .padding(12.dp),
         contentAlignment = Alignment.Center
     ) {
-        Box(modifier = Modifier) {
+        Box(
+            modifier = Modifier,
+            contentAlignment = Alignment.Center
+        ) {
             BasicTextField(
                 textStyle = MaterialTheme.typography.h6.copy(
                     color = MaterialTheme.colors.onPrimary,
@@ -145,9 +148,12 @@ fun <T> TextFieldItem(
             )
             if (placeholder != null) {
                 Text(
+                    modifier = Modifier.fillMaxWidth(),
                     text = placeholder,
                     color = MaterialTheme.colors.onPrimary.copy(alpha = 0.1f),
-                    style = MaterialTheme.typography.h6
+                    style = MaterialTheme.typography.h6.copy(
+                        textAlign = TextAlign.Center
+                    )
                 )
             }
         }
@@ -177,11 +183,13 @@ fun <T> OutlinedTextFieldItem(
             textAlign = TextAlign.Center,
         ),
         shape = RoundedCornerShape(4.dp),
-        placeholder = { Text(
-            modifier = Modifier.fillMaxSize(),
-            text = placeholder ?: "",
-            textAlign = TextAlign.Center
-        ) },
+        placeholder = {
+            Text(
+                modifier = Modifier.fillMaxWidth(),
+                text = placeholder ?: "",
+                textAlign = TextAlign.Center
+            )
+        },
         singleLine = true,
         keyboardOptions = KeyboardOptions.Default.copy(keyboardType = keyboardType),
         colors = TextFieldDefaults.outlinedTextFieldColors(
