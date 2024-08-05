@@ -13,8 +13,8 @@ data class ControllerDatetimeViewState(
     val timeOld: String = "",
     val time: String = "",
 
-    val timeZoneOld: String = "",
-    val timeZone: String = "",
+    val timeZoneOld: Int = 0,
+    val timeZone: Int = 0,
 
     val isChanged: Boolean = false,
 )

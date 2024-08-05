@@ -20,25 +20,25 @@ class AlgoWaterViewModel @Inject constructor(
             is AlgoWaterViewIntent.OnModeZimaLetoSourceChange -> updateState {
                 copy(
                     modeZimaLetoSource = intent.value,
-                    isChanged = intent.value != modeZimaLetoSourceOld
+                    isChanged = isChanged || intent.value != modeZimaLetoSourceOld
                 )
             }
             is AlgoWaterViewIntent.OnModeZimaLetoUserChange -> updateState {
                 copy(
                     modeZimaLetoUser = intent.value,
-                    isChanged = intent.value != modeZimaLetoUserOld
+                    isChanged = isChanged || intent.value != modeZimaLetoUserOld
                 )
             }
             is AlgoWaterViewIntent.OnTimeWarmUpChange -> updateState {
                 copy(
                     timeWarmUp = intent.value,
-                    isChanged = intent.value != timeWarmUpOld
+                    isChanged = isChanged || intent.value != timeWarmUpOld
                 )
             }
             is AlgoWaterViewIntent.OnTimeDefrostChange -> updateState {
                 copy(
                     timeDefrost = intent.value,
-                    isChanged = intent.value != timeDefrostOld
+                    isChanged = isChanged || intent.value != timeDefrostOld
                 )
             }
         }

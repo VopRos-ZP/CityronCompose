@@ -21,6 +21,9 @@ import ru.cityron.presentation.screens.algo.water.AlgoWaterScreen
 import ru.cityron.presentation.screens.changeName.ChangeNameScreen
 import ru.cityron.presentation.screens.controller.ControllerSettingsScreen
 import ru.cityron.presentation.screens.controller.datetime.ControllerDatetimeScreen
+import ru.cityron.presentation.screens.controller.eth.ControllerEthScreen
+import ru.cityron.presentation.screens.controller.http.ControllerHttpScreen
+import ru.cityron.presentation.screens.controller.metric.ControllerMetricScreen
 import ru.cityron.presentation.screens.editAlarm.EditAlarmScreen
 import ru.cityron.presentation.screens.editScheduler.EditSchedulerScreen
 import ru.cityron.presentation.screens.events.filters.EventFiltersScreen
@@ -52,6 +55,9 @@ fun NavGraphBuilder.m3NavGraph(
     onWaterClick: () -> Unit,
     onOtherClick: () -> Unit,
     onDatetimeClick: () -> Unit,
+    onEthClick: () -> Unit,
+    onWebClick: () -> Unit,
+    onMetricClick: () -> Unit,
 ) {
     navigation(
         startDestination = Screen.M3Tabs.route,
@@ -157,11 +163,23 @@ fun NavGraphBuilder.m3NavGraph(
         slideInOutComposable(route = Screen.Controller.route) {
             ControllerSettingsScreen(
                 onClick = onBack,
-                onDatetimeClick = onDatetimeClick
+                onDatetimeClick = onDatetimeClick,
+                onEthClick = onEthClick,
+                onWebClick = onWebClick,
+                onMetricClick = onMetricClick
             )
         }
         slideInOutComposable(route = Screen.ControllerDatetime.route) {
             ControllerDatetimeScreen(onClick = onBack)
+        }
+        slideInOutComposable(route = Screen.ControllerEth.route) {
+            ControllerEthScreen(onClick = onBack)
+        }
+        slideInOutComposable(route = Screen.ControllerWeb.route) {
+            ControllerHttpScreen(onClick = onBack)
+        }
+        slideInOutComposable(route = Screen.ControllerMetric.route) {
+            ControllerMetricScreen(onClick = onBack)
         }
     }
 }

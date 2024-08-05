@@ -20,25 +20,25 @@ class AlgoPi1ViewModel @Inject constructor(
             is AlgoPi1ViewIntent.OnPiAutoEnChange -> updateState {
                 copy(
                     piAutoEn = intent.value,
-                    isChanged = intent.value != piAutoEnOld
+                    isChanged = isChanged || intent.value != piAutoEnOld
                 )
             }
             is AlgoPi1ViewIntent.OnPi1KofPChange -> updateState {
                 copy(
                     piKofP = intent.value,
-                    isChanged = intent.value != piKofPOld
+                    isChanged = isChanged || intent.value != piKofPOld
                 )
             }
             is AlgoPi1ViewIntent.OnPi1KofIChange -> updateState {
                 copy(
                     piKofI = intent.value,
-                    isChanged = intent.value != piKofIOld
+                    isChanged = isChanged || intent.value != piKofIOld
                 )
             }
             is AlgoPi1ViewIntent.OnPi1ErrChange -> updateState {
                 copy(
                     piErr = intent.value,
-                    isChanged = intent.value != piErrOld
+                    isChanged = isChanged || intent.value != piErrOld
                 )
             }
         }

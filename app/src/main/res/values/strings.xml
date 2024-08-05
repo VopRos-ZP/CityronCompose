@@ -86,9 +86,18 @@
         <item>Каждые 10 секунд</item>
         <item>Каждые 30 секунд</item>
         <item>Каждую минуту</item>
-        <item>Каждую 5 минут</item>
-        <item>Каждую 10 минут</item>
-        <item>Каждую 30 минут</item>
+        <item>Каждые 5 минут</item>
+        <item>Каждые 10 минут</item>
+        <item>Каждые 30 минут</item>
+    </string-array>
+
+    <string-array name="metric_frequency_short">
+        <item>10 сек</item>
+        <item>30 сек</item>
+        <item>1 мин</item>
+        <item>5 мин</item>
+        <item>10 мин</item>
+        <item>30 мин</item>
     </string-array>
 
 </resources>

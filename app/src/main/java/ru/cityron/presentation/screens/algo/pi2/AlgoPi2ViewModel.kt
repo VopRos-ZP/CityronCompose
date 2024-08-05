@@ -20,19 +20,19 @@ class AlgoPi2ViewModel @Inject constructor(
             is AlgoPi2ViewIntent.OnPi2KofPChange -> updateState {
                 copy(
                     pi2KofP = intent.value,
-                    isChanged = intent.value != pi2KofPOld
+                    isChanged = isChanged || intent.value != pi2KofPOld
                 )
             }
             is AlgoPi2ViewIntent.OnPi2KofIChange -> updateState {
                 copy(
                     pi2KofI = intent.value,
-                    isChanged = intent.value != pi2KofIOld
+                    isChanged = isChanged || intent.value != pi2KofIOld
                 )
             }
             is AlgoPi2ViewIntent.OnPi2ErrChange -> updateState {
                 copy(
                     pi2Err = intent.value,
-                    isChanged = intent.value != pi2ErrOld
+                    isChanged = isChanged || intent.value != pi2ErrOld
                 )
             }
         }

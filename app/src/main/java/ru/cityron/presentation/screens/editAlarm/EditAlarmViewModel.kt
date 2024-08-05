@@ -64,7 +64,7 @@ class EditAlarmViewModel @Inject constructor(
 
     private fun updateIsChanged() {
         val value = state.value
-        _state.value = value.copy(isChanged = value.alarm != value.localAlarm)
+        _state.value = value.copy(isChanged = value.isChanged || value.alarm != value.localAlarm)
     }
 
     fun onActionChanged(action: Int) {

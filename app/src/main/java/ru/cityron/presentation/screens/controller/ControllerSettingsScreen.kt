@@ -36,6 +36,9 @@ import ru.cityron.ui.theme.LightGrey
 fun ControllerSettingsScreen(
     onClick: () -> Unit,
     onDatetimeClick: () -> Unit,
+    onEthClick: () -> Unit,
+    onWebClick: () -> Unit,
+    onMetricClick: () -> Unit,
     viewModel: ControllerSettingsViewModel = hiltViewModel()
 ) {
     BackScaffoldWithState(
@@ -60,21 +63,21 @@ fun ControllerSettingsScreen(
                 EthItem(
                     ipLoc = state.ipLoc,
                     dhcp = state.ethDhcp,
-                    onClick = {}
+                    onClick = onEthClick
                 )
             }
             item {
                 WebInterfaceItem(
                     httpP1 = state.httpP1,
                     httpP2 = state.httpP2,
-                    onClick = {}
+                    onClick = onWebClick
                 )
             }
             item {
                 MetricItem(
                     values = state.metricVal,
                     frequency = state.metricFrequency,
-                    onClick = {}
+                    onClick = onMetricClick
                 )
             }
         }

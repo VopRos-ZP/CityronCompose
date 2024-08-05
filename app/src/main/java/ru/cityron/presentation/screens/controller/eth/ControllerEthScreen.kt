@@ -1,4 +1,4 @@
-package ru.cityron.presentation.screens.controller.datetime
+package ru.cityron.presentation.screens.controller.eth
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -19,26 +19,26 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import ru.cityron.domain.utils.toTimeZone
 import ru.cityron.presentation.components.AlgoBooleanItem
 import ru.cityron.presentation.components.BackScaffoldWithState
 import ru.cityron.presentation.components.BottomSaveButton
-import ru.cityron.presentation.components.DropDownMenu
 import ru.cityron.presentation.components.TextFieldItem
 
 @Composable
-fun ControllerDatetimeScreen(
+fun ControllerEthScreen(
     onClick: () -> Unit,
-    viewModel: ControllerDatetimeViewModel = hiltViewModel()
+    viewModel: ControllerEthViewModel = hiltViewModel()
 ) {
     val stateState = viewModel.state.collectAsState()
     BackScaffoldWithState(
-        title = "Дата / Время",
+        title = "Сетевой интерфейс Eth",
         onClick = onClick,
         state = stateState,
         bottomBar = {
             if (stateState.value?.isChanged == true) {
-                BottomSaveButton(onClick = { viewModel.intent(ControllerDatetimeViewIntent.OnSaveClick) })
+                BottomSaveButton {
+                    viewModel.intent(ControllerEthViewIntent.OnSaveClick)
+                }
             }
         }
     ) { state ->
@@ -48,11 +48,11 @@ fun ControllerDatetimeScreen(
                 .padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            val enabled = state.timeFSntp != 1
+            val enabled = state.fDhcp != 1
             AlgoBooleanItem(
                 text = "Получать автоматически",
-                value = state.timeFSntp,
-                onValueChange = { viewModel.intent(ControllerDatetimeViewIntent.OnTimeFSntpChange(it)) }
+                value = state.fDhcp,
+                onValueChange = { viewModel.intent(ControllerEthViewIntent.OnFDhcpChange(it)) }
             )
             Column(
                 modifier = Modifier
@@ -67,19 +67,19 @@ fun ControllerDatetimeScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Сервер времени (SNTP)",
+                        text = "Локальный IP - адрес",
                         style = MaterialTheme.typography.body1,
                         modifier = Modifier.weight(1f)
                     )
                     TextFieldItem(
                         modifier = Modifier.weight(1f),
-                        value = state.timeIp,
+                        value = state.ip,
                         onValueChange = {
-                            viewModel.intent(ControllerDatetimeViewIntent.OnTimeIpChange(it))
+                            viewModel.intent(ControllerEthViewIntent.OnIpChange(it))
                         },
                         transform = { it },
                         keyboardType = KeyboardType.Number,
-                        placeholder = state.timeIpOld,
+                        placeholder = state.ipOld,
                         enabled = enabled
                     )
                 }
@@ -88,19 +88,19 @@ fun ControllerDatetimeScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Дата",
+                        text = "Маска подсети",
                         style = MaterialTheme.typography.body1,
                         modifier = Modifier.weight(1f)
                     )
                     TextFieldItem(
                         modifier = Modifier.weight(1f),
-                        value = state.date,
+                        value = state.mask,
                         onValueChange = {
-                            viewModel.intent(ControllerDatetimeViewIntent.OnDateChange(it))
+                            viewModel.intent(ControllerEthViewIntent.OnMaskChange(it))
                         },
                         transform = { it },
                         keyboardType = KeyboardType.Number,
-                        placeholder = state.dateOld,
+                        placeholder = state.maskOld,
                         enabled = enabled
                     )
                 }
@@ -109,45 +109,46 @@ fun ControllerDatetimeScreen(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
-                        text = "Время",
+                        text = "IP-адрес шлюза (роутера)",
                         style = MaterialTheme.typography.body1,
                         modifier = Modifier.weight(1f)
                     )
                     TextFieldItem(
                         modifier = Modifier.weight(1f),
-                        value = state.time,
+                        value = state.gw,
                         onValueChange = {
-                            viewModel.intent(ControllerDatetimeViewIntent.OnTimeChange(it))
+                            viewModel.intent(ControllerEthViewIntent.OnGwChange(it))
+                        },
+                        transform = { it },
+                        keyboardType = KeyboardType.Number,
+                        placeholder = state.gwOld,
+                        enabled = enabled
+                    )
+                }
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Физический адрес",
+                        style = MaterialTheme.typography.body1,
+                        modifier = Modifier.weight(1f)
+                    )
+                    TextFieldItem(
+                        modifier = Modifier.weight(1f),
+                        value = state.mac,
+                        onValueChange = {
+                            viewModel.intent(ControllerEthViewIntent.OnMacChange(it))
                         },
                         transform = { it },
                         keyboardType = KeyboardType.Text,
-                        placeholder = state.timeOld,
-                        enabled = enabled
-                    )
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = "Часовой пояс",
-                        style = MaterialTheme.typography.body1,
-                        modifier = Modifier.weight(1f)
-                    )
-                    DropDownMenu(
-                        modifier = Modifier.weight(1f),
-                        value = state.timeZone,
-                        onValueChange = {
-                            viewModel.intent(ControllerDatetimeViewIntent.OnTimeZoneChange(it))
-                        },
-                        format = { "GMT${it.toTimeZone()}" },
-                        items = (-12..12).toList()
+                        placeholder = state.macOld
                     )
                 }
             }
         }
     }
     LaunchedEffect(Unit) {
-        viewModel.intent(ControllerDatetimeViewIntent.Launch)
+        viewModel.intent(ControllerEthViewIntent.Launch)
     }
 }

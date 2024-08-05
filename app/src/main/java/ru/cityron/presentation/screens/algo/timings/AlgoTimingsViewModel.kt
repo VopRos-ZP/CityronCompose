@@ -19,19 +19,19 @@ class AlgoTimingsViewModel @Inject constructor(
             is AlgoTimingsViewIntent.OnTimeOpenDamperChange -> updateState {
                 copy(
                     timeOpenDamper = intent.value,
-                    isChanged = timeOpenDamperOld != intent.value
+                    isChanged = isChanged || timeOpenDamperOld != intent.value
                 )
             }
             is AlgoTimingsViewIntent.OnTimeAccelerFanChange -> updateState {
                 copy(
                     timeAccelerFan = intent.value,
-                    isChanged = timeAccelerFanOld != intent.value
+                    isChanged = isChanged || timeAccelerFanOld != intent.value
                 )
             }
             is AlgoTimingsViewIntent.OnTimeBlowHeatChange -> updateState {
                 copy(
                     timeBlowHeat = intent.value,
-                    isChanged = timeBlowHeatOld != intent.value
+                    isChanged = isChanged || timeBlowHeatOld != intent.value
                 )
             }
             is AlgoTimingsViewIntent.OnIsChangedChange -> updateState { copy(isChanged = intent.value) }

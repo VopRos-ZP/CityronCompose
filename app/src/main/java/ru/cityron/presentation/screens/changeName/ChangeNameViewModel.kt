@@ -22,7 +22,7 @@ class ChangeNameViewModel @Inject constructor(
             is ChangeNameViewIntent.OnNameChange -> updateState {
                 copy(
                     name = intent.value.trim(),
-                    isChanged = intent.value != oldName
+                    isChanged = isChanged || intent.value != oldName
                 )
             }
 

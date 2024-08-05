@@ -5,7 +5,7 @@ import kotlinx.coroutines.launch
 import ru.cityron.domain.repository.ConfRepository
 import ru.cityron.domain.usecase.GetM3AllUseCase
 import ru.cityron.domain.utils.Time
-import ru.cityron.domain.utils.toTimeZone
+import ru.cityron.domain.utils.Time.stringToSeconds
 import ru.cityron.presentation.components.MviViewModel
 import javax.inject.Inject
 
@@ -22,39 +22,39 @@ class ControllerDatetimeViewModel @Inject constructor(
             is ControllerDatetimeViewIntent.OnTimeFSntpChange -> updateState {
                 copy(
                     timeFSntp = intent.value,
-                    isChanged = intent.value != timeFSntpOld
+                    isChanged = isChanged || intent.value != timeFSntpOld
                 )
             }
             is ControllerDatetimeViewIntent.OnTimeIpChange -> updateState {
                 copy(
                     timeIp = intent.value,
-                    isChanged = intent.value != timeIpOld
+                    isChanged = isChanged || intent.value != timeIpOld
                 )
             }
             is ControllerDatetimeViewIntent.OnDateChange -> updateState {
                 copy(
                     date = intent.value,
-                    isChanged = intent.value != dateOld
+                    isChanged = isChanged || intent.value != dateOld
                 )
             }
             is ControllerDatetimeViewIntent.OnTimeChange -> updateState {
                 copy(
                     time = intent.value,
-                    isChanged = intent.value != timeOld
+                    isChanged = isChanged || intent.value != timeOld
                 )
             }
             is ControllerDatetimeViewIntent.OnTimeZoneChange -> updateState {
                 copy(
-                    timeZone = intent.value.toTimeZone(),
-                    isChanged = intent.value.toTimeZone() != timeZoneOld
+                    timeZone = intent.value,
+                    isChanged = isChanged || intent.value != timeZoneOld
                 )
             }
         }
     }
 
     private fun launch() {
-        updateState({ copy() }, ControllerDatetimeViewState())
         scope.launch {
+            updateState({ copy() }, ControllerDatetimeViewState())
             val all = getM3AllUseCase()
             updateState {
                 val zone = all.settings.time.zone
@@ -68,8 +68,8 @@ class ControllerDatetimeViewModel @Inject constructor(
                     date = datetime[0],
                     timeOld = datetime[1],
                     time = datetime[1],
-                    timeZoneOld = "GMT${zone.toTimeZone()}",
-                    timeZone = "GMT${zone.toTimeZone()}",
+                    timeZoneOld = zone,
+                    timeZone = zone,
                 )
             }
         }
@@ -77,7 +77,17 @@ class ControllerDatetimeViewModel @Inject constructor(
 
     private fun onSaveClick() {
         scope.launch {
-
+            try {
+                state.value?.let {
+                    confRepository.conf("time-fSntp", it.timeFSntp)
+                    confRepository.conf("time-ip", it.timeIp)
+                    confRepository.conf("time-zone", it.timeZone)
+                    confRepository.conf("time-unix", stringToSeconds("${it.date} ${it.time}", it.timeZone, Time.formatDatetime))
+                    updateState { copy(isChanged = false) }
+                }
+            } catch (_: Exception) {
+                updateState { copy(isChanged = true) }
+            }
         }
     }
 

@@ -132,7 +132,10 @@ fun RootScreen() {
             onElectricClick = { navigationState.navigate(Screen.AlgoElectric.route) },
             onWaterClick = { navigationState.navigate(Screen.AlgoWater.route) },
             onOtherClick = { navigationState.navigate(Screen.AlgoOther.route) },
-            onDatetimeClick = { navigationState.navigate(Screen.ControllerDatetime.route) }
+            onDatetimeClick = { navigationState.navigate(Screen.ControllerDatetime.route) },
+            onEthClick = { navigationState.navigate(Screen.ControllerEth.route) },
+            onWebClick = { navigationState.navigate(Screen.ControllerWeb.route) },
+            onMetricClick = { navigationState.navigate(Screen.ControllerMetric.route) },
         )
     }
     LaunchedEffect(Unit) {

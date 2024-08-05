@@ -20,31 +20,31 @@ class AlgoOtherViewModel @Inject constructor(
             is AlgoOtherViewIntent.OnTempControlChange -> updateState {
                 copy(
                     tempControl = intent.value,
-                    isChanged = intent.value != tempControlOld
+                    isChanged = isChanged || intent.value != tempControlOld
                 )
             }
             is AlgoOtherViewIntent.OnFilterEnChange -> updateState {
                 copy(
                     filterEn = intent.value,
-                    isChanged = intent.value != filterEnOld
+                    isChanged = isChanged || intent.value != filterEnOld
                 )
             }
             is AlgoOtherViewIntent.OnAutoStartEnChange -> updateState {
                 copy(
                     autoStartEn = intent.value,
-                    isChanged = intent.value != autoStartEnOld
+                    isChanged = isChanged || intent.value != autoStartEnOld
                 )
             }
             is AlgoOtherViewIntent.OnIsDistPowerChange -> updateState {
                 copy(
                     isDistPower = intent.value,
-                    isChanged = intent.value != isDistPowerOld
+                    isChanged = isChanged || intent.value != isDistPowerOld
                 )
             }
             is AlgoOtherViewIntent.OnAlarmRestartCountChange -> updateState {
                 copy(
                     alarmRestartCount = intent.value,
-                    isChanged = intent.value != alarmRestartCountOld
+                    isChanged = isChanged || intent.value != alarmRestartCountOld
                 )
             }
         }

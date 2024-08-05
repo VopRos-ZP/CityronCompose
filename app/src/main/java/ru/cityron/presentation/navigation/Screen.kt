@@ -33,6 +33,9 @@ sealed class Screen(val route: String) {
     data object AlgoOther : Screen(ROUTE_ALGO_OTHER)
 
     data object ControllerDatetime : Screen(ROUTE_CONTROLLER_DATETIME)
+    data object ControllerEth : Screen(ROUTE_CONTROLLER_ETH)
+    data object ControllerWeb : Screen(ROUTE_CONTROLLER_WEB)
+    data object ControllerMetric : Screen(ROUTE_CONTROLLER_METRIC)
 
     companion object {
         const val ROUTE_BLANK = "blank"
@@ -59,6 +62,9 @@ sealed class Screen(val route: String) {
         const val ROUTE_ALGO_OTHER = "other"
 
         const val ROUTE_CONTROLLER_DATETIME = "datetime"
+        const val ROUTE_CONTROLLER_ETH = "eth"
+        const val ROUTE_CONTROLLER_WEB = "web"
+        const val ROUTE_CONTROLLER_METRIC = "metric"
 
         const val ROUTE_ATLAS = "atlas"
         const val ROUTE_M3_TABS = "m3_tabs"

@@ -19,13 +19,13 @@ class AlgoFan2ViewModel @Inject constructor(
             is AlgoFan2ViewIntent.OnSpeedMinChange -> updateState {
                 copy(
                     fan2SpeedMin = intent.value,
-                    isChanged = intent.value != fan2SpeedMinOld
+                    isChanged = isChanged ||intent.value != fan2SpeedMinOld
                 )
             }
             is AlgoFan2ViewIntent.OnSpeedMaxChange -> updateState {
                 copy(
                     fan2SpeedMax = intent.value,
-                    isChanged = intent.value != fan2SpeedMaxOld
+                    isChanged = isChanged || intent.value != fan2SpeedMaxOld
                 )
             }
             is AlgoFan2ViewIntent.OnSaveClick -> onSaveClick()

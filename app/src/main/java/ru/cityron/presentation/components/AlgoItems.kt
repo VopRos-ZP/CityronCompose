@@ -1,21 +1,26 @@
 package ru.cityron.presentation.components
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.DropdownMenu
+import androidx.compose.material.DropdownMenuItem
+import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
 import androidx.compose.material.Text
@@ -29,19 +34,24 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import ru.cityron.R
 import ru.cityron.domain.utils.toInt
+import kotlin.math.exp
 
 @Composable
 fun AlgoNumberItem(
     text: String,
     textUnit: String? = null,
     value: Int,
+    enabled: Boolean = true,
     onValueChange: (Int) -> Unit,
 ) {
     Row(
@@ -58,14 +68,15 @@ fun AlgoNumberItem(
             style = MaterialTheme.typography.body1
         )
         Spacer(modifier = Modifier.width(24.dp))
-        OutlinedTextFieldItem(
+        TextFieldItem(
             modifier = Modifier
                 .widthIn(max = 96.dp)
                 .heightIn(min = 44.dp),
             value = value,
             onValueChange = onValueChange,
             transform = { it.toInt() },
-            keyboardType = KeyboardType.Number
+            keyboardType = KeyboardType.Number,
+            enabled = enabled
         )
         if (textUnit != null) {
             Spacer(modifier = Modifier.weight(0.1f))
@@ -112,9 +123,10 @@ fun <T> TextFieldItem(
     onValueChange: (T) -> Unit,
     transform: (String) -> T,
     keyboardType: KeyboardType,
+    enabled: Boolean = true,
     placeholder: String? = null
 ) {
-    var textValue by remember { mutableStateOf("$value") }
+    var textValue by remember(value) { mutableStateOf("$value") }
     var isFocused by remember { mutableStateOf(false) }
     Box(
         modifier = modifier
@@ -136,10 +148,11 @@ fun <T> TextFieldItem(
             contentAlignment = Alignment.Center
         ) {
             BasicTextField(
-                textStyle = MaterialTheme.typography.h6.copy(
-                    color = MaterialTheme.colors.onPrimary,
+                textStyle = MaterialTheme.typography.body1.copy(
+                    color = if (enabled) MaterialTheme.colors.onPrimary else MaterialTheme.colors.background,
                     textAlign = TextAlign.Center,
                 ),
+                enabled = enabled,
                 singleLine = true,
                 cursorBrush = SolidColor(MaterialTheme.colors.onPrimary),
                 value = textValue,
@@ -151,7 +164,7 @@ fun <T> TextFieldItem(
                     modifier = Modifier.fillMaxWidth(),
                     text = placeholder,
                     color = MaterialTheme.colors.onPrimary.copy(alpha = 0.1f),
-                    style = MaterialTheme.typography.h6.copy(
+                    style = MaterialTheme.typography.body1.copy(
                         textAlign = TextAlign.Center
                     )
                 )
@@ -178,7 +191,7 @@ fun <T> OutlinedTextFieldItem(
         modifier = modifier.onFocusChanged { isFocused = it.isFocused },
         value = textValue,
         onValueChange = { textValue = it },
-        textStyle = MaterialTheme.typography.h6.copy(
+        textStyle = MaterialTheme.typography.body1.copy(
             color = MaterialTheme.colors.onPrimary,
             textAlign = TextAlign.Center,
         ),
@@ -203,5 +216,72 @@ fun <T> OutlinedTextFieldItem(
     )
     LaunchedEffect(textValue) {
         onValueChange(transform(textValue))
+    }
+}
+
+@Composable
+fun <T> DropDownMenu(
+    modifier: Modifier = Modifier,
+    value: T,
+    onValueChange: (T) -> Unit,
+    format: (T) -> String,
+    items: List<T>,
+) {
+    val textValue by remember(value) { mutableStateOf(format(value)) }
+    var isFocused by remember { mutableStateOf(false) }
+    val expanded by remember(isFocused) { mutableStateOf(isFocused) }
+    Box(
+        modifier = modifier
+            .background(
+                color = if (isFocused) MaterialTheme.colors.secondaryVariant else MaterialTheme.colors.background,
+                shape = RoundedCornerShape(4.dp)
+            )
+            .border(
+                width = 1.dp,
+                color = if (isFocused) MaterialTheme.colors.primaryVariant else Color.Transparent,
+                shape = RoundedCornerShape(4.dp)
+            )
+            .clickable { isFocused = true }
+            .padding(12.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            BasicTextField(
+                modifier = Modifier
+                    .weight(1f)
+                    .onFocusChanged { isFocused = it.isFocused },
+                textStyle = MaterialTheme.typography.body1.copy(
+                    color = MaterialTheme.colors.onPrimary,
+                    textAlign = TextAlign.Center,
+                ),
+                readOnly = true,
+                singleLine = true,
+                cursorBrush = SolidColor(MaterialTheme.colors.onPrimary),
+                value = textValue,
+                onValueChange = {},
+                keyboardOptions = KeyboardOptions.Default,
+            )
+            Icon(
+                painter = painterResource(id = R.drawable.arrow),
+                contentDescription = null,
+                modifier = Modifier
+                    .size(24.dp)
+                    .rotate(if (expanded) -90f else 90f)
+            )
+        }
+        DropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { isFocused = false },
+        ) {
+            items.forEach {
+                DropdownMenuItem(
+                    onClick = { onValueChange(it) }
+                ) {
+                    Text(text = format(it))
+                }
+            }
+        }
     }
 }
