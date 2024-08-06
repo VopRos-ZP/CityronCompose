@@ -24,10 +24,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ru.cityron.R
-import ru.cityron.presentation.components.BackScaffold
+import ru.cityron.presentation.components.BackScaffoldWithState
 import ru.cityron.presentation.components.BottomSaveButton
-import ru.cityron.presentation.components.Loader
 import ru.cityron.presentation.components.Picker
+import ru.cityron.presentation.components.rememberSnackbarState
 import ru.cityron.presentation.screens.editScheduler.DayChip
 import ru.cityron.presentation.screens.editScheduler.TitledContent
 
@@ -36,37 +36,25 @@ fun EditAlarmScreen(
     onClick: () -> Unit, id: Int,
     viewModel: EditAlarmViewModel = hiltViewModel()
 ) {
-    val state by viewModel.state.collectAsState()
-    BackScaffold(
+    val stateState = viewModel.state.collectAsState()
+    val alarmsString = stringArrayResource(id = R.array.alarms_m3)
+    val snackbarState = rememberSnackbarState(result = stateState.value?.result)
+    BackScaffoldWithState(
         title = "Аварии / Настройки",
         onClick = onClick,
+        state = stateState,
+        snackbarState = snackbarState,
         bottomBar = {
-            if (state.isChanged) {
-                BottomSaveButton(onClick = { viewModel.onSaveClick(id) })
+            if (stateState.value?.isChanged == true) {
+                BottomSaveButton(onClick = { viewModel.intent(EditAlarmViewIntent.OnSaveClick) })
             }
         },
-        content = { EditAlarmScreenContent(viewModel = viewModel, state = state) }
-    )
-    LaunchedEffect(state.isChanged) {
-        if (!state.isChanged) {
-            viewModel.fetchAlarm(id)
-        }
-    }
-}
-
-@Composable
-private fun EditAlarmScreenContent(
-    viewModel: EditAlarmViewModel,
-    state: EditAlarmViewState,
-) {
-    val alarmsString = stringArrayResource(id = R.array.alarms_m3)
-    when (val alarm = state.localAlarm) {
-        null -> Loader()
-        else -> Column(
+    ) { state ->
+        Column(
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             Text(
-                text = alarmsString[alarm.i - 1],
+                text = alarmsString[state.i - 1],
                 fontWeight = FontWeight.Bold,
                 fontSize = 14.sp,
                 modifier = Modifier.padding(top = 20.dp, start = 20.dp, end = 20.dp)
@@ -78,27 +66,41 @@ private fun EditAlarmScreenContent(
             ) {
                 item {
                     ActionRow(
-                        action = alarm.action,
-                        onActionChanged = viewModel::onActionChanged
+                        action = state.action,
+                        onActionChanged = { viewModel.intent(EditAlarmViewIntent.OnActionChange(it)) }
                     )
                 }
-                item {
-                    DelayRow(
-                        delay = alarm.delay,
-                        values = state.delayValues,
-                        onDelayChanged = viewModel::onDelayChanged
-                    )
+                if (state.delayValues.isNotEmpty() && state.delayValues.all { it != 0 }) {
+                    item {
+                        DelayRow(
+                            delay = state.delay,
+                            values = state.delayValues,
+                            onDelayChanged = { viewModel.intent(EditAlarmViewIntent.OnDelayChange(it)) }
+                        )
+                    }
                 }
-                if (state.valueValues.all { it != 0 }) {
+                if (state.valueValues.isNotEmpty() && state.valueValues.all { it != 0 }) {
                     item {
                         ValueRow(
-                            value = alarm.value,
+                            value = state.value,
                             values = state.valueValues,
-                            onValueChanged = viewModel::onValueChanged
+                            onValueChanged = { viewModel.intent(EditAlarmViewIntent.OnValueChange(it)) }
                         )
                     }
                 }
             }
+        }
+        LaunchedEffect(state) {
+            if (state.result != null) {
+                snackbarState.showSnackbar {
+                    viewModel.intent(EditAlarmViewIntent.OnSnakbarResultChange(null))
+                }
+            }
+        }
+    }
+    LaunchedEffect(stateState.value?.result) {
+        if (stateState.value?.result == null) {
+            viewModel.intent(EditAlarmViewIntent.Launch(id))
         }
     }
 }

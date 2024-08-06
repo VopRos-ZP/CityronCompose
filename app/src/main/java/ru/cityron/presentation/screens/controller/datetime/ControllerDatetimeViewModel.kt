@@ -6,7 +6,7 @@ import ru.cityron.domain.repository.ConfRepository
 import ru.cityron.domain.usecase.GetM3AllUseCase
 import ru.cityron.domain.utils.Time
 import ru.cityron.domain.utils.Time.stringToSeconds
-import ru.cityron.presentation.components.MviViewModel
+import ru.cityron.presentation.mvi.MviViewModel
 import javax.inject.Inject
 
 @HiltViewModel

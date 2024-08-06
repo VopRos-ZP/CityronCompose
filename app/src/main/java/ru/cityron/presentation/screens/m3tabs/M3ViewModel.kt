@@ -9,7 +9,7 @@ import ru.cityron.domain.model.DataSource
 import ru.cityron.domain.repository.ConfRepository
 import ru.cityron.domain.repository.CurrentRepository
 import ru.cityron.domain.repository.M3Repository
-import ru.cityron.presentation.components.MviViewModel
+import ru.cityron.presentation.mvi.MviViewModel
 import ru.cityron.presentation.screens.m3temp.M3TempViewIntent
 import ru.cityron.presentation.screens.m3temp.M3TempViewState
 import javax.inject.Inject

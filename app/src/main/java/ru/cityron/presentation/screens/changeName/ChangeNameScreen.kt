@@ -7,14 +7,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.SnackbarDuration
-import androidx.compose.material.SnackbarHostState
 import androidx.compose.material.Text
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
@@ -22,6 +19,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ru.cityron.presentation.components.BackScaffoldWithState
 import ru.cityron.presentation.components.BottomSaveButton
+import ru.cityron.presentation.components.rememberSnackbarState
 
 @Composable
 fun ChangeNameScreen(
@@ -29,11 +27,11 @@ fun ChangeNameScreen(
     viewModel: ChangeNameViewModel = hiltViewModel()
 ) {
     val stateState = viewModel.state.collectAsState()
-    val snackbarHostState = remember { SnackbarHostState() }
+    val snackbarState = rememberSnackbarState(result = stateState.value?.result)
     BackScaffoldWithState(
         title = "Имя контроллера",
         onClick = onClick,
-        snackbarHostState = snackbarHostState,
+        snackbarState = snackbarState,
         state = stateState,
         bottomBar = {
             if (stateState.value?.name != stateState.value?.oldName) {
@@ -69,17 +67,11 @@ fun ChangeNameScreen(
                 modifier = Modifier.fillMaxWidth()
             )
         }
-        LaunchedEffect(key1 = state) {
-            if (state.isErrorChecked == true && state.isShowSnackbar) {
-                snackbarHostState.showSnackbar(message = "Устройство не было найдено.")
-                viewModel.intent(ChangeNameViewIntent.OnIsShowSnakbarChange(false))
-            }
-            if (state.isErrorChecked == false) {
-                snackbarHostState.showSnackbar(
-                    message = "Устройство успешно добавлено в список.",
-                    duration = SnackbarDuration.Short
-                )
-                onClick()
+        LaunchedEffect(state) {
+            if (state.result != null) {
+                snackbarState.showSnackbar {
+                    viewModel.intent(ChangeNameViewIntent.OnSnakbarResultChange(null))
+                }
             }
         }
     }

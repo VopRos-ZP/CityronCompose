@@ -2,17 +2,17 @@ package ru.cityron.presentation.screens.changeName
 
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import ru.cityron.R
 import ru.cityron.domain.repository.ConfRepository
-import ru.cityron.domain.repository.ControllerRepository
 import ru.cityron.domain.repository.CurrentRepository
-import ru.cityron.presentation.components.MviViewModel
+import ru.cityron.presentation.mvi.MviViewModel
+import ru.cityron.presentation.mvi.SnackbarResult
 import javax.inject.Inject
 
 @HiltViewModel
 class ChangeNameViewModel @Inject constructor(
     private val confRepository: ConfRepository,
     private val currentRepository: CurrentRepository,
-    private val controllerRepository: ControllerRepository,
 ) : MviViewModel<ChangeNameViewState, ChangeNameViewIntent>() {
 
     override fun intent(intent: ChangeNameViewIntent) {
@@ -21,17 +21,12 @@ class ChangeNameViewModel @Inject constructor(
             is ChangeNameViewIntent.OnSaveClick -> onSaveClick()
             is ChangeNameViewIntent.OnNameChange -> updateState {
                 copy(
-                    name = intent.value.trim(),
-                    isChanged = isChanged || intent.value != oldName
+                    name = intent.value,
+                    isChanged = intent.value != oldName
                 )
             }
-
-            is ChangeNameViewIntent.OnIsErrorCheckedChange -> updateState {
-                copy(isErrorChecked = intent.value)
-            }
-
-            is ChangeNameViewIntent.OnIsShowSnakbarChange -> updateState {
-                copy(isShowSnackbar = intent.value)
+            is ChangeNameViewIntent.OnSnakbarResultChange -> updateState {
+                copy(result = intent.value)
             }
         }
     }
@@ -56,20 +51,17 @@ class ChangeNameViewModel @Inject constructor(
             state.value?.let {
                 try {
                     confRepository.conf("others-loc", it.name.plus("\n"))// Перенос строки обязателен!!!
-                    val controller = currentRepository.current!!.first
-                    val devName = controller.name.split(" ")[0]
-                    controllerRepository.upsert(controller.copy(name = "$devName (${it.name})"))
                     updateState {
                         copy(
-                            isErrorChecked = false,
-                            isShowSnackbar = false
+                            isChanged = false,
+                            result = SnackbarResult(R.string.success_save_settings, false)
                         )
                     }
                 } catch (_: Exception) {
                     updateState {
                         copy(
-                            isErrorChecked = true,
-                            isShowSnackbar = true
+                            isChanged = true,
+                            result = SnackbarResult(R.string.error_save_settings, true)
                         )
                     }
                 }

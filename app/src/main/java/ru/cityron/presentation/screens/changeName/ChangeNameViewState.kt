@@ -1,11 +1,10 @@
 package ru.cityron.presentation.screens.changeName
 
-import ru.cityron.domain.model.Controller
+import ru.cityron.presentation.mvi.SnackbarResult
 
 data class ChangeNameViewState(
     val name: String = "",
     val oldName: String = "",
     val isChanged: Boolean = false,
-    val isErrorChecked: Boolean? = null,
-    val isShowSnackbar: Boolean = false
+    val result: SnackbarResult? = null,
 )

@@ -6,10 +6,8 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.SnackbarHost
-import androidx.compose.material.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.State
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -22,14 +20,14 @@ fun <T> DrawerScaffoldWithState(
     onSettingsClick: (() -> Unit)? = null,
     fab: @Composable () -> Unit = {},
     bottomBar: @Composable () -> Unit = {},
-    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    snackbarState: SnackbarState = rememberSnackbarState(),
     state: State<T?>,
     content: @Composable BoxScope.(T) -> Unit,
 ) {
     ToolbarScaffold(
         modifier = modifier,
         topBar = { DrawerTopBar(title = title, onClick = onClick, onSettingsClick = onSettingsClick) },
-        snackbarHostState = snackbarHostState,
+        snackbarState = snackbarState,
         fab = fab,
         bottomBar = bottomBar,
         content = {
@@ -49,13 +47,13 @@ fun DrawerScaffold(
     onSettingsClick: (() -> Unit)? = null,
     fab: @Composable () -> Unit = {},
     bottomBar: @Composable () -> Unit = {},
-    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    snackbarState: SnackbarState = rememberSnackbarState(),
     content: @Composable BoxScope.() -> Unit,
 ) {
     ToolbarScaffold(
         modifier = modifier,
         topBar = { DrawerTopBar(title = title, onClick = onClick, onSettingsClick = onSettingsClick) },
-        snackbarHostState = snackbarHostState,
+        snackbarState = snackbarState,
         fab = fab,
         bottomBar = bottomBar,
         content = content
@@ -69,14 +67,14 @@ fun <T> BackScaffoldWithState(
     modifier: Modifier = Modifier,
     fab: @Composable () -> Unit = {},
     bottomBar: @Composable () -> Unit = {},
-    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    snackbarState: SnackbarState = rememberSnackbarState(),
     state: State<T?>,
     content: @Composable BoxScope.(T) -> Unit,
 ) {
     ToolbarScaffold(
         modifier = modifier,
         topBar = { BackTopBar(title = title, onClick = onClick) },
-        snackbarHostState = snackbarHostState,
+        snackbarState = snackbarState,
         fab = fab,
         bottomBar = bottomBar,
         content = {
@@ -95,13 +93,13 @@ fun BackScaffold(
     modifier: Modifier = Modifier,
     fab: @Composable () -> Unit = {},
     bottomBar: @Composable () -> Unit = {},
-    snackbarHostState: SnackbarHostState = remember { SnackbarHostState() },
+    snackbarState: SnackbarState = rememberSnackbarState(),
     content: @Composable BoxScope.() -> Unit,
 ) {
     ToolbarScaffold(
         modifier = modifier,
         topBar = { BackTopBar(title = title, onClick = onClick) },
-        snackbarHostState = snackbarHostState,
+        snackbarState = snackbarState,
         fab = fab,
         bottomBar = bottomBar,
         content = content
@@ -114,15 +112,15 @@ fun ToolbarScaffold(
     topBar: @Composable () -> Unit,
     content: @Composable BoxScope.() -> Unit,
     bottomBar: @Composable () -> Unit = {},
-    snackbarHostState: SnackbarHostState,
+    snackbarState: SnackbarState,
     fab: @Composable () -> Unit
 ) {
     Scaffold(
         topBar = topBar,
         snackbarHost = {
             SnackbarHost(
-                hostState = snackbarHostState,
-                snackbar = { Snackbar(it) }
+                hostState = snackbarState.snackbarHostState,
+                snackbar = { Snackbar(snackbarState.snackbarResult, it) }
             )
         },
         floatingActionButton = fab,

@@ -6,7 +6,7 @@ import ru.cityron.domain.repository.ConfRepository
 import ru.cityron.domain.usecase.GetM3AllUseCase
 import ru.cityron.domain.utils.toInt
 import ru.cityron.domain.utils.utilsBitGet
-import ru.cityron.presentation.components.MviViewModel
+import ru.cityron.presentation.mvi.MviViewModel
 import javax.inject.Inject
 
 @HiltViewModel
@@ -23,13 +23,13 @@ class ControllerMetricViewModel @Inject constructor(
                 copy(
                     valuesBits = intent.value,
                     capacity = getCapacity(intent.value),
-                    isChanged = isChanged || intent.value != valuesBitsOld,
+                    isChanged = intent.value != valuesBitsOld || frequency != frequencyOld
                 )
             }
             is ControllerMetricViewIntent.OnFrequencyChange -> updateState {
                 copy(
                     frequency = intent.value,
-                    isChanged = isChanged || intent.value != frequencyOld
+                    isChanged = intent.value != frequencyOld || valuesBits != valuesBitsOld
                 )
             }
         }

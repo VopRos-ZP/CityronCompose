@@ -1,6 +1,11 @@
 <resources>
     <string name="app_name">Cityron</string>
 
+    <string name="success_save_settings">Настройки успешно применены.</string>
+    <string name="success_add_controller">Устройство успешно добавлено в список.</string>
+    <string name="error_add_controller">Устройство не найдено.</string>
+    <string name="error_save_settings">Не удалось применить настройки.</string>
+
     <string-array name="sources">
         <item>Журнал контроллера</item>
         <item>Журнал сервера</item>

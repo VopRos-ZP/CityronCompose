@@ -1,7 +1,8 @@
-package ru.cityron.presentation.components
+package ru.cityron.presentation.mvi
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -22,6 +23,8 @@ abstract class MviViewModel <S, I> : ViewModel() {
 
     abstract fun intent(intent: I)
 
-    protected val scope = viewModelScope.plus(Dispatchers.IO)
+    private val coroutineExceptionHandler = CoroutineExceptionHandler { _, _ -> }
+
+    protected val scope = viewModelScope.plus(Dispatchers.IO + coroutineExceptionHandler)
 
 }

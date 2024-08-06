@@ -1,96 +1,117 @@
 package ru.cityron.presentation.screens.editAlarm
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import ru.cityron.R
 import ru.cityron.domain.repository.ConfRepository
-import ru.cityron.domain.repository.M3Repository
-import ru.cityron.domain.usecase.GetM3SettingsUseCase
+import ru.cityron.domain.usecase.GetM3AllUseCase
+import ru.cityron.presentation.mvi.MviViewModel
+import ru.cityron.presentation.mvi.SnackbarResult
 import javax.inject.Inject
 
 @HiltViewModel
 class EditAlarmViewModel @Inject constructor(
     private val confRepository: ConfRepository,
-    private val getM3SettingsUseCase: GetM3SettingsUseCase,
-    private val m3Repository: M3Repository,
-) : ViewModel() {
+    private val getM3AllUseCase: GetM3AllUseCase,
+) : MviViewModel<EditAlarmViewState, EditAlarmViewIntent>() {
 
-    private val _state = MutableStateFlow(EditAlarmViewState())
-    val state = _state.asStateFlow()
-
-    fun fetchAlarm(id: Int) {
-        viewModelScope.launch(Dispatchers.IO) {
-            launch {
-                m3Repository.static.collect { static ->
-                    val minAlarms = static.settingsMin.let {
-                        listOf(
-                            it.alarm1, it.alarm2, it.alarm3, it.alarm4, it.alarm5,
-                            it.alarm6, it.alarm7, it.alarm8, it.alarm9
-                        ).mapIndexed { i, alarm -> alarm.copy(i = i + 1) }
-                    }
-                    val maxAlarms = static.settingsMax.let {
-                        listOf(
-                            it.alarm1, it.alarm2, it.alarm3, it.alarm4, it.alarm5,
-                            it.alarm6, it.alarm7, it.alarm8, it.alarm9
-                        ).mapIndexed { i, alarm -> alarm.copy(i = i + 1) }
-                    }
-                    val minAlarm = minAlarms[id - 1]
-                    val maxAlarm = maxAlarms[id - 1]
-
-                    _state.emit(
-                        state.value.copy(
-                            delayValues = (minAlarm.delay..maxAlarm.delay).toList(),
-                            valueValues = (minAlarm.value..maxAlarm.value).toList()
-                        )
-                    )
-                }
+    override fun intent(intent: EditAlarmViewIntent) {
+        when (intent) {
+            is EditAlarmViewIntent.Launch -> launch(intent.id)
+            is EditAlarmViewIntent.OnSaveClick ->  onSaveClick()
+            is EditAlarmViewIntent.OnActionChange -> updateState {
+                copy(
+                    action = intent.value,
+                    isChanged = intent.value != actionOld || delay != delayOld || value != valueOld
+                )
             }
+            is EditAlarmViewIntent.OnDelayChange -> updateState {
+                copy(
+                    delay = intent.value,
+                    isChanged = intent.value != delayOld || action != actionOld || value != valueOld
+                )
+            }
+            is EditAlarmViewIntent.OnValueChange -> updateState {
+                copy(
+                    value = intent.value,
+                    isChanged = intent.value != valueOld || delay != delayOld || action != actionOld
+                )
+            }
+            is EditAlarmViewIntent.OnSnakbarResultChange -> updateState {
+                copy(result = intent.value)
+            }
+        }
+    }
 
-            val alarms = getM3SettingsUseCase().let {
+    private fun launch(id: Int) {
+        if (state.value == null) {
+            updateState({ copy() }, EditAlarmViewState(id))
+        }
+        scope.launch {
+            val all = getM3AllUseCase()
+
+            val minAlarms = all.static.settingsMin.let {
                 listOf(
                     it.alarm1, it.alarm2, it.alarm3, it.alarm4, it.alarm5,
                     it.alarm6, it.alarm7, it.alarm8, it.alarm9
                 ).mapIndexed { i, alarm -> alarm.copy(i = i + 1) }
             }
-            val alarm = alarms.getOrNull(id - 1)
+            val maxAlarms = all.static.settingsMax.let {
+                listOf(
+                    it.alarm1, it.alarm2, it.alarm3, it.alarm4, it.alarm5,
+                    it.alarm6, it.alarm7, it.alarm8, it.alarm9
+                ).mapIndexed { i, alarm -> alarm.copy(i = i + 1) }
+            }
+            val minAlarm = minAlarms[id - 1]
+            val maxAlarm = maxAlarms[id - 1]
 
-            _state.value = state.value.copy(alarm = alarm, localAlarm = alarm)
+            val alarms = all.settings.let {
+                listOf(
+                    it.alarm1, it.alarm2, it.alarm3, it.alarm4, it.alarm5,
+                    it.alarm6, it.alarm7, it.alarm8, it.alarm9
+                ).mapIndexed { i, alarm -> alarm.copy(i = i + 1) }
+            }
+            val alarm = alarms[id - 1]
+
+            updateState {
+                copy(
+                    actionOld = alarm.action,
+                    action = alarm.action,
+
+                    delayOld = alarm.delay,
+                    delay = alarm.delay,
+
+                    valueOld = alarm.value,
+                    value = alarm.value,
+
+                    delayValues = (minAlarm.delay..maxAlarm.delay).toList(),
+                    valueValues = (minAlarm.value..maxAlarm.value).toList()
+                )
+            }
         }
     }
 
-    private fun updateIsChanged() {
-        val value = state.value
-        _state.value = value.copy(isChanged = value.isChanged || value.alarm != value.localAlarm)
-    }
-
-    fun onActionChanged(action: Int) {
-        _state.value = state.value.copy(localAlarm = state.value.localAlarm?.copy(action = action))
-        updateIsChanged()
-    }
-
-    fun onDelayChanged(delay: Int) {
-        _state.value = state.value.copy(localAlarm = state.value.localAlarm?.copy(delay = delay))
-        updateIsChanged()
-    }
-
-    fun onValueChanged(value: Int) {
-        _state.value = state.value.copy(localAlarm = state.value.localAlarm?.copy(value = value))
-        updateIsChanged()
-    }
-
-    fun onSaveClick(id: Int) {
-        viewModelScope.launch(Dispatchers.IO) {
-            state.value.localAlarm?.let {
+    private fun onSaveClick() {
+        scope.launch {
+            state.value?.let {
                 try {
-                    confRepository.conf("alarm$id-delay", "${it.delay}\n")
-                    confRepository.conf("alarm$id-value", "${it.value}\n")
-                    confRepository.conf("alarm$id-action", "${it.action}\n")
-                    _state.value = state.value.copy(isChanged = false)
-                } catch (_: Exception) {}
+                    confRepository.conf("alarm${it.i}-delay", "${it.delay}\n")
+                    confRepository.conf("alarm${it.i}-value", "${it.value}\n")
+                    confRepository.conf("alarm${it.i}-action", "${it.action}\n")
+                    updateState {
+                        copy(
+                            isChanged = false,
+                            result = SnackbarResult(R.string.success_save_settings, false)
+                        )
+                    }
+                } catch (_: Exception) {
+                    updateState {
+                        copy(
+                            isChanged = true,
+                            result = SnackbarResult(R.string.error_save_settings, true)
+                        )
+                    }
+                }
             }
         }
     }

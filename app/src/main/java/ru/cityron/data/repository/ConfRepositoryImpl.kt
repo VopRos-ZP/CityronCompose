@@ -1,5 +1,6 @@
 package ru.cityron.data.repository
 
+import android.util.Log
 import ru.cityron.domain.repository.ConfRepository
 import ru.cityron.domain.repository.NetworkRepository
 import ru.cityron.domain.utils.Path.CONF
@@ -9,9 +10,12 @@ class ConfRepositoryImpl @Inject constructor(
     private val networkRepository: NetworkRepository
 ) : ConfRepository {
 
-    override suspend fun conf(key: String, value: Any): Boolean {
+    override suspend fun conf(key: String, value: Any) {
         val body = networkRepository.post(CONF, body = "$key=$value")
-        return !body.contains("error") || !body.contains("wrong")
+        if (!body.contains("\"result\":\"ok\"")) {
+            Log.e("ConfRepository", body)
+            throw RuntimeException() // Error
+        }
     }
 
 }
