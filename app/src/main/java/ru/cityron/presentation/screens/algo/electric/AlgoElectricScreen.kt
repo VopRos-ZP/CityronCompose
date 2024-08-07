@@ -7,31 +7,37 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ru.cityron.presentation.components.AlgoNumberItem
-import ru.cityron.presentation.components.BackScaffoldWithState
+import ru.cityron.presentation.components.BackScaffold
 import ru.cityron.presentation.components.BottomSaveButton
+import ru.cityron.presentation.components.rememberSnackbarResult
 
 @Composable
 fun AlgoElectricScreen(
     onClick: () -> Unit,
     viewModel: AlgoElectricViewModel = hiltViewModel()
 ) {
-    val stateState = viewModel.state.collectAsState()
-    BackScaffoldWithState(
+    val state by viewModel.state().collectAsState()
+    val viewAction = viewModel.action().collectAsState(initial = null)
+    var snackbarResult by rememberSnackbarResult()
+    BackScaffold(
         title = "Электрический нагрев",
         onClick = onClick,
-        state = stateState,
+        snackbarResult = snackbarResult,
+        onDismissSnackbar = { if (!isError) viewModel.intent(AlgoElectricViewIntent.OnSnackbarDismiss) },
         bottomBar = {
-            if (stateState.value?.isChanged == true) {
-                BottomSaveButton(
-                    onClick = { viewModel.intent(AlgoElectricViewIntent.OnSaveClick) }
-                )
+            if (state.isChanged) {
+                BottomSaveButton(enabled = state.isInRange) {
+                    viewModel.intent(AlgoElectricViewIntent.OnSaveClick)
+                }
             }
         }
-    ) { state ->
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -41,13 +47,15 @@ fun AlgoElectricScreen(
             AlgoNumberItem(
                 text = "Период ШИМ",
                 value = state.heatPwmPeriod,
-                onValueChange = { viewModel.intent(AlgoElectricViewIntent.OnHeatPwmPeriodChange(it)) }
+                onValueChange = { viewModel.intent(AlgoElectricViewIntent.OnHeatPwmPeriodChange(it)) },
+                isError = !state.isInRange
             )
         }
     }
-    LaunchedEffect(stateState.value) {
-        if (stateState.value?.isChanged == false || stateState.value == null) {
-            viewModel.intent(AlgoElectricViewIntent.Launch)
+    LaunchedEffect(viewAction.value) {
+        when (val action = viewAction.value) {
+            is AlgoElectricViewAction.ShowSnackbar -> snackbarResult = action.result
+            else -> viewModel.intent(AlgoElectricViewIntent.Launch)
         }
     }
 }

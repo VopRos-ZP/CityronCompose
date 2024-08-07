@@ -5,5 +5,5 @@ import androidx.compose.runtime.LaunchedEffect
 
 @Composable
 fun BlankScreen(onClick: () -> Unit) {
-    LaunchedEffect(key1 = Unit) { onClick() }
+    LaunchedEffect(Unit) { onClick() }
 }

@@ -11,6 +11,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringArrayResource
@@ -18,8 +20,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ru.cityron.R
 import ru.cityron.presentation.components.AlgoNumberItem
-import ru.cityron.presentation.components.BackScaffoldWithState
+import ru.cityron.presentation.components.BackScaffold
 import ru.cityron.presentation.components.BottomSaveButton
+import ru.cityron.presentation.components.rememberSnackbarResult
 import ru.cityron.presentation.screens.editScheduler.DayChip
 import ru.cityron.presentation.screens.editScheduler.TitledContent
 
@@ -28,19 +31,22 @@ fun AlgoWaterScreen(
     onClick: () -> Unit,
     viewModel: AlgoWaterViewModel = hiltViewModel()
 ) {
-    val stateState = viewModel.state.collectAsState()
-    BackScaffoldWithState(
+    val state by viewModel.state().collectAsState()
+    val viewAction = viewModel.action().collectAsState(initial = null)
+    var snackbarResult by rememberSnackbarResult()
+    BackScaffold(
         title = "Водяной нагрев",
         onClick = onClick,
-        state = stateState,
+        snackbarResult = snackbarResult,
+        onDismissSnackbar = { if (!isError) viewModel.intent(AlgoWaterViewIntent.OnSnackbarDismiss) },
         bottomBar = {
-            if (stateState.value?.isChanged == true) {
-                BottomSaveButton(
-                    onClick = { viewModel.intent(AlgoWaterViewIntent.OnSaveClick) }
-                )
+            if (state.isChanged) {
+                BottomSaveButton(enabled = state.timeWarmUpInRange && state.timeDefrostInRange) {
+                    viewModel.intent(AlgoWaterViewIntent.OnSaveClick)
+                }
             }
         }
-    ) { state ->
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -63,19 +69,22 @@ fun AlgoWaterScreen(
                 text = "Время прогрева",
                 textUnit = "мин",
                 value = state.timeWarmUp,
+                isError = state.timeWarmUpInRange,
                 onValueChange = { viewModel.intent(AlgoWaterViewIntent.OnTimeWarmUpChange(it)) }
             )
             AlgoNumberItem(
                 text = "Время разморозки",
                 textUnit = "мин",
                 value = state.timeDefrost,
+                isError = state.timeDefrostInRange,
                 onValueChange = { viewModel.intent(AlgoWaterViewIntent.OnTimeDefrostChange(it)) }
             )
         }
     }
-    LaunchedEffect(stateState.value) {
-        if (stateState.value?.isChanged == false || stateState.value == null) {
-            viewModel.intent(AlgoWaterViewIntent.Launch)
+    LaunchedEffect(viewAction.value) {
+        when (val action = viewAction.value) {
+            is AlgoWaterViewAction.ShowSnackbar -> snackbarResult = action.result
+            null -> viewModel.intent(AlgoWaterViewIntent.Launch)
         }
     }
 }

@@ -24,10 +24,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ru.cityron.R
-import ru.cityron.presentation.components.BackScaffoldWithState
+import ru.cityron.presentation.components.BackScaffold
 import ru.cityron.presentation.components.BottomSaveButton
 import ru.cityron.presentation.components.Picker
-import ru.cityron.presentation.components.rememberSnackbarState
+import ru.cityron.presentation.components.rememberSnackbarResult
 import ru.cityron.presentation.screens.editScheduler.DayChip
 import ru.cityron.presentation.screens.editScheduler.TitledContent
 
@@ -36,20 +36,23 @@ fun EditAlarmScreen(
     onClick: () -> Unit, id: Int,
     viewModel: EditAlarmViewModel = hiltViewModel()
 ) {
-    val stateState = viewModel.state.collectAsState()
+    val state by viewModel.state().collectAsState()
+    val viewAction = viewModel.action().collectAsState(initial = null)
     val alarmsString = stringArrayResource(id = R.array.alarms_m3)
-    val snackbarState = rememberSnackbarState(result = stateState.value?.result)
-    BackScaffoldWithState(
+    var snackbarResult by rememberSnackbarResult()
+    BackScaffold(
         title = "Аварии / Настройки",
         onClick = onClick,
-        state = stateState,
-        snackbarState = snackbarState,
+        snackbarResult = snackbarResult,
+        onDismissSnackbar = { if (!isError) viewModel.intent(EditAlarmViewIntent.OnSnackbarDismiss) },
         bottomBar = {
-            if (stateState.value?.isChanged == true) {
-                BottomSaveButton(onClick = { viewModel.intent(EditAlarmViewIntent.OnSaveClick) })
+            if (state.isChanged) {
+                BottomSaveButton {
+                    viewModel.intent(EditAlarmViewIntent.OnSaveClick)
+                }
             }
         },
-    ) { state ->
+    ) {
         Column(
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
@@ -90,17 +93,11 @@ fun EditAlarmScreen(
                 }
             }
         }
-        LaunchedEffect(state) {
-            if (state.result != null) {
-                snackbarState.showSnackbar {
-                    viewModel.intent(EditAlarmViewIntent.OnSnakbarResultChange(null))
-                }
-            }
-        }
     }
-    LaunchedEffect(stateState.value?.result) {
-        if (stateState.value?.result == null) {
-            viewModel.intent(EditAlarmViewIntent.Launch(id))
+    LaunchedEffect(viewAction.value) {
+        when (val action = viewAction.value) {
+            is EditAlarmViewAction.ShowSnackbar -> snackbarResult = action.result
+            null -> viewModel.intent(EditAlarmViewIntent.Launch(id))
         }
     }
 }

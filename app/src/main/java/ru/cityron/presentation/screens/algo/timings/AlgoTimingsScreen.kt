@@ -7,31 +7,37 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ru.cityron.presentation.components.AlgoNumberItem
-import ru.cityron.presentation.components.BackScaffoldWithState
+import ru.cityron.presentation.components.BackScaffold
 import ru.cityron.presentation.components.BottomSaveButton
+import ru.cityron.presentation.components.rememberSnackbarResult
 
 @Composable
 fun AlgoTimingsScreen(
     onClick: () -> Unit,
     viewModel: AlgoTimingsViewModel = hiltViewModel()
 ) {
-    val stateState = viewModel.state.collectAsState()
-    BackScaffoldWithState(
+    val state by viewModel.state().collectAsState()
+    val viewAction = viewModel.action().collectAsState(initial = null)
+    var snackbarResult by rememberSnackbarResult()
+    BackScaffold(
         title = "Тайминги",
         onClick = onClick,
-        state = stateState,
+        snackbarResult = snackbarResult,
+        onDismissSnackbar = { if (!isError) viewModel.intent(AlgoTimingsViewIntent.OnSnackbarDismiss) },
         bottomBar = {
-            if (stateState.value?.isChanged == true) {
-                BottomSaveButton(
-                    onClick = { viewModel.intent(AlgoTimingsViewIntent.OnSaveClick) }
-                )
+            if (state.isChanged) {
+                BottomSaveButton(enabled = state.timeOpenDamperInRange && state.timeAccelerFanInRange && state.timeBlowHeatInRange) {
+                    viewModel.intent(AlgoTimingsViewIntent.OnSaveClick)
+                }
             }
         }
-    ) { state ->
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -42,25 +48,29 @@ fun AlgoTimingsScreen(
                 text = "Открытие заслонки",
                 textUnit = "сек",
                 value = state.timeOpenDamper,
+                isError = state.timeOpenDamperInRange,
                 onValueChange = { viewModel.intent(AlgoTimingsViewIntent.OnTimeOpenDamperChange(it)) }
             )
             AlgoNumberItem(
                 text = "Разгон вентилятора",
                 textUnit = "сек",
                 value = state.timeAccelerFan,
+                isError = state.timeAccelerFanInRange,
                 onValueChange = { viewModel.intent(AlgoTimingsViewIntent.OnTimeAccelerFanChange(it)) }
             )
             AlgoNumberItem(
                 text = "Продува ТЭНа",
                 textUnit = "сек",
                 value = state.timeBlowHeat,
+                isError = state.timeBlowHeatInRange,
                 onValueChange = { viewModel.intent(AlgoTimingsViewIntent.OnTimeBlowHeatChange(it)) }
             )
         }
     }
-    LaunchedEffect(stateState.value) {
-        if (stateState.value?.isChanged == false || stateState.value == null) {
-            viewModel.intent(AlgoTimingsViewIntent.Launch)
+    LaunchedEffect(viewAction.value) {
+        when (val action = viewAction.value) {
+            is AlgoTimingsViewAction.ShowSnackbar -> snackbarResult = action.result
+            null -> viewModel.intent(AlgoTimingsViewIntent.Launch)
         }
     }
 }

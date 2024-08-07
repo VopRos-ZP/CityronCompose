@@ -16,8 +16,10 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import ru.cityron.R
 import ru.cityron.presentation.components.BackScaffold
 import ru.cityron.ui.theme.LightRed
 
@@ -26,18 +28,19 @@ fun AlertsScreen(
     onClick: () -> Unit,
     viewModel: AlertsViewModel = hiltViewModel()
 ) {
-    val alerts by viewModel.alerts.collectAsState()
+    val titles = stringArrayResource(id = R.array.alarms_m3)
+    val state by viewModel.state().collectAsState()
     BackScaffold(title = "Аварии", onClick = onClick) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(20.dp),
             contentPadding = PaddingValues(20.dp)
         ) {
-            items(alerts) { ErrorItem(text = it) }
+            items(state.alerts) { ErrorItem(text = it) }
         }
     }
-    LaunchedEffect(key1 = Unit) {
-        viewModel.fetchAlerts()
+    LaunchedEffect(Unit) {
+        viewModel.intent(AlertsViewIntent.OnAlertsArrayChange(titles.toList()))
     }
 }
 

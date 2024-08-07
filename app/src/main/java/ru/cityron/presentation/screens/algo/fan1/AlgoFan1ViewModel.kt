@@ -1,64 +1,79 @@
 package ru.cityron.presentation.screens.algo.fan1
 
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
+import ru.cityron.R
 import ru.cityron.domain.repository.ConfRepository
-import ru.cityron.domain.usecase.GetM3SettingsUseCase
-import ru.cityron.presentation.mvi.MviViewModel
+import ru.cityron.domain.usecase.GetM3AllUseCase
+import ru.cityron.presentation.mvi.BaseSharedViewModel
+import ru.cityron.presentation.mvi.SnackbarResult
 import javax.inject.Inject
 
 @HiltViewModel
 class AlgoFan1ViewModel @Inject constructor(
     private val confRepository: ConfRepository,
-    private val getM3SettingsUseCase: GetM3SettingsUseCase
-) : MviViewModel<AlgoFan1ViewState, AlgoFan1ViewIntent>() {
+    private val getM3AllUseCase: GetM3AllUseCase,
+) : BaseSharedViewModel<AlgoFan1ViewState, AlgoFan1ViewAction, AlgoFan1ViewIntent>(
+    initialState = AlgoFan1ViewState()
+) {
 
-    override fun intent(intent: AlgoFan1ViewIntent) {
-        when (intent) {
+    override fun intent(viewEvent: AlgoFan1ViewIntent) {
+        when (viewEvent) {
             is AlgoFan1ViewIntent.Launch -> launch()
-            is AlgoFan1ViewIntent.OnSpeedMinChange -> updateState {
-                copy(
-                    fan1SpeedMin = intent.value,
-                    isChanged = isChanged ||intent.value != fan1SpeedMinOld
-                )
-            }
-            is AlgoFan1ViewIntent.OnSpeedMaxChange -> updateState {
-                copy(
-                    fan1SpeedMax = intent.value,
-                    isChanged = isChanged ||intent.value != fan1SpeedMaxOld
-                )
-            }
             is AlgoFan1ViewIntent.OnSaveClick -> onSaveClick()
+            is AlgoFan1ViewIntent.OnSnackbarDismiss -> onSnackbarDismiss()
+            is AlgoFan1ViewIntent.OnSpeedMinChange -> onSpeedMinChange(viewEvent.value)
+            is AlgoFan1ViewIntent.OnSpeedMaxChange -> onSpeedMaxChange(viewEvent.value)
         }
     }
 
     private fun launch() {
-        scope.launch {
-            try {
-                val settings = getM3SettingsUseCase()
-                updateState(
-                    { copy() }, AlgoFan1ViewState(
-                        fan1SpeedMinOld = settings.algo.fan1SpeedMin,
-                        fan1SpeedMin = settings.algo.fan1SpeedMin,
-                        fan1SpeedMaxOld = settings.algo.fan1SpeedMax,
-                        fan1SpeedMax = settings.algo.fan1SpeedMax,
-                    )
-                )
-            } catch (_: Exception) {}
+        withViewModelScope {
+            val all = getM3AllUseCase()
+            viewState = viewState.copy(
+                fan1SpeedMinOld = all.settings.algo.fan1SpeedMin,
+                fan1SpeedMin = all.settings.algo.fan1SpeedMin,
+                fan1SpeedMinMin = all.static.settingsMin.algo.fan1SpeedMin,
+                fan1SpeedMinMax = all.static.settingsMax.algo.fan1SpeedMin,
+
+                fan1SpeedMaxOld = all.settings.algo.fan1SpeedMax,
+                fan1SpeedMax = all.settings.algo.fan1SpeedMax,
+                fan1SpeedMaxMin = all.static.settingsMin.algo.fan1SpeedMax,
+                fan1SpeedMaxMax = all.static.settingsMax.algo.fan1SpeedMax,
+            )
         }
     }
 
+    private fun onSnackbarDismiss() {
+        viewAction = null
+    }
+
+    private fun onSpeedMinChange(value: Int) {
+        viewState = viewState.copy(
+            fan1SpeedMin = value,
+            fan1SpeedMinInRange = value in (viewState.fan1SpeedMinMin..viewState.fan1SpeedMinMax),
+            isChanged = value != viewState.fan1SpeedMinOld || viewState.fan1SpeedMax != viewState.fan1SpeedMaxOld
+        )
+    }
+
+    private fun onSpeedMaxChange(value: Int) {
+        viewState = viewState.copy(
+            fan1SpeedMax = value,
+            fan1SpeedMaxInRange = value in (viewState.fan1SpeedMaxMin..viewState.fan1SpeedMaxMax),
+            isChanged = value != viewState.fan1SpeedMaxOld || viewState.fan1SpeedMin != viewState.fan1SpeedMinOld
+        )
+    }
+
     private fun onSaveClick() {
-        scope.launch {
-            state.value?.let {
-                try {
-                    confRepository.conf("algo-fan1SpeedMin", it.fan1SpeedMin)
-                    confRepository.conf("algo-fan1SpeedMax", it.fan1SpeedMax)
-                    updateState { copy(isChanged = false) }
-                } catch (_: Exception) {
-                    updateState { copy(isChanged = true) }
-                }
+        withViewModelScope {
+            val (label, isError) = try {
+                confRepository.conf("algo-fan1SpeedMin", viewState.fan1SpeedMin)
+                confRepository.conf("algo-fan1SpeedMax", viewState.fan1SpeedMax)
+                R.string.success_save_settings to false
+            } catch (_: Exception) {
+                R.string.error_save_settings to true
             }
+            viewAction = AlgoFan1ViewAction.ShowSnackbar(SnackbarResult(label, isError))
+            viewState = viewState.copy(isChanged = isError)
         }
     }
 

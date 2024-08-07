@@ -6,11 +6,16 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material.SnackbarHost
+import androidx.compose.material.SnackbarHostState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.State
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
+import ru.cityron.presentation.mvi.SnackbarResult
 
 @Composable
 fun <T> DrawerScaffoldWithState(
@@ -20,16 +25,18 @@ fun <T> DrawerScaffoldWithState(
     onSettingsClick: (() -> Unit)? = null,
     fab: @Composable () -> Unit = {},
     bottomBar: @Composable () -> Unit = {},
-    snackbarState: SnackbarState = rememberSnackbarState(),
+    snackbarResult: SnackbarResult? = null,
+    onDismissSnackbar: SnackbarResult.() -> Unit = {},
     state: State<T?>,
     content: @Composable BoxScope.(T) -> Unit,
 ) {
     ToolbarScaffold(
         modifier = modifier,
         topBar = { DrawerTopBar(title = title, onClick = onClick, onSettingsClick = onSettingsClick) },
-        snackbarState = snackbarState,
+        snackbarResult = snackbarResult,
         fab = fab,
         bottomBar = bottomBar,
+        onDismissSnackbar = onDismissSnackbar,
         content = {
             when (val value = state.value) {
                 null -> Loader()
@@ -47,15 +54,17 @@ fun DrawerScaffold(
     onSettingsClick: (() -> Unit)? = null,
     fab: @Composable () -> Unit = {},
     bottomBar: @Composable () -> Unit = {},
-    snackbarState: SnackbarState = rememberSnackbarState(),
+    snackbarResult: SnackbarResult? = null,
+    onDismissSnackbar: SnackbarResult.() -> Unit = {},
     content: @Composable BoxScope.() -> Unit,
 ) {
     ToolbarScaffold(
         modifier = modifier,
         topBar = { DrawerTopBar(title = title, onClick = onClick, onSettingsClick = onSettingsClick) },
-        snackbarState = snackbarState,
+        snackbarResult = snackbarResult,
         fab = fab,
         bottomBar = bottomBar,
+        onDismissSnackbar = onDismissSnackbar,
         content = content
     )
 }
@@ -67,16 +76,18 @@ fun <T> BackScaffoldWithState(
     modifier: Modifier = Modifier,
     fab: @Composable () -> Unit = {},
     bottomBar: @Composable () -> Unit = {},
-    snackbarState: SnackbarState = rememberSnackbarState(),
+    snackbarResult: SnackbarResult? = null,
+    onDismissSnackbar: SnackbarResult.() -> Unit = {},
     state: State<T?>,
     content: @Composable BoxScope.(T) -> Unit,
 ) {
     ToolbarScaffold(
         modifier = modifier,
         topBar = { BackTopBar(title = title, onClick = onClick) },
-        snackbarState = snackbarState,
+        snackbarResult = snackbarResult,
         fab = fab,
         bottomBar = bottomBar,
+        onDismissSnackbar = onDismissSnackbar,
         content = {
             when (val value = state.value) {
                 null -> Loader()
@@ -93,15 +104,17 @@ fun BackScaffold(
     modifier: Modifier = Modifier,
     fab: @Composable () -> Unit = {},
     bottomBar: @Composable () -> Unit = {},
-    snackbarState: SnackbarState = rememberSnackbarState(),
+    snackbarResult: SnackbarResult? = null,
+    onDismissSnackbar: SnackbarResult.() -> Unit = {},
     content: @Composable BoxScope.() -> Unit,
 ) {
     ToolbarScaffold(
         modifier = modifier,
         topBar = { BackTopBar(title = title, onClick = onClick) },
-        snackbarState = snackbarState,
+        snackbarResult = snackbarResult,
         fab = fab,
         bottomBar = bottomBar,
+        onDismissSnackbar = onDismissSnackbar,
         content = content
     )
 }
@@ -112,16 +125,21 @@ fun ToolbarScaffold(
     topBar: @Composable () -> Unit,
     content: @Composable BoxScope.() -> Unit,
     bottomBar: @Composable () -> Unit = {},
-    snackbarState: SnackbarState,
+    snackbarResult: SnackbarResult? = null,
+    onDismissSnackbar: SnackbarResult.() -> Unit = {},
     fab: @Composable () -> Unit
 ) {
+    val ctx = LocalContext.current
+    val snackbarHostState = remember { SnackbarHostState() }
     Scaffold(
         topBar = topBar,
         snackbarHost = {
-            SnackbarHost(
-                hostState = snackbarState.snackbarHostState,
-                snackbar = { Snackbar(snackbarState.snackbarResult, it) }
-            )
+            snackbarResult?.let { r ->
+                SnackbarHost(
+                    hostState = snackbarHostState,
+                    snackbar = { Snackbar(r, it) }
+                )
+            }
         },
         floatingActionButton = fab,
         bottomBar = bottomBar,
@@ -135,5 +153,12 @@ fun ToolbarScaffold(
             content = content
         )
     }
-
+    LaunchedEffect(snackbarResult) {
+        if (snackbarResult != null) {
+            if (snackbarHostState.showSnackbar(message = ctx.getString(snackbarResult.label))
+                == androidx.compose.material.SnackbarResult.Dismissed) {
+                onDismissSnackbar(snackbarResult)
+            }
+        }
+    }
 }

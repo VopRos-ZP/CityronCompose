@@ -7,29 +7,37 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ru.cityron.presentation.components.AlgoNumberItem
-import ru.cityron.presentation.components.BackScaffoldWithState
+import ru.cityron.presentation.components.BackScaffold
 import ru.cityron.presentation.components.BottomSaveButton
+import ru.cityron.presentation.components.rememberSnackbarResult
 
 @Composable
 fun AlgoFan1Screen(
     onClick: () -> Unit,
     viewModel: AlgoFan1ViewModel = hiltViewModel()
 ) {
-    val stateState = viewModel.state.collectAsState()
-    BackScaffoldWithState(
+    val state by viewModel.state().collectAsState()
+    val viewAction = viewModel.action().collectAsState(initial = null)
+    var snackbarResult by rememberSnackbarResult()
+    BackScaffold(
         title = "Приточный вентилятор",
         onClick = onClick,
-        state = stateState,
+        snackbarResult = snackbarResult,
+        onDismissSnackbar = { if (!isError) viewModel.intent(AlgoFan1ViewIntent.OnSnackbarDismiss) },
         bottomBar = {
-            if (stateState.value?.isChanged == true) {
-                BottomSaveButton(onClick = { viewModel.intent(AlgoFan1ViewIntent.OnSaveClick) })
+            if (state.isChanged) {
+                BottomSaveButton(enabled = state.fan1SpeedMinInRange && state.fan1SpeedMaxInRange) {
+                    viewModel.intent(AlgoFan1ViewIntent.OnSaveClick)
+                }
             }
         }
-    ) { state ->
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -40,19 +48,22 @@ fun AlgoFan1Screen(
                 text = "Мин. скорость",
                 textUnit = "%",
                 value = state.fan1SpeedMin,
+                isError = state.fan1SpeedMinInRange,
                 onValueChange = { viewModel.intent(AlgoFan1ViewIntent.OnSpeedMinChange(it)) }
             )
             AlgoNumberItem(
                 text = "Макс. скорость",
                 textUnit = "%",
                 value = state.fan1SpeedMax,
+                isError = state.fan1SpeedMaxInRange,
                 onValueChange = { viewModel.intent(AlgoFan1ViewIntent.OnSpeedMaxChange(it)) }
             )
         }
     }
-    LaunchedEffect(stateState.value) {
-        if (stateState.value?.isChanged == false || stateState.value == null) {
-            viewModel.intent(AlgoFan1ViewIntent.Launch)
+    LaunchedEffect(viewAction.value) {
+        when (val action = viewAction.value) {
+            is AlgoFan1ViewAction.ShowSnackbar -> snackbarResult = action.result
+            else -> viewModel.intent(AlgoFan1ViewIntent.Launch)
         }
     }
 }

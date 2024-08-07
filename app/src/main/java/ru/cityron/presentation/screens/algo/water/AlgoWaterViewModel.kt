@@ -1,83 +1,111 @@
 package ru.cityron.presentation.screens.algo.water
 
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
+import ru.cityron.R
 import ru.cityron.domain.repository.ConfRepository
-import ru.cityron.domain.usecase.GetM3SettingsUseCase
-import ru.cityron.presentation.mvi.MviViewModel
+import ru.cityron.domain.usecase.GetM3AllUseCase
+import ru.cityron.presentation.mvi.BaseSharedViewModel
+import ru.cityron.presentation.mvi.SnackbarResult
 import javax.inject.Inject
 
 @HiltViewModel
 class AlgoWaterViewModel @Inject constructor(
     private val confRepository: ConfRepository,
-    private val getM3SettingsUseCase: GetM3SettingsUseCase
-) : MviViewModel<AlgoWaterViewState, AlgoWaterViewIntent>() {
+    private val getM3AllUseCase: GetM3AllUseCase,
+) : BaseSharedViewModel<AlgoWaterViewState, AlgoWaterViewAction, AlgoWaterViewIntent>(
+    initialState = AlgoWaterViewState()
+) {
 
-    override fun intent(intent: AlgoWaterViewIntent) {
-        when (intent) {
+    override fun intent(viewEvent: AlgoWaterViewIntent) {
+        when (viewEvent) {
             is AlgoWaterViewIntent.Launch -> launch()
             is AlgoWaterViewIntent.OnSaveClick -> onSaveClick()
-            is AlgoWaterViewIntent.OnModeZimaLetoSourceChange -> updateState {
-                copy(
-                    modeZimaLetoSource = intent.value,
-                    isChanged = isChanged || intent.value != modeZimaLetoSourceOld
-                )
-            }
-            is AlgoWaterViewIntent.OnModeZimaLetoUserChange -> updateState {
-                copy(
-                    modeZimaLetoUser = intent.value,
-                    isChanged = isChanged || intent.value != modeZimaLetoUserOld
-                )
-            }
-            is AlgoWaterViewIntent.OnTimeWarmUpChange -> updateState {
-                copy(
-                    timeWarmUp = intent.value,
-                    isChanged = isChanged || intent.value != timeWarmUpOld
-                )
-            }
-            is AlgoWaterViewIntent.OnTimeDefrostChange -> updateState {
-                copy(
-                    timeDefrost = intent.value,
-                    isChanged = isChanged || intent.value != timeDefrostOld
-                )
-            }
+            is AlgoWaterViewIntent.OnSnackbarDismiss -> onSnackbarDismiss()
+            is AlgoWaterViewIntent.OnModeZimaLetoSourceChange -> onModeZimaLetoSourceChange(viewEvent.value)
+            is AlgoWaterViewIntent.OnModeZimaLetoUserChange -> onModeZimaLetoUserChange(viewEvent.value)
+            is AlgoWaterViewIntent.OnTimeWarmUpChange -> onTimeWarmUpChange(viewEvent.value)
+            is AlgoWaterViewIntent.OnTimeDefrostChange -> onTimeDefrostChange(viewEvent.value)
         }
     }
 
     private fun launch() {
-        scope.launch {
-            try {
-                val settings = getM3SettingsUseCase()
-                updateState({ copy() }, AlgoWaterViewState(
-                    modeZimaLetoSourceOld = settings.algo.modeZimaLetoSource,
-                    modeZimaLetoSource = settings.algo.modeZimaLetoSource,
+        withViewModelScope {
+            val all = getM3AllUseCase()
+            viewState = viewState.copy(
+                modeZimaLetoSourceOld = all.settings.algo.modeZimaLetoSource,
+                modeZimaLetoSource = all.settings.algo.modeZimaLetoSource,
 
-                    modeZimaLetoUserOld = settings.algo.modeZimaLetoUser,
-                    modeZimaLetoUser = settings.algo.modeZimaLetoUser,
+                modeZimaLetoUserOld = all.settings.algo.modeZimaLetoUser,
+                modeZimaLetoUser = all.settings.algo.modeZimaLetoUser,
 
-                    timeWarmUpOld = settings.algo.timeWarmUp,
-                    timeWarmUp = settings.algo.timeWarmUp,
+                timeWarmUpOld = all.settings.algo.timeWarmUp,
+                timeWarmUp = all.settings.algo.timeWarmUp,
 
-                    timeDefrostOld = settings.algo.timeDefrost,
-                    timeDefrost = settings.algo.timeDefrost,
-                ))
-            } catch (_: Exception) {}
+                timeDefrostOld = all.settings.algo.timeDefrost,
+                timeDefrost = all.settings.algo.timeDefrost,
+            )
         }
     }
 
+    private fun onSnackbarDismiss() {
+        viewAction = null
+    }
+
+    private fun onModeZimaLetoSourceChange(value: Int) {
+        viewState = viewState.copy(
+            modeZimaLetoSource = value,
+            isChanged = value != viewState.modeZimaLetoSourceOld
+                    || viewState.modeZimaLetoUser != viewState.modeZimaLetoUserOld
+                    || viewState.timeWarmUp != viewState.timeWarmUpOld
+                    || viewState.timeDefrost != viewState.timeDefrostOld
+        )
+    }
+
+    private fun onModeZimaLetoUserChange(value: Int) {
+        viewState = viewState.copy(
+            modeZimaLetoUser = value,
+            isChanged = value != viewState.modeZimaLetoUserOld
+                    || viewState.modeZimaLetoSource != viewState.modeZimaLetoSourceOld
+                    || viewState.timeWarmUp != viewState.timeWarmUpOld
+                    || viewState.timeDefrost != viewState.timeDefrostOld
+        )
+    }
+
+    private fun onTimeWarmUpChange(value: Int) {
+        viewState = viewState.copy(
+            timeWarmUp = value,
+            timeWarmUpInRange = value in viewState.timeWarmUpRange,
+            isChanged = value != viewState.timeWarmUpOld
+                    || viewState.modeZimaLetoSource != viewState.modeZimaLetoSourceOld
+                    || viewState.modeZimaLetoUser != viewState.modeZimaLetoUserOld
+                    || viewState.timeDefrost != viewState.timeDefrostOld
+        )
+    }
+
+    private fun onTimeDefrostChange(value: Int) {
+        viewState = viewState.copy(
+            timeDefrost = value,
+            timeDefrostInRange = value in viewState.timeDefrostRange,
+            isChanged = value != viewState.timeDefrostOld
+                    || viewState.modeZimaLetoSource != viewState.modeZimaLetoSourceOld
+                    || viewState.modeZimaLetoUser != viewState.modeZimaLetoUserOld
+                    || viewState.timeWarmUp != viewState.timeWarmUpOld
+        )
+    }
+
     private fun onSaveClick() {
-        scope.launch {
-            state.value?.let {
-                try {
-                    confRepository.conf("algo-modeZimaLetoSource", it.modeZimaLetoSource)
-                    confRepository.conf("algo-modeZimaLetoUser", it.modeZimaLetoUser)
-                    confRepository.conf("algo-timeWarmUp", it.timeWarmUp)
-                    confRepository.conf("algo-timeDefrost", it.timeDefrost)
-                    updateState { copy(isChanged = false) }
-                } catch (_: Exception) {
-                    updateState { copy(isChanged = true) }
-                }
+        withViewModelScope {
+            val (label, isError) = try {
+                confRepository.conf("algo-modeZimaLetoSource", viewState.modeZimaLetoSource)
+                confRepository.conf("algo-modeZimaLetoUser", viewState.modeZimaLetoUser)
+                confRepository.conf("algo-timeWarmUp", viewState.timeWarmUp)
+                confRepository.conf("algo-timeDefrost", viewState.timeDefrost)
+                R.string.success_save_settings to false
+            } catch (_: Exception) {
+                R.string.error_save_settings to true
             }
+            viewAction = AlgoWaterViewAction.ShowSnackbar(SnackbarResult(label, isError))
+            viewState = viewState.copy(isChanged = isError)
         }
     }
 

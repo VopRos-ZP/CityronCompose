@@ -17,13 +17,17 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import ru.cityron.presentation.components.BackScaffoldWithState
-import ru.cityron.presentation.components.rememberSnackbarState
+import ru.cityron.presentation.components.BackScaffold
+import ru.cityron.presentation.mvi.SnackbarResult
 
 @Composable
 fun AddCustomScreen(
@@ -31,14 +35,22 @@ fun AddCustomScreen(
     onNextClick: () -> Unit,
     viewModel: AddCustomViewModel = hiltViewModel()
 ) {
-    val stateState = viewModel.state.collectAsState()
-    val snackbarState = rememberSnackbarState(result = stateState.value?.result)
-    BackScaffoldWithState(
+    val state by viewModel.state().collectAsState()
+    val viewAction = viewModel.action().collectAsState(initial = null)
+    var snackbarResult by remember { mutableStateOf<SnackbarResult?>(null) }
+
+    LaunchedEffect(viewAction.value) {
+        when (val action = viewAction.value) {
+            is AddCustomViewAction.Snackbar -> snackbarResult = action.result
+            else -> {}
+        }
+    }
+    BackScaffold(
         title = "Добавить вручную",
         onClick = onClick,
-        state = stateState,
-        snackbarState = snackbarState
-    ) { state ->
+        snackbarResult = snackbarResult,
+        onDismissSnackbar = { if (!isError) onNextClick() }
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -86,18 +98,5 @@ fun AddCustomScreen(
                 )
             }
         }
-        LaunchedEffect(state) {
-            if (state.result != null) {
-                snackbarState.showSnackbar {
-                    viewModel.intent(AddCustomViewIntent.OnSnackbarResultChange(null))
-                    if (!state.result.isError) {
-                        onNextClick()
-                    }
-                }
-            }
-        }
-    }
-    LaunchedEffect(Unit) {
-        viewModel.intent(AddCustomViewIntent.Launch)
     }
 }

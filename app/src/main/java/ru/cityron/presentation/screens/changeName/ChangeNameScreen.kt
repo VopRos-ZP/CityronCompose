@@ -12,35 +12,38 @@ import androidx.compose.material.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import ru.cityron.presentation.components.BackScaffoldWithState
+import ru.cityron.presentation.components.BackScaffold
 import ru.cityron.presentation.components.BottomSaveButton
-import ru.cityron.presentation.components.rememberSnackbarState
+import ru.cityron.presentation.components.rememberSnackbarResult
 
 @Composable
 fun ChangeNameScreen(
     onClick: () -> Unit,
     viewModel: ChangeNameViewModel = hiltViewModel()
 ) {
-    val stateState = viewModel.state.collectAsState()
-    val snackbarState = rememberSnackbarState(result = stateState.value?.result)
-    BackScaffoldWithState(
+    val state by viewModel.state().collectAsState()
+    val viewAction = viewModel.action().collectAsState(initial = null)
+    var snackbarResult by rememberSnackbarResult()
+    BackScaffold(
         title = "Имя контроллера",
         onClick = onClick,
-        snackbarState = snackbarState,
-        state = stateState,
+        snackbarResult = snackbarResult,
+        onDismissSnackbar = { if (!isError) viewModel.intent(ChangeNameViewIntent.OnSnackbarDismiss) },
         bottomBar = {
-            if (stateState.value?.name != stateState.value?.oldName) {
-                BottomSaveButton(
-                    onClick = { viewModel.intent(ChangeNameViewIntent.OnSaveClick) }
-                )
+            if (state.isChanged) {
+                BottomSaveButton {
+                    viewModel.intent(ChangeNameViewIntent.OnSaveClick)
+                }
             }
         }
-    ) { state ->
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -52,10 +55,12 @@ fun ChangeNameScreen(
                 singleLine = true,
                 textStyle = MaterialTheme.typography.h4,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Text),
-                placeholder = { Text(
-                    text = "Введите имя контроллера",
-                    style = MaterialTheme.typography.h4,
-                ) },
+                placeholder = {
+                    Text(
+                        text = "Введите имя контроллера",
+                        style = MaterialTheme.typography.h4,
+                    )
+                },
                 colors = TextFieldDefaults.outlinedTextFieldColors(
                     textColor = MaterialTheme.colors.onPrimary,
                     backgroundColor = MaterialTheme.colors.primary,
@@ -67,15 +72,11 @@ fun ChangeNameScreen(
                 modifier = Modifier.fillMaxWidth()
             )
         }
-        LaunchedEffect(state) {
-            if (state.result != null) {
-                snackbarState.showSnackbar {
-                    viewModel.intent(ChangeNameViewIntent.OnSnakbarResultChange(null))
-                }
-            }
-        }
     }
-    LaunchedEffect(Unit) {
-        viewModel.intent(ChangeNameViewIntent.Launch)
+    LaunchedEffect(viewAction.value) {
+        when (val action = viewAction.value) {
+            is ChangeNameViewAction.ShowSnackbar -> snackbarResult = action.result
+            null -> viewModel.intent(ChangeNameViewIntent.Launch)
+        }
     }
 }

@@ -38,7 +38,8 @@ fun AlarmsScreen(
     viewModel: AlarmsViewModel = hiltViewModel()
 ) {
     val alarmsStrings = stringArrayResource(id = R.array.alarms_m3)
-    val alarms by viewModel.alarms.collectAsState()
+    val state by viewModel.state().collectAsState()
+    val viewAction = viewModel.action().collectAsState(initial = null)
     BackScaffold(
         title = "Аварии",
         onClick = onClick
@@ -48,18 +49,21 @@ fun AlarmsScreen(
             contentPadding = PaddingValues(20.dp),
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            items(alarms) { alarm ->
+            items(state.alarms) { alarm ->
                 AlarmScreenItem(
                     text = alarmsStrings[alarm.i - 1],
                     isChecked = alarm.en == 1,
-                    onCheckedChange = { viewModel.setEnAlarm(alarm, it) },
-                    onClick = { onEditAlarmClick(alarm.i) }
+                    onCheckedChange = { viewModel.intent(AlarmsViewIntent.OnAlarmEnChange(alarm, it)) },
+                    onClick = { viewModel.intent(AlarmsViewIntent.OnAlarmClick(alarm)) }
                 )
             }
         }
     }
-    LaunchedEffect(key1 = Unit) {
-        viewModel.fetchAlarms()
+    LaunchedEffect(viewAction.value) {
+        when (val action = viewAction.value) {
+            is AlarmsViewAction.OnNavigate -> onEditAlarmClick(action.id)
+            null -> {}
+        }
     }
 }
 

@@ -1,6 +1,5 @@
 package ru.cityron.presentation.components
 
-import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -44,7 +43,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ru.cityron.R
 import ru.cityron.domain.utils.toInt
-import kotlin.math.exp
 
 @Composable
 fun AlgoNumberItem(
@@ -53,6 +51,7 @@ fun AlgoNumberItem(
     value: Int,
     enabled: Boolean = true,
     onValueChange: (Int) -> Unit,
+    isError: Boolean = false,
 ) {
     Row(
         modifier = Modifier
@@ -76,7 +75,8 @@ fun AlgoNumberItem(
             onValueChange = onValueChange,
             transform = { it.toInt() },
             keyboardType = KeyboardType.Number,
-            enabled = enabled
+            enabled = enabled,
+            isError = isError
         )
         if (textUnit != null) {
             Spacer(modifier = Modifier.weight(0.1f))
@@ -124,7 +124,8 @@ fun <T> TextFieldItem(
     transform: (String) -> T,
     keyboardType: KeyboardType,
     enabled: Boolean = true,
-    placeholder: String? = null
+    placeholder: String? = null,
+    isError: Boolean = false,
 ) {
     var textValue by remember(value) { mutableStateOf("$value") }
     var isFocused by remember { mutableStateOf(false) }
@@ -136,7 +137,10 @@ fun <T> TextFieldItem(
             )
             .border(
                 width = 1.dp,
-                color = if (isFocused) MaterialTheme.colors.primaryVariant else Color.Transparent,
+                color = if (isFocused) {
+                    if (isError) MaterialTheme.colors.error
+                    else MaterialTheme.colors.primaryVariant
+                } else Color.Transparent,
                 shape = RoundedCornerShape(4.dp)
             )
             .onFocusChanged { isFocused = it.isFocused }

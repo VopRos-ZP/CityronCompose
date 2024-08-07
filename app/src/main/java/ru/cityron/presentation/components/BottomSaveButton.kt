@@ -16,7 +16,8 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun BottomSaveButton(
     modifier: Modifier = Modifier,
-    onClick: () -> Unit
+    enabled: Boolean = true,
+    onClick: () -> Unit,
 ) {
     BottomAppBar(
         modifier = modifier.clip(RoundedCornerShape(topStart = 10.dp, topEnd = 10.dp)),
@@ -27,6 +28,7 @@ fun BottomSaveButton(
         Button(
             modifier = Modifier.fillMaxWidth(),
             shape = RoundedCornerShape(4.dp),
+            enabled = enabled,
             contentPadding = PaddingValues(vertical = 14.dp),
             colors = ButtonDefaults.buttonColors(
                 backgroundColor = MaterialTheme.colors.secondary,

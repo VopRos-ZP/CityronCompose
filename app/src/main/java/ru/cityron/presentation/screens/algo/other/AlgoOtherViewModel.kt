@@ -2,95 +2,131 @@ package ru.cityron.presentation.screens.algo.other
 
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import ru.cityron.R
 import ru.cityron.domain.repository.ConfRepository
-import ru.cityron.domain.usecase.GetM3SettingsUseCase
-import ru.cityron.presentation.mvi.MviViewModel
+import ru.cityron.domain.usecase.GetM3AllUseCase
+import ru.cityron.presentation.mvi.BaseSharedViewModel
+import ru.cityron.presentation.mvi.SnackbarResult
 import javax.inject.Inject
 
 @HiltViewModel
 class AlgoOtherViewModel @Inject constructor(
     private val confRepository: ConfRepository,
-    private val getM3SettingsUseCase: GetM3SettingsUseCase
-) : MviViewModel<AlgoOtherViewState, AlgoOtherViewIntent>() {
+    private val getM3AllUseCase: GetM3AllUseCase,
+) : BaseSharedViewModel<AlgoOtherViewState, AlgoOtherViewAction, AlgoOtherViewIntent>(
+    initialState = AlgoOtherViewState()
+) {
 
-    override fun intent(intent: AlgoOtherViewIntent) {
-        when (intent) {
+    override fun intent(viewEvent: AlgoOtherViewIntent) {
+        when (viewEvent) {
             is AlgoOtherViewIntent.Launch -> launch()
             is AlgoOtherViewIntent.OnSaveClick -> onSaveClick()
-            is AlgoOtherViewIntent.OnTempControlChange -> updateState {
-                copy(
-                    tempControl = intent.value,
-                    isChanged = isChanged || intent.value != tempControlOld
-                )
-            }
-            is AlgoOtherViewIntent.OnFilterEnChange -> updateState {
-                copy(
-                    filterEn = intent.value,
-                    isChanged = isChanged || intent.value != filterEnOld
-                )
-            }
-            is AlgoOtherViewIntent.OnAutoStartEnChange -> updateState {
-                copy(
-                    autoStartEn = intent.value,
-                    isChanged = isChanged || intent.value != autoStartEnOld
-                )
-            }
-            is AlgoOtherViewIntent.OnIsDistPowerChange -> updateState {
-                copy(
-                    isDistPower = intent.value,
-                    isChanged = isChanged || intent.value != isDistPowerOld
-                )
-            }
-            is AlgoOtherViewIntent.OnAlarmRestartCountChange -> updateState {
-                copy(
-                    alarmRestartCount = intent.value,
-                    isChanged = isChanged || intent.value != alarmRestartCountOld
-                )
-            }
+            is AlgoOtherViewIntent.OnSnackbarDismiss -> onSnackbarDismiss()
+            is AlgoOtherViewIntent.OnTempControlChange -> onTempControlChange(viewEvent.value)
+            is AlgoOtherViewIntent.OnFilterEnChange -> onFilterEnChange(viewEvent.value)
+            is AlgoOtherViewIntent.OnAutoStartEnChange -> onAutoStartEnChange(viewEvent.value)
+            is AlgoOtherViewIntent.OnIsDistPowerChange -> onIsDistPowerChange(viewEvent.value)
+            is AlgoOtherViewIntent.OnAlarmRestartCountChange -> onAlarmRestartCountChange(viewEvent.value)
         }
     }
 
     private fun launch() {
         scope.launch {
-            try {
-                val settings = getM3SettingsUseCase()
-                updateState(
-                    { copy() }, AlgoOtherViewState(
-                        tempControlOld = settings.algo.tempControl,
-                        tempControl = settings.algo.tempControl,
+            val all = getM3AllUseCase()
+            viewState = viewState.copy(
+                tempControlOld = all.settings.algo.tempControl,
+                tempControl = all.settings.algo.tempControl,
 
-                        filterEnOld = settings.algo.filterEn,
-                        filterEn = settings.algo.filterEn,
+                filterEnOld = all.settings.algo.filterEn,
+                filterEn = all.settings.algo.filterEn,
 
-                        autoStartEnOld = settings.algo.autoStartEn,
-                        autoStartEn = settings.algo.autoStartEn,
+                autoStartEnOld = all.settings.algo.autoStartEn,
+                autoStartEn = all.settings.algo.autoStartEn,
 
-                        isDistPowerOld = settings.algo.isDistPower,
-                        isDistPower = settings.algo.isDistPower,
+                isDistPowerOld = all.settings.algo.isDistPower,
+                isDistPower = all.settings.algo.isDistPower,
 
-                        alarmRestartCountOld = settings.algo.alarmRestartCount,
-                        alarmRestartCount = settings.algo.alarmRestartCount,
-                    )
-                )
-            } catch (_: Exception) {}
+                alarmRestartCountOld = all.settings.algo.alarmRestartCount,
+                alarmRestartCount = all.settings.algo.alarmRestartCount,
+                alarmRestartCountRange = (all.static.settingsMin.algo.alarmRestartCount..all.static.settingsMax.algo.alarmRestartCount)
+            )
         }
     }
 
-    private fun onSaveClick() {
-        scope.launch {
-            state.value?.let {
-                try {
-                    confRepository.conf("algo-tempControl", it.tempControl)
-                    confRepository.conf("algo-filterEn", it.filterEn)
-                    confRepository.conf("algo-autoStartEn", it.autoStartEn)
-                    confRepository.conf("algo-isDistPower", it.isDistPower)
-                    confRepository.conf("algo-alarmRestartCount", it.alarmRestartCount)
+    private fun onSnackbarDismiss() {
+        viewAction = null
+    }
 
-                    updateState { copy(isChanged = false) }
-                } catch (_: Exception) {
-                    updateState { copy(isChanged = true) }
-                }
+    private fun onTempControlChange(value: Int) {
+        viewState = viewState.copy(
+            tempControl = value,
+            isChanged = value != viewState.tempControlOld
+                    || viewState.filterEn != viewState.filterEnOld
+                    || viewState.autoStartEn != viewState.autoStartEnOld
+                    || viewState.isDistPower != viewState.isDistPowerOld
+                    || viewState.alarmRestartCount != viewState.alarmRestartCountOld
+        )
+    }
+
+    private fun onFilterEnChange(value: Int) {
+        viewState = viewState.copy(
+            filterEn = value,
+            isChanged = value != viewState.filterEnOld
+                    || viewState.tempControl != viewState.tempControlOld
+                    || viewState.autoStartEn != viewState.autoStartEnOld
+                    || viewState.isDistPower != viewState.isDistPowerOld
+                    || viewState.alarmRestartCount != viewState.alarmRestartCountOld
+        )
+    }
+
+    private fun onAutoStartEnChange(value: Int) {
+        viewState = viewState.copy(
+            autoStartEn = value,
+            isChanged = value != viewState.autoStartEnOld
+                    || viewState.filterEn != viewState.filterEnOld
+                    || viewState.tempControl != viewState.tempControlOld
+                    || viewState.isDistPower != viewState.isDistPowerOld
+                    || viewState.alarmRestartCount != viewState.alarmRestartCountOld
+        )
+    }
+
+    private fun onIsDistPowerChange(value: Int) {
+        viewState = viewState.copy(
+            isDistPower = value,
+            isChanged = value != viewState.isDistPowerOld
+                    || viewState.filterEn != viewState.filterEnOld
+                    || viewState.autoStartEn != viewState.autoStartEnOld
+                    || viewState.tempControl != viewState.tempControlOld
+                    || viewState.alarmRestartCount != viewState.alarmRestartCountOld
+        )
+    }
+
+    private fun onAlarmRestartCountChange(value: Int) {
+        viewState = viewState.copy(
+            alarmRestartCount = value,
+            alarmRestartCountInRange = value in viewState.alarmRestartCountRange,
+            isChanged = value != viewState.alarmRestartCountOld
+                    || viewState.filterEn != viewState.filterEnOld
+                    || viewState.autoStartEn != viewState.autoStartEnOld
+                    || viewState.isDistPower != viewState.isDistPowerOld
+                    || viewState.tempControl != viewState.tempControlOld
+        )
+    }
+
+    private fun onSaveClick() {
+        withViewModelScope {
+            val (label, isError) = try {
+                confRepository.conf("algo-tempControl", viewState.tempControl)
+                confRepository.conf("algo-filterEn", viewState.filterEn)
+                confRepository.conf("algo-autoStartEn", viewState.autoStartEn)
+                confRepository.conf("algo-isDistPower", viewState.isDistPower)
+                confRepository.conf("algo-alarmRestartCount", viewState.alarmRestartCount)
+                R.string.success_save_settings to false
+            } catch (_: Exception) {
+                R.string.error_save_settings to true
             }
+            viewAction = AlgoOtherViewAction.ShowSnackbar(SnackbarResult(label, isError))
+            viewState = viewState.copy(isChanged = isError)
         }
     }
 
