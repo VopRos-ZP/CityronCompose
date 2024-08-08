@@ -20,8 +20,10 @@ class MetricRepositoryImpl @Inject constructor(
 
     private val scope = CoroutineScope(Dispatchers.IO)
 
-    override suspend fun chart(types: Int, sources: Int, values: Int): Chart {
+    override suspend fun chart(start: Long, end: Long, types: Int, sources: Int, values: Int): Chart {
         val params = mapOf(
+            "start" to start,
+            "end" to end,
             "types" to types,
             "sources" to sources,
             "values" to values

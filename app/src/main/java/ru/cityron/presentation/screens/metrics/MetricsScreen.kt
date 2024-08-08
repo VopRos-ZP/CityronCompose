@@ -8,6 +8,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -28,9 +29,23 @@ import java.util.Collections
 fun MetricsScreen(
     viewModel: MetricsViewModel = hiltViewModel()
 ) {
-    val chart by viewModel.chart.collectAsState()
-    val transformableState =  TransformableState { zoomChange, _, _ ->
+    val state by viewModel.state().collectAsState()
 
+    val transformableState = remember {
+        TransformableState { zoomChange, _, _ ->
+            // Изменение диапазона времени на основе масштабирования
+            val currentRange = state.end - state.start
+            val newRange = (currentRange / zoomChange).toLong()
+
+            // Определение новых значений start и end с учетом границ
+            val midPoint = state.start + currentRange / 2
+            val newStart = (midPoint - newRange / 2).coerceAtLeast(state.minStart)
+            val newEnd = (midPoint + newRange / 2).coerceAtMost(state.maxEnd)
+
+            // Обновляем состояние ViewModel
+            viewModel.intent(MetricsViewIntent.OnStartChange(newStart))
+            viewModel.intent(MetricsViewIntent.OnEndChange(newEnd))
+        }
     }
     AndroidView(
         modifier = Modifier
@@ -39,7 +54,7 @@ fun MetricsScreen(
         factory = { View.inflate(it, R.layout.chart_view, null) },
         update = {
             with(it.findViewById<HIChartView>(R.id.chartView)) {
-                if (chart != null) {
+                if (state.chart != null) {
                     val options = HIOptions().apply {
                         this.chart = HIChart().apply {
                             type = "line"
@@ -67,9 +82,9 @@ fun MetricsScreen(
                         title.text = ""
                         this.title = title
 
-                        val dataWithDate = chart!!.channel.mapIndexed { i, temp ->
+                        val dataWithDate = state.chart!!.channel.mapIndexed { i, temp ->
                             arrayOf(
-                                i * (chart!!.end - chart!!.start / chart!!.point) + chart!!.start,
+                                state.chart!!.start + i * (state.chart!!.end - state.chart!!.start) / state.chart!!.point,
                                 when (temp) {
                                     null -> null
                                     else -> Temp.toGrade(temp).toDouble()
@@ -87,7 +102,13 @@ fun MetricsScreen(
             }
         }
     )
-    LaunchedEffect(key1 = Unit) {
-        viewModel.fetchChart(types = 1, sources = -1, values = 1)
+    LaunchedEffect(state.start, state.end) {
+        viewModel.intent(MetricsViewIntent.FetchChart(
+            start = state.start,
+            end = state.end,
+            types = 1,
+            sources = -1,
+            values = 1
+        ))
     }
 }

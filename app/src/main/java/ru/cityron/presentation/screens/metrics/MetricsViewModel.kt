@@ -1,27 +1,30 @@
 package ru.cityron.presentation.screens.metrics
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
-import ru.cityron.domain.model.Chart
 import ru.cityron.domain.repository.MetricRepository
+import ru.cityron.presentation.mvi.BaseSharedViewModel
 import javax.inject.Inject
 
 @HiltViewModel
 class MetricsViewModel @Inject constructor(
     private val metricRepository: MetricRepository
-) : ViewModel() {
+) : BaseSharedViewModel<MetricsViewState, Any, MetricsViewIntent>(
+    initialState = MetricsViewState()
+) {
 
-    private val _chart = MutableStateFlow<Chart?>(null)
-    val chart = _chart.asStateFlow()
+    override fun intent(viewEvent: MetricsViewIntent) {
+        when (viewEvent) {
+            is MetricsViewIntent.FetchChart -> fetchChart(
+                viewEvent.start, viewEvent.end, viewEvent.types, viewEvent.sources, viewEvent.values
+            )
+            is MetricsViewIntent.OnStartChange -> viewState = viewState.copy(start = viewEvent.value)
+            is MetricsViewIntent.OnEndChange -> viewState = viewState.copy(end = viewEvent.value)
+        }
+    }
 
-    fun fetchChart(types: Int, sources: Int, values: Int) {
-        viewModelScope.launch(Dispatchers.IO) {
-            _chart.value = metricRepository.chart(types, sources, values)
+    private fun fetchChart(start: Long, end: Long, types: Int, sources: Int, values: Int) {
+        withViewModelScope {
+            viewState = viewState.copy(chart = metricRepository.chart(start, end, types, sources, values))
         }
     }
 
