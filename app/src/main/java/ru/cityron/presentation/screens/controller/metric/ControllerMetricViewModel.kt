@@ -4,6 +4,8 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import ru.cityron.R
 import ru.cityron.domain.repository.ConfRepository
 import ru.cityron.domain.usecase.GetM3AllUseCase
+import ru.cityron.domain.utils.fromFrequencyToIndex
+import ru.cityron.domain.utils.fromIndexToFrequency
 import ru.cityron.domain.utils.toInt
 import ru.cityron.domain.utils.utilsBitGet
 import ru.cityron.presentation.mvi.BaseSharedViewModel
@@ -35,25 +37,14 @@ class ControllerMetricViewModel @Inject constructor(
                 valuesBitsOld = settings.metric.valuesBits,
                 valuesBits = settings.metric.valuesBits,
 
-                frequencyOld = frequencyToIndex(settings.metric.frequency),
-                frequency = frequencyToIndex(settings.metric.frequency),
+                frequencyOld = settings.metric.frequency.fromFrequencyToIndex(),
+                frequency = settings.metric.frequency.fromFrequencyToIndex(),
 
                 capacity = getCapacity(settings.metric.valuesBits)
             )
         }
     }
 
-    private fun frequencyToIndex(frequency: Int): Int {
-        return when (frequency) {
-            1 -> 0
-            3 -> 1
-            6 -> 2
-            6 * 5 -> 3
-            6 * 10 -> 4
-            6 * 30 -> 5
-            else -> 0
-        }
-    }
 
     private fun getCapacity(bits: Int): Int = when (bits) {
         in listOf(1, 2, 4) -> 62
@@ -93,7 +84,7 @@ class ControllerMetricViewModel @Inject constructor(
                     }
                 }
                 if (viewState.frequency != viewState.frequencyOld)
-                    confRepository.conf("metric-frequency", viewState.frequency)
+                    confRepository.conf("metric-frequency", viewState.frequency.fromIndexToFrequency())
                 R.string.success_save_settings to false
             } catch (_: Exception) {
                 R.string.error_save_settings to true

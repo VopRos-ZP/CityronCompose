@@ -39,8 +39,9 @@ class RootViewModel @Inject constructor(
                     if (currentRepository.current != null) {
                         val oldController = currentRepository.current!!.first
                         val founded = it.keys.toList().find { c -> c.idCpu == oldController.idCpu }
-                        if (oldController != founded) {
-                            currentRepository.current = founded!! to it[founded]!!
+                        if (oldController != founded && founded != null) {
+                            val source = it[founded]
+                            currentRepository.current = if (source != null) founded to source else null
                         }
                     }
                     viewState = viewState.copy(controllers = it)

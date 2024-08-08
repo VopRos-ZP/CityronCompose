@@ -3,6 +3,7 @@
 
     <string name="success_save_settings">Настройки успешно применены.</string>
     <string name="success_add_controller">Устройство успешно добавлено в список.</string>
+    <string name="contains_add_controller">Устройство уже существует в списоке.</string>
     <string name="error_add_controller">Устройство не найдено.</string>
     <string name="error_save_settings">Не удалось применить настройки.</string>
 

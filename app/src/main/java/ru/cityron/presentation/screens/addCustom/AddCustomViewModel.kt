@@ -34,12 +34,13 @@ class AddCustomViewModel @Inject constructor(
     private fun checkIpAddress() {
         withViewModelScope {
             val isSuccess = checkIpAddressUseCase(viewState.ip)
-            if (isSuccess) {
+            val contains = if (isSuccess) {
                 addIpUseCase(viewState.ip)
-            }
+            } else null
             viewAction = AddCustomViewAction.Snackbar(
                 SnackbarResult(
-                    label = if (isSuccess) R.string.success_add_controller
+                    label = if (isSuccess && contains == false) R.string.success_add_controller
+                    else if (isSuccess && contains == true) R.string.contains_add_controller
                     else R.string.error_add_controller,
                     isError = isSuccess.not()
                 )

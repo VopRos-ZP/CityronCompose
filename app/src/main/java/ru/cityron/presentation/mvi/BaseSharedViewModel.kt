@@ -4,6 +4,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.plus
 
 abstract class BaseSharedViewModel<State : Any, Action, Event>(initialState: State) : KViewModel() {
 
@@ -31,7 +32,7 @@ abstract class BaseSharedViewModel<State : Any, Action, Event>(initialState: Sta
      * Convenient method to perform work in [scope] scope.
      */
     protected fun withViewModelScope(scope: CoroutineScope = this.scope, block: suspend CoroutineScope.() -> Unit) {
-        scope.launch(block = block)
+        scope.plus(getCoroutineExceptionHandler()).launch(block = block)
     }
 
 }

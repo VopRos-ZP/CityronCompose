@@ -21,29 +21,11 @@ abstract class KViewModel : ViewModel() {
 
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    protected open fun getCoroutineExceptionHandler(): CoroutineExceptionHandler? = sharedExceptionHandler
+    protected open fun getCoroutineExceptionHandler(): CoroutineExceptionHandler = CoroutineExceptionHandler { _, thr ->  }
 
     fun clear() {
         coroutineTags.forEach { it.value.cancel() }
         onCleared()
-    }
-
-    // Launch view model scope except you provide a new key
-    fun launchNewScope(
-        key: String = MAIN_JOB_KEY,
-        coroutineContext: CoroutineContext = mainCoroutineContext
-    ): CoroutineScope =
-        coroutineTags.getOrPut(key) {
-            CoroutineScope(coroutineContext)
-        }
-
-    companion object {
-        private var sharedExceptionHandler: CoroutineExceptionHandler? = null
-        private const val MAIN_JOB_KEY = "main.viewmodel.shared.coroutine.job"
-
-        fun setupSharedExceptionHandler(exceptionHandler: CoroutineExceptionHandler) {
-            sharedExceptionHandler = exceptionHandler
-        }
     }
 
 }

@@ -10,8 +10,14 @@ class AddIpUseCase @Inject constructor(
     private val ipRepository: IpRepository
 ) {
 
-    suspend operator fun invoke(ip: String) {
-        ipRepository.upsert(Ip(address = ip))
+    suspend operator fun invoke(ip: String): Boolean {
+        return when (ipRepository.fetchAll().find { it.address == ip }) {
+            null -> {
+                ipRepository.upsert(Ip(address = ip))
+                false
+            }
+            else -> true
+        }
     }
 
 }

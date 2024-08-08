@@ -49,6 +49,7 @@ class ControllerSettingsViewModel @Inject constructor(
     private fun onDeleteClick() {
         withViewModelScope {
             deleteControllerUseCase(currentRepository.current!!.first.id)
+            currentRepository.current = null
         }
     }
 

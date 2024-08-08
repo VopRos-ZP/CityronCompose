@@ -1,6 +1,8 @@
 package ru.cityron.presentation.screens.metrics
 
 import android.view.View
+import androidx.compose.foundation.gestures.TransformableState
+import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -27,8 +29,13 @@ fun MetricsScreen(
     viewModel: MetricsViewModel = hiltViewModel()
 ) {
     val chart by viewModel.chart.collectAsState()
+    val transformableState =  TransformableState { zoomChange, _, _ ->
+
+    }
     AndroidView(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .transformable(transformableState),
         factory = { View.inflate(it, R.layout.chart_view, null) },
         update = {
             with(it.findViewById<HIChartView>(R.id.chartView)) {
@@ -62,7 +69,7 @@ fun MetricsScreen(
 
                         val dataWithDate = chart!!.channel.mapIndexed { i, temp ->
                             arrayOf(
-                                (688_680_000 * i) + chart!!.start,
+                                i * (chart!!.end - chart!!.start / chart!!.point) + chart!!.start,
                                 when (temp) {
                                     null -> null
                                     else -> Temp.toGrade(temp).toDouble()

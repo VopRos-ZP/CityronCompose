@@ -28,4 +28,13 @@ fun Int.fromFrequencyToIndex(): Int = when (this) {
     else -> 0
 }
 
+fun Int.fromIndexToFrequency(): Int = when (this) {
+    1 -> 3
+    2 -> 6
+    3 -> 6 * 5
+    4 -> 6 * 10
+    5 -> 6 * 30
+    else -> 1
+}
+
 inline fun <reified T> fromJson(string: String): T = Json.decodeFromString(string)

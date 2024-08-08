@@ -7,24 +7,19 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
-import kotlinx.serialization.json.Json
-import ru.cityron.domain.InfoState
 import ru.cityron.domain.model.Controller
 import ru.cityron.domain.model.Info
 import ru.cityron.domain.model.Ip
-import ru.cityron.domain.model.JsonStatic
+import ru.cityron.domain.model.m3.M3All
 import ru.cityron.domain.repository.ControllerRepository
 import ru.cityron.domain.repository.HttpRepository
 import ru.cityron.domain.repository.IpRepository
 import ru.cityron.domain.repository.UdpRepository
-import ru.cityron.domain.utils.Path.JSON_STATIC
+import ru.cityron.domain.utils.Path.JSON_ALL
+import ru.cityron.domain.utils.fromJson
 import java.net.SocketTimeoutException
 import javax.inject.Inject
 import javax.inject.Singleton
-
-private val json = Json {
-    ignoreUnknownKeys = true
-}
 
 @Singleton
 class GetInfoListUseCase @Inject constructor(
@@ -36,9 +31,9 @@ class GetInfoListUseCase @Inject constructor(
 
     private val atlasTestInfo = Info(
         cmd = "info",
-        type = 0,
+        type = 4,
         idUsr = "C4A6DA8D",
-        idCpu = "335541503437330734545957", // 4a0f41503437330634545957
+        idCpu = "335541503437330734545957", // 4A0F41503437330634545957
         devName = "atlas",
         name = "",
         usePass = 0,
@@ -62,7 +57,7 @@ class GetInfoListUseCase @Inject constructor(
                     infoList.add(udpRepository.receive())
                 } catch (_: SocketTimeoutException) {}
 
-                for (info in infoList) {
+                for (info in infoList.distinctBy { i -> i.idCpu }) {
                     if (!list.contains(info)) {
                         list.add(info)
                     }
@@ -83,20 +78,20 @@ class GetInfoListUseCase @Inject constructor(
     private suspend fun getInfoListByIps(ipList: List<Ip>): MutableList<Info> {
         val list = mutableListOf<Info>()
         for (ip in ipList) {
-            val static = json.decodeFromString<JsonStatic<InfoState>>(httpRepository.get("http://${ip.address}/$JSON_STATIC")).static
+            val all = fromJson<M3All>(httpRepository.get("http://${ip.address}/$JSON_ALL"))
             list.add(
                 Info(
                     cmd = "info",
-                    type = 0,
-                    idCpu = static.idCpu,
-                    idUsr = static.idUsr,
-                    devName = static.devName,
-                    name = "",
+                    type = 4,
+                    idCpu = all.static.idCpu,
+                    idUsr = all.static.idUsr,
+                    devName = all.static.devName,
+                    name = all.settings.others.loc,
                     usePass = 0,
-                    dhcp = 1,
+                    dhcp = all.settings.eth.fDhcp,
                     ip = ip.address,
-                    mask = "",
-                    setIp = ""
+                    mask = all.settings.eth.mask,
+                    setIp = all.settings.eth.ip
                 )
             )
         }

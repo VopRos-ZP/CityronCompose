@@ -1,5 +1,6 @@
 package ru.cityron.presentation.screens.controller
 
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -138,6 +139,9 @@ fun ControllerSettingsScreen(
             )
         }
     }
+    LaunchedEffect(state) {
+        Log.d("Settings", "$state")
+    }
     LaunchedEffect(Unit) {
         viewModel.intent(ControllerSettingsViewIntent.Launch)
     }
@@ -275,8 +279,6 @@ fun MetricItem(
         .joinToString()
     val frequencies = stringArrayResource(id = R.array.metric_frequency)
 
-    val index = frequency.fromFrequencyToIndex()
-
     SettingItem(title = "Журнал метрик", onClick = onClick) {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(
@@ -297,7 +299,7 @@ fun MetricItem(
                 style = MaterialTheme.typography.h4
             )
             Text(
-                text = frequencies[index],
+                text = frequencies[frequency.fromFrequencyToIndex()],
                 color = MaterialTheme.colors.onPrimary,
                 style = MaterialTheme.typography.h5
             )
@@ -315,7 +317,7 @@ fun DeleteControllerItem(
         onClick = onClick,
         contentPadding = PaddingValues(vertical = 14.dp),
         colors = ButtonDefaults.textButtonColors(
-            backgroundColor = AccentRed,
+            backgroundColor = MaterialTheme.colors.error,
             contentColor = MaterialTheme.colors.onPrimary,
         ),
     ) {

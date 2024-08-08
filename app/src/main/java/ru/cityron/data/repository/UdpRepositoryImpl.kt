@@ -59,8 +59,8 @@ class UdpRepositoryImpl @Inject constructor() : UdpRepository {
         return Info(
             cmd = map["cmd"]!!,
             type = map["type"]!!.toInt(),
-            idUsr = map["idUsr"]!!,
-            idCpu = map["idCpu"]!!,
+            idUsr = map["idUsr"]!!.uppercase(),
+            idCpu = map["idCpu"]!!.uppercase(),
             devName = map["devName"]!!,
             name = map["name"]!!,
             usePass = map["usePass"]!!.toInt(),
