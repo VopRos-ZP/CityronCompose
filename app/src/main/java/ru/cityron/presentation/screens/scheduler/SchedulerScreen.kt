@@ -22,8 +22,8 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.TabRowDefaults.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -35,7 +35,7 @@ import ru.cityron.R
 import ru.cityron.domain.model.m3.M3Task
 import ru.cityron.domain.utils.toInt
 import ru.cityron.domain.utils.toTime
-import ru.cityron.presentation.components.BackScaffoldWithState
+import ru.cityron.presentation.components.BackScaffold
 import ru.cityron.presentation.components.Switch
 
 @Composable
@@ -44,12 +44,11 @@ fun SchedulersScreen(
     onTaskClick: (Int) -> Unit,
     viewModel: SchedulersViewModel = hiltViewModel()
 ) {
-    val stateState = viewModel.state.collectAsState()
-    BackScaffoldWithState(
+    val state by viewModel.state().collectAsState()
+    BackScaffold(
         title = "Планировщик",
         onClick = onClick,
-        state = stateState
-    ) { state ->
+    ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(20.dp),
@@ -63,9 +62,6 @@ fun SchedulersScreen(
                 )
             }
         }
-    }
-    LaunchedEffect(Unit) {
-        viewModel.intent(SchedulersViewIntent.Launch)
     }
 }
 

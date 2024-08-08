@@ -42,10 +42,7 @@ import ru.cityron.presentation.components.FanSlider
 import ru.cityron.presentation.components.Loader
 import ru.cityron.presentation.components.Thermostat
 import ru.cityron.presentation.screens.m3tabs.M3ViewModel
-import ru.cityron.ui.theme.Black
 import ru.cityron.ui.theme.Green
-import ru.cityron.ui.theme.LightRed
-import ru.cityron.ui.theme.Red
 
 @Composable
 fun M3TempScreen(
@@ -53,18 +50,20 @@ fun M3TempScreen(
     onSchedulerClick: () -> Unit,
     viewModel: M3ViewModel = hiltViewModel()
 ) {
+    val errorColor = MaterialTheme.colors.error
+    val onColor = Green
+    val offColor = MaterialTheme.colors.primary
+
     val stateState = viewModel.state.collectAsState()
     when (val state = stateState.value) {
         null -> Loader()
         else -> {
             val statusColor by remember(state) {
                 mutableStateOf(
-                    if (state.isShowAlarms) {
-                        Red
-                    } else if (state.isPowerOn) {
-                        Green
-                    } else {
-                        Black
+                    when {
+                        state.isShowAlarms -> errorColor
+                        state.isPowerOn -> onColor
+                        else -> offColor
                     }
                 )
             }
@@ -189,7 +188,7 @@ fun M3TempScreen(
                 }
                 AnimatedContent(targetState = state.isShowAlarms, label = "") {
                     val (bg, content) = when (it) {
-                        true -> LightRed to MaterialTheme.colors.onBackground
+                        true -> MaterialTheme.colors.error to MaterialTheme.colors.onBackground
                         else -> MaterialTheme.colors.background to Color.Transparent
                     }
                     Button(

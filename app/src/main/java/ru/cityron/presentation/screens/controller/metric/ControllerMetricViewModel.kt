@@ -1,55 +1,45 @@
 package ru.cityron.presentation.screens.controller.metric
 
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
+import ru.cityron.R
 import ru.cityron.domain.repository.ConfRepository
 import ru.cityron.domain.usecase.GetM3AllUseCase
 import ru.cityron.domain.utils.toInt
 import ru.cityron.domain.utils.utilsBitGet
-import ru.cityron.presentation.mvi.MviViewModel
+import ru.cityron.presentation.mvi.BaseSharedViewModel
+import ru.cityron.presentation.mvi.SnackbarResult
 import javax.inject.Inject
 
 @HiltViewModel
 class ControllerMetricViewModel @Inject constructor(
     private val confRepository: ConfRepository,
     private val getM3AllUseCase: GetM3AllUseCase,
-) : MviViewModel<ControllerMetricViewState, ControllerMetricViewIntent>() {
+) : BaseSharedViewModel<ControllerMetricViewState, ControllerMetricViewAction, ControllerMetricViewIntent>(
+    initialState = ControllerMetricViewState()
+) {
 
-    override fun intent(intent: ControllerMetricViewIntent) {
-        when (intent) {
+    override fun intent(viewEvent: ControllerMetricViewIntent) {
+        when (viewEvent) {
             is ControllerMetricViewIntent.Launch -> launch()
             is ControllerMetricViewIntent.OnSaveClick -> onSaveClick()
-            is ControllerMetricViewIntent.OnValuesBitsChange -> updateState {
-                copy(
-                    valuesBits = intent.value,
-                    capacity = getCapacity(intent.value),
-                    isChanged = intent.value != valuesBitsOld || frequency != frequencyOld
-                )
-            }
-            is ControllerMetricViewIntent.OnFrequencyChange -> updateState {
-                copy(
-                    frequency = intent.value,
-                    isChanged = intent.value != frequencyOld || valuesBits != valuesBitsOld
-                )
-            }
+            is ControllerMetricViewIntent.OnSnackbarDismiss -> onSnackbarDismiss()
+            is ControllerMetricViewIntent.OnValuesBitsChange -> onValuesBitsChange(viewEvent.value)
+            is ControllerMetricViewIntent.OnFrequencyChange -> onFrequencyChange(viewEvent.value)
         }
     }
 
     private fun launch() {
-        updateState({ copy() }, ControllerMetricViewState())
-        scope.launch {
-            try {
-                val settings = getM3AllUseCase().settings
-                updateState {
-                    copy(
-                        valuesBitsOld = settings.metric.valuesBits,
-                        valuesBits = settings.metric.valuesBits,
-                        frequencyOld = frequencyToIndex(settings.metric.frequency),
-                        frequency = frequencyToIndex(settings.metric.frequency),
-                        capacity = getCapacity(settings.metric.valuesBits)
-                    )
-                }
-            } catch (_: Exception) {}
+        withViewModelScope {
+            val settings = getM3AllUseCase().settings
+            viewState = viewState.copy(
+                valuesBitsOld = settings.metric.valuesBits,
+                valuesBits = settings.metric.valuesBits,
+
+                frequencyOld = frequencyToIndex(settings.metric.frequency),
+                frequency = frequencyToIndex(settings.metric.frequency),
+
+                capacity = getCapacity(settings.metric.valuesBits)
+            )
         }
     }
 
@@ -68,22 +58,48 @@ class ControllerMetricViewModel @Inject constructor(
     private fun getCapacity(bits: Int): Int = when (bits) {
         in listOf(1, 2, 4) -> 62
         in listOf(3, 5, 6) -> 31
-        else -> 21
+        7 -> 21
+        else -> 62
+    }
+
+    private fun onSnackbarDismiss() {
+        viewAction = null
+    }
+
+    private fun onValuesBitsChange(value: Int) {
+        viewState = viewState.copy(
+            valuesBits = value,
+            capacity = getCapacity(value),
+            isChanged = value != viewState.valuesBitsOld || viewState.frequency != viewState.frequencyOld
+        )
+    }
+
+    private fun onFrequencyChange(value: Int) {
+        viewState = viewState.copy(
+            frequency = value,
+            isChanged = value != viewState.frequencyOld || viewState.valuesBits != viewState.valuesBitsOld
+        )
     }
 
     private fun onSaveClick() {
-        scope.launch {
-            try {
-                state.value?.let {
+        withViewModelScope {
+            val (label, isError) = try {
+                if (viewState.valuesBits != viewState.valuesBitsOld) {
                     (0..2).forEach { n ->
-                        confRepository.conf("metric-value$n", utilsBitGet(it.valuesBits, n).toInt())
+                        confRepository.conf(
+                            "metric-value$n",
+                            utilsBitGet(viewState.valuesBits, n).toInt()
+                        )
                     }
-                    confRepository.conf("metric-frequency", it.frequency)
-                    updateState { copy(isChanged = false) }
                 }
+                if (viewState.frequency != viewState.frequencyOld)
+                    confRepository.conf("metric-frequency", viewState.frequency)
+                R.string.success_save_settings to false
             } catch (_: Exception) {
-                updateState { copy(isChanged = true) }
+                R.string.error_save_settings to true
             }
+            viewAction = ControllerMetricViewAction.ShowSnackbar(SnackbarResult(label, isError))
+            viewState = viewState.copy(isChanged = isError)
         }
     }
 

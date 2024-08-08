@@ -1,48 +1,41 @@
 package ru.cityron.presentation.screens.scheduler
 
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
 import ru.cityron.domain.repository.ConfRepository
-import ru.cityron.domain.usecase.GetM3SchedUseCase
-import ru.cityron.presentation.mvi.MviViewModel
+import ru.cityron.domain.repository.M3Repository
+import ru.cityron.presentation.mvi.BaseSharedViewModel
 import javax.inject.Inject
 
 @HiltViewModel
 class SchedulersViewModel @Inject constructor(
     private val confRepository: ConfRepository,
-    private val getM3SchedUseCase: GetM3SchedUseCase
-) : MviViewModel<SchedulersViewState, SchedulersViewIntent>() {
+    private val m3Repository: M3Repository,
+) : BaseSharedViewModel<SchedulersViewState, Any, SchedulersViewIntent>(
+    initialState = SchedulersViewState()
+) {
 
-    override fun intent(intent: SchedulersViewIntent) {
-        when (intent) {
-            is SchedulersViewIntent.Launch -> launch()
-            is SchedulersViewIntent.OnCheckedChange -> onCheckedChange(intent.sched, intent.value)
-        }
-    }
-
-    private fun launch() {
-        updateState({ copy() }, SchedulersViewState())
-        scope.launch {
-            while (true) {
-                try {
-                    val sched = getM3SchedUseCase()
-                    updateState {
-                        copy(
-                            tasks = listOf(
-                                sched.task0, sched.task1, sched.task2, sched.task3,
-                                sched.task4, sched.task5, sched.task6, sched.task7,
-                                sched.task8, sched.task9
-                            ).mapIndexed { i, t -> t.copy(i = i) }
-                        )
-                    }
-                } catch (_: Exception) {
-                }
+    init {
+        withViewModelScope {
+            m3Repository.all.collect { all ->
+                viewState = viewState.copy(
+                    tasks = listOf(
+                        all.sched.task0, all.sched.task1, all.sched.task2, all.sched.task3,
+                        all.sched.task4, all.sched.task5, all.sched.task6, all.sched.task7,
+                        all.sched.task8, all.sched.task9
+                    ).mapIndexed { i, t -> t.copy(i = i) }
+                )
             }
         }
     }
 
+    override fun intent(viewEvent: SchedulersViewIntent) {
+        when (viewEvent) {
+            is SchedulersViewIntent.OnCheckedChange -> onCheckedChange(viewEvent.sched, viewEvent.value)
+        }
+    }
+
     private fun onCheckedChange(sched: Int, value: Int) {
-        scope.launch {
+        withViewModelScope {
             try {
                 confRepository.conf("task$sched-on", value)
             } catch (_: Exception) {}

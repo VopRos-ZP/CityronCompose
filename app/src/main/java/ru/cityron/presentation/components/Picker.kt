@@ -14,6 +14,8 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.snapshotFlow
@@ -45,11 +47,14 @@ fun Picker(
     textModifier: Modifier = Modifier,
     dividerColor: Color = LocalContentColor.current,
 ) {
-
     val visibleItemsMiddle = visibleItemsCount / 2
     val listScrollCount = Integer.MAX_VALUE
     val listScrollMiddle = listScrollCount / 2
-    val listStartIndex = listScrollMiddle - listScrollMiddle % items.size - visibleItemsMiddle + items.indexOf(value)
+    val listStartIndex by remember {
+        derivedStateOf {
+            listScrollMiddle - listScrollMiddle % items.size - visibleItemsMiddle + items.indexOf(value)
+        }
+    }
 
     fun getItem(index: Int) = items[index % items.size]
 

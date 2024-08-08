@@ -49,7 +49,7 @@ class ChangeNameViewModel @Inject constructor(
     private fun onSaveClick() {
         withViewModelScope {
             val (label, isError) = try {
-                confRepository.conf("others-loc", viewState.name.plus("\n"))// Перенос строки обязателен!!!
+                confRepository.conf("others-loc", viewState.name)
                 R.string.success_save_settings to false
             } catch (_: Exception) {
                 R.string.error_save_settings to true

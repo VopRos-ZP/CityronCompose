@@ -16,8 +16,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -31,7 +32,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -40,6 +40,7 @@ import ru.cityron.presentation.components.BackScaffold
 import ru.cityron.presentation.components.BottomSaveButton
 import ru.cityron.presentation.components.FanSlider
 import ru.cityron.presentation.components.Picker
+import ru.cityron.presentation.components.rememberSnackbarResult
 import ru.cityron.ui.theme.LightGrey
 
 @Composable
@@ -47,73 +48,68 @@ fun EditSchedulerScreen(
     onClick: () -> Unit, id: Int,
     viewModel: EditSchedulerViewModel = hiltViewModel()
 ) {
-    val task by viewModel.localTask.collectAsState()
-    val isChanged by viewModel.isChanged.collectAsState()
-
+    val state by viewModel.state().collectAsState()
+    val viewAction = viewModel.action().collectAsState(initial = null)
+    var snackbarResult by rememberSnackbarResult()
     BackScaffold(
         title = "Планировщик",
         onClick = onClick,
+        snackbarResult = snackbarResult,
+        onDismissSnackbar = { if (!isError) viewModel.intent(EditSchedulerViewIntent.OnSnackbarDismiss) },
         bottomBar = {
-            if (isChanged) {
-                BottomSaveButton(onClick = viewModel::onSaveClick)
+            if (state.isChanged) {
+                BottomSaveButton {
+                    viewModel.intent(EditSchedulerViewIntent.OnSaveClick)
+                }
             }
         }
     ) {
-        if (task != null) {
-            LazyColumn(
-                modifier = Modifier.fillMaxSize().padding(top = 20.dp),
-            ) {
-                item {
-                    TitledContent(title = "Время") {
-                        TimePicker(
-                            hour = task!!.hour,
-                            onHourChanged = viewModel::onHourChanged,
-                            min = task!!.min,
-                            onMinChanged = viewModel::onMinChanged
-                        )
-                    }
-                }
-                item {
-                    TitledContent(title = "Дата") {
-                        DayTabRow(
-                            day = task!!.day,
-                            onDayChanged = viewModel::onDayChanged
-                        )
-                    }
-                }
-                item {
-                    TitledContent(title = "Режим") {
-                        ModeRow(
-                            mode = task!!.mode,
-                            onModeChanged = viewModel::onModeChanged
-                        )
-                    }
-                }
-                item {
-                    FanRow(
-                        fan = task!!.fan,
-                        onFanChanged = viewModel::onFanChanged
-                    )
-                }
-                item {
-                    TempRow(
-                        value = task!!.temp,
-                        onValueChanged = viewModel::onTempChanged
-                    )
-                }
-                item {
-                    TitledContent(title = "Действие") {
-                        PowerRow(
-                            power = task!!.power,
-                            onPowerChange = viewModel::onPowerChanged
-                        )
-                    }
-                }
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(rememberScrollState()),
+            verticalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            if (state.hourValues.isNotEmpty() && state.minValues.isNotEmpty()) {
+                TimePicker(
+                    hour = state.hour,
+                    hourValues = state.hourValues,
+                    onHourChanged = { viewModel.intent(EditSchedulerViewIntent.OnHourChange(it)) },
+                    min = state.min,
+                    minValues = state.minValues,
+                    onMinChanged = { viewModel.intent(EditSchedulerViewIntent.OnMinChange(it)) },
+                )
             }
+            DayTabRow(
+                day = state.day,
+                onDayChanged = { viewModel.intent(EditSchedulerViewIntent.OnDayChange(it)) },
+            )
+            ModeRow(
+                mode = state.mode,
+                onModeChanged = { viewModel.intent(EditSchedulerViewIntent.OnModeChange(it)) },
+            )
+            FanRow(
+                fan = state.fan,
+                onFanChanged = { viewModel.intent(EditSchedulerViewIntent.OnFanChange(it)) },
+            )
+            if (state.tempValues.isNotEmpty()) {
+                TempRow(
+                    value = state.temp,
+                    values = state.tempValues,
+                    onValueChanged = { viewModel.intent(EditSchedulerViewIntent.OnTempChange(it)) },
+                )
+            }
+            PowerRow(
+                power = state.power,
+                onPowerChange = { viewModel.intent(EditSchedulerViewIntent.OnPowerChange(it)) },
+            )
         }
     }
-    LaunchedEffect(key1 = Unit) {
-        viewModel.fetchTask(id)
+    LaunchedEffect(viewAction.value) {
+        when (val action = viewAction.value) {
+            is EditSchedulerViewAction.ShowSnackbar -> snackbarResult = action.result
+            null -> viewModel.intent(EditSchedulerViewIntent.Launch(id))
+        }
     }
 }
 
@@ -148,30 +144,34 @@ fun TitledContent(
 @Composable
 fun TimePicker(
     hour: Int,
+    hourValues: List<Int>,
     onHourChanged: (Int) -> Unit,
     min: Int,
+    minValues: List<Int>,
     onMinChanged: (Int) -> Unit
 ) {
-    val hourValues = (0..23).toList()
-    val minValues = (0..59).toList()
-
-    Row(modifier = Modifier.fillMaxWidth(0.6f)) {
-        Picker(
-            modifier = Modifier.fillMaxWidth(0.5f),
-            value = hour,
-            items = hourValues,
-            format = ::toTime,
-            onValueChanged = onHourChanged,
-            textModifier = Modifier.padding(8.dp),
-        )
-        Picker(
-            modifier = Modifier.fillMaxWidth(),
-            value = min,
-            items = minValues,
-            format = ::toTime,
-            onValueChanged = onMinChanged,
-            textModifier = Modifier.padding(8.dp),
-        )
+    TitledContent(
+        title = "Время",
+        paddingValues = PaddingValues(20.dp)
+    ) {
+        Row(modifier = Modifier.fillMaxWidth(0.6f)) {
+            Picker(
+                modifier = Modifier.fillMaxWidth(0.5f),
+                value = hour,
+                items = hourValues,
+                format = ::toTime,
+                onValueChanged = onHourChanged,
+                textModifier = Modifier.padding(8.dp),
+            )
+            Picker(
+                modifier = Modifier.fillMaxWidth(),
+                value = min,
+                items = minValues,
+                format = ::toTime,
+                onValueChanged = onMinChanged,
+                textModifier = Modifier.padding(8.dp),
+            )
+        }
     }
 }
 
@@ -182,31 +182,33 @@ fun DayTabRow(
 ) {
     val values = listOf("пн", "вт", "ср", "чт", "пт", "сб", "вс", "", "", "")
 
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            (0..4).forEach { i ->
-                DayChip(
-                    modifier = Modifier.width(67.dp),
-                    day = values[i],
-                    isSelected = day == i,
-                    onClick = { onDayChanged(i) }
-                )
+    TitledContent(title = "Дата") {
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                (0..4).forEach { i ->
+                    DayChip(
+                        modifier = Modifier.width(67.dp),
+                        day = values[i],
+                        isSelected = day == i,
+                        onClick = { onDayChanged(i) }
+                    )
+                }
             }
-        }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceBetween
-        ) {
-            (5..9).forEach { i ->
-                DayChip(
-                    modifier = Modifier.width(67.dp),
-                    day = values[i],
-                    isSelected = day == i,
-                    onClick = { onDayChanged(i) }
-                )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                (5..9).forEach { i ->
+                    DayChip(
+                        modifier = Modifier.width(67.dp),
+                        day = values[i],
+                        isSelected = day == i,
+                        onClick = { onDayChanged(i) }
+                    )
+                }
             }
         }
     }
@@ -218,22 +220,24 @@ fun ModeRow(
     onModeChanged: (Int) -> Unit,
 ) {
     val values = listOf("обогрев", "вентиляция")
-    var selected by remember { mutableIntStateOf(mode) }
+    var selected by remember(mode) { mutableIntStateOf(mode) }
 
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        values.forEachIndexed { index, s ->
-            DayChip(
-                modifier = Modifier.width(158.dp),
-                day = s,
-                isSelected = selected == index,
-                onClick = { selected = index }
-            )
+    TitledContent(title = "Режим") {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            values.forEachIndexed { index, s ->
+                DayChip(
+                    modifier = Modifier.width(158.dp),
+                    day = s,
+                    isSelected = selected == index,
+                    onClick = { selected = index }
+                )
+            }
         }
     }
-    LaunchedEffect(key1 = selected) {
+    LaunchedEffect(selected) {
         onModeChanged(selected)
     }
 }
@@ -289,9 +293,7 @@ fun FanRow(
 ) {
     TitledContent(
         title = "Скорость",
-        trailing = {
-            Text(text = "$fan")
-        }
+        trailing = { Text(text = "$fan") }
     ) {
         FanSlider(
             value = fan,
@@ -304,12 +306,13 @@ fun FanRow(
 @Composable
 fun TempRow(
     value: Int,
+    values: List<Int>,
     onValueChanged: (Int) -> Unit
 ) {
     TitledContent(title = "Уставка") {
         Picker(
             modifier = Modifier.fillMaxWidth(0.5f),
-            items = (5..40).toList(),
+            items = values,
             value = value,
             onValueChanged = onValueChanged,
             format = { t -> "$t°С" },
@@ -324,22 +327,24 @@ fun PowerRow(
     onPowerChange: (Int) -> Unit
 ) {
     val values = listOf("отключить", "включить")
-    var selected by remember { mutableIntStateOf(power) }
+    var selected by remember(power) { mutableIntStateOf(power) }
 
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        values.forEachIndexed { index, s ->
-            DayChip(
-                modifier = Modifier.width(158.dp),
-                day = s,
-                isSelected = selected == index,
-                onClick = { selected = index }
-            )
+    TitledContent(title = "Действие") {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            values.forEachIndexed { index, s ->
+                DayChip(
+                    modifier = Modifier.width(158.dp),
+                    day = s,
+                    isSelected = selected == index,
+                    onClick = { selected = index }
+                )
+            }
         }
     }
-    LaunchedEffect(key1 = selected) {
+    LaunchedEffect(selected) {
         onPowerChange(selected)
     }
 }

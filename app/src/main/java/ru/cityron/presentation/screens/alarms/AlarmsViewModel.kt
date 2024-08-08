@@ -32,13 +32,8 @@ class AlarmsViewModel @Inject constructor(
 
     override fun intent(viewEvent: AlarmsViewIntent) {
         when (viewEvent) {
-            is AlarmsViewIntent.OnAlarmClick -> onAlarmClick(viewEvent.value)
             is AlarmsViewIntent.OnAlarmEnChange -> onAlarmEnChange(viewEvent.alarm, viewEvent.value)
         }
-    }
-
-    private fun onAlarmClick(alarm: Alarm) {
-        viewAction = AlarmsViewAction.OnNavigate(alarm.i)
     }
 
     private fun onAlarmEnChange(alarm: Alarm, en: Boolean) {

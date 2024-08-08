@@ -108,7 +108,7 @@ fun ActionRow(
     onActionChanged: (Int) -> Unit
 ) {
     val labels = listOf("НЕТ", "СТОП", "РЕСТАРТ")
-    var selected by remember { mutableIntStateOf(action) }
+    var selected by remember(action) { mutableIntStateOf(action) }
     TitledContent(title = "Действие") {
         Row(
             modifier = Modifier.fillMaxWidth(),
@@ -124,7 +124,7 @@ fun ActionRow(
             }
         }
     }
-    LaunchedEffect(key1 = selected) {
+    LaunchedEffect(selected) {
         onActionChanged(selected)
     }
 }

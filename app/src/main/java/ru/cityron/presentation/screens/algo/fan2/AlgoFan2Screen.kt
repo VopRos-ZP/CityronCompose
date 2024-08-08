@@ -48,14 +48,14 @@ fun AlgoFan2Screen(
                 text = "Мин. скорость",
                 textUnit = "%",
                 value = state.fan2SpeedMin,
-                isError = state.fan2SpeedMinInRange,
+                isError = !state.fan2SpeedMinInRange,
                 onValueChange = { viewModel.intent(AlgoFan2ViewIntent.OnSpeedMinChange(it)) }
             )
             AlgoNumberItem(
                 text = "Макс. скорость",
                 textUnit = "%",
                 value = state.fan2SpeedMax,
-                isError = state.fan2SpeedMaxInRange,
+                isError = !state.fan2SpeedMaxInRange,
                 onValueChange = { viewModel.intent(AlgoFan2ViewIntent.OnSpeedMaxChange(it)) }
             )
         }

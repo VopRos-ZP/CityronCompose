@@ -21,7 +21,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ru.cityron.R
 import ru.cityron.presentation.components.BackScaffold
-import ru.cityron.ui.theme.LightRed
 
 @Composable
 fun AlertsScreen(
@@ -50,7 +49,7 @@ fun ErrorItem(text: String) {
         modifier = Modifier
             .fillMaxWidth()
             .background(
-                color = LightRed,
+                color = MaterialTheme.colors.error,
                 shape = RoundedCornerShape(4.dp)
             )
             .padding(horizontal = 16.dp, vertical = 20.dp),

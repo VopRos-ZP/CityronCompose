@@ -47,19 +47,19 @@ fun AlgoPi2Screen(
             AlgoNumberItem(
                 text = "Пропорциональный коэффициент",
                 value = state.pi2KofP,
-                isError = state.pi2KofPInRange,
+                isError = !state.pi2KofPInRange,
                 onValueChange = { viewModel.intent(AlgoPi2ViewIntent.OnPi2KofPChange(it)) }
             )
             AlgoNumberItem(
                 text = "Интегральный коэффициент",
                 value = state.pi2KofI,
-                isError = state.pi2KofIInRange,
+                isError = !state.pi2KofIInRange,
                 onValueChange = { viewModel.intent(AlgoPi2ViewIntent.OnPi2KofIChange(it)) }
             )
             AlgoNumberItem(
                 text = "Зона нечувствительности",
                 value = state.pi2Err,
-                isError = state.pi2ErrInRange,
+                isError = !state.pi2ErrInRange,
                 onValueChange = { viewModel.intent(AlgoPi2ViewIntent.OnPi2ErrChange(it)) }
             )
         }

@@ -33,122 +33,109 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import ru.cityron.R
 import ru.cityron.presentation.components.BackScaffold
 import ru.cityron.presentation.components.BottomSaveButton
-import ru.cityron.presentation.screens.events.EventsScreenViewModel
 
 @Composable
 fun EventFiltersScreen(
-    viewModel: EventsScreenViewModel = hiltViewModel(),
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    viewModel: EventFiltersViewModel = hiltViewModel()
 ) {
-    val isChanged by viewModel.isChanged.collectAsState()
+    val state by viewModel.state().collectAsState()
+    var selectedTab by remember { mutableIntStateOf(0) }
     BackScaffold(
         title = "Фильтры",
         onClick = onClick,
         bottomBar = {
-            if (isChanged) {
-                BottomSaveButton(onClick = viewModel::onSaveClick)
+            if (state.isChanged) {
+                BottomSaveButton {
+                    viewModel.intent(EventFiltersViewIntent.OnSaveClick)
+                }
             }
         }
     ) {
-        LeftMenu(viewModel = viewModel)
-    }
-    LaunchedEffect(key1 = Unit) {
-        viewModel.fetchEventsFromStore()
-    }
-}
+        val menuItems = mapOf(
+            "Журнал\nконтроллера" to Triple(
+                state.sources,
+                stringArrayResource(id = R.array.sources)
+            ) { it: Int -> viewModel.intent(EventFiltersViewIntent.OnSourcesChange(it)) },
+            "Все типы" to Triple(
+                state.types,
+                stringArrayResource(id = R.array.types),
+            ) { it: Int -> viewModel.intent(EventFiltersViewIntent.OnTypesChange(it)) },
+            "Все причины" to Triple(
+                state.reasons,
+                stringArrayResource(id = R.array.reasons),
+            ) { it: Int -> viewModel.intent(EventFiltersViewIntent.OnReasonsChange(it)) },
+            "Последние ..." to Triple(
+                state.count,
+                stringArrayResource(id = R.array.count),
+            ) { it: Int -> viewModel.intent(EventFiltersViewIntent.OnCountChange(it)) },
+        )
 
-@Composable
-fun LeftMenu(viewModel: EventsScreenViewModel) {
-    val count by viewModel.count.collectAsState()
-    val types by viewModel.types.collectAsState()
-    val sources by viewModel.sources.collectAsState()
-    val reasons by viewModel.reasons.collectAsState()
-
-    var selectedTab by remember { mutableIntStateOf(0) }
-    val menuItems = mapOf(
-        "Журнал\nконтроллера" to Triple(
-            sources,
-            stringArrayResource(id = R.array.sources),
-            viewModel::setSources
-        ),
-        "Все типы" to Triple(
-            types,
-            stringArrayResource(id = R.array.types),
-            viewModel::setTypes
-        ),
-        "Все причины" to Triple(
-            reasons,
-            stringArrayResource(id = R.array.reasons),
-            viewModel::setReasons
-        ),
-        "Последние ..." to Triple(
-            count,
-            stringArrayResource(id = R.array.count),
-            viewModel::setCount
-        ),
-    )
-
-    Row(modifier = Modifier.fillMaxSize()) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth(0.35f)
-                .fillMaxHeight()
-                .selectableGroup()
-                .background(MaterialTheme.colors.primary)
-        ) {
-            menuItems.keys.mapIndexed { i, it ->
-                val isSelected = selectedTab == i
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(if (isSelected) MaterialTheme.colors.background else MaterialTheme.colors.primary)
-                        .selectable(
+        Row(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth(0.35f)
+                    .fillMaxHeight()
+                    .selectableGroup()
+                    .background(MaterialTheme.colors.primary)
+            ) {
+                menuItems.keys.mapIndexed { i, it ->
+                    val isSelected = selectedTab == i
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .background(if (isSelected) MaterialTheme.colors.background else MaterialTheme.colors.primary)
+                            .selectable(
+                                selected = isSelected,
+                                onClick = { selectedTab = i }
+                            )
+                            .padding(16.dp)
+                    ) {
+                        Text(
+                            text = it,
+                            color = MaterialTheme.colors.onPrimary,
+                            style = MaterialTheme.typography.body1
+                        )
+                    }
+                }
+            }
+            Column(
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(24.dp)
+                    .selectableGroup(),
+            ) {
+                val (value, values, onUpdate) = menuItems[menuItems.keys.toList()[selectedTab]]!!
+                values.mapIndexed { i, it ->
+                    val isSelected = value == i
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(10.dp))
+                            .clickable { onUpdate(i) }
+                    ) {
+                        RadioButton(
+                            modifier = Modifier,
                             selected = isSelected,
-                            onClick = { selectedTab = i }
+                            onClick = { onUpdate(i) },
+                            colors = RadioButtonDefaults.colors(
+                                selectedColor = MaterialTheme.colors.primaryVariant,
+                                unselectedColor = MaterialTheme.colors.secondaryVariant
+                            )
                         )
-                        .padding(16.dp)
-                ) {
-                    Text(
-                        text = it,
-                        color = MaterialTheme.colors.onPrimary,
-                        style = MaterialTheme.typography.body1
-                    )
+                        Text(
+                            text = it,
+                            color = MaterialTheme.colors.onPrimary,
+                            style = MaterialTheme.typography.caption
+                        )
+                    }
                 }
             }
         }
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(24.dp)
-                .selectableGroup(),
-        ) {
-            val (value, values, onClick) = menuItems[menuItems.keys.toList()[selectedTab]]!!
-            values.mapIndexed { i, it ->
-                val isSelected = value == i
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(10.dp))
-                        .clickable { onClick(i) }
-                ) {
-                    RadioButton(
-                        modifier = Modifier,
-                        selected = isSelected,
-                        onClick = { onClick(i) },
-                        colors = RadioButtonDefaults.colors(
-                            selectedColor = MaterialTheme.colors.primaryVariant,
-                            unselectedColor = MaterialTheme.colors.secondaryVariant
-                        )
-                    )
-                    Text(
-                        text = it,
-                        color = MaterialTheme.colors.onPrimary,
-                        style = MaterialTheme.typography.caption
-                    )
-                }
-            }
-        }
+    }
+    LaunchedEffect(Unit) {
+        viewModel.intent(EventFiltersViewIntent.Launch)
     }
 }

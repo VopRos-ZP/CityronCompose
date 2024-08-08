@@ -72,7 +72,7 @@ fun AlgoOtherScreen(
             AlgoNumberItem(
                 text = "Колличество аварийных перезапусков",
                 value = state.alarmRestartCount,
-                isError = state.alarmRestartCountInRange,
+                isError = !state.alarmRestartCountInRange,
                 onValueChange = { viewModel.intent(AlgoOtherViewIntent.OnAlarmRestartCountChange(it)) }
             )
         }

@@ -54,7 +54,7 @@ fun RootNavGraph(
         controllers.forEach { controller ->
             if (controller.name.startsWith("M3")) {
                 m3NavGraph(
-                    route = controller.name,
+                    route = controller.idCpu,
                     onDrawer = onDrawer,
                     onBack = onBack,
                     onAlertsClick = onAlertsClick,

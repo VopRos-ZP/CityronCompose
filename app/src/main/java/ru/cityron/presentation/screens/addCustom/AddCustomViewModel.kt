@@ -4,6 +4,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import ru.cityron.R
 import ru.cityron.domain.usecase.AddIpUseCase
 import ru.cityron.domain.usecase.CheckIpAddressUseCase
+import ru.cityron.domain.utils.isValidIPAddress
 import ru.cityron.presentation.mvi.BaseSharedViewModel
 import ru.cityron.presentation.mvi.SnackbarResult
 import javax.inject.Inject
@@ -26,7 +27,7 @@ class AddCustomViewModel @Inject constructor(
     private fun onIpChange(ip: String) {
         viewState = viewState.copy(
             ip = ip,
-            isCorrect = isValidIPAddress(ip)
+            isCorrect = ip.isValidIPAddress()
         )
     }
 
@@ -44,12 +45,6 @@ class AddCustomViewModel @Inject constructor(
                 )
             )
         }
-    }
-
-    private fun isValidIPAddress(ip: String): Boolean {
-        val ipRegex =
-            "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
-        return ip.matches(ipRegex.toRegex())
     }
 
 }

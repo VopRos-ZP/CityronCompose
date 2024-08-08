@@ -19,4 +19,13 @@ fun roundToFive(num: Double): Int {
 
 fun Int.toTimeZone(): String = "${if (this > 0) "+" else ""}$this"
 
+fun Int.fromFrequencyToIndex(): Int = when (this) {
+    3 -> 1
+    6 -> 2
+    6 * 5 -> 3
+    6 * 10 -> 4
+    6 * 30 -> 5
+    else -> 0
+}
+
 inline fun <reified T> fromJson(string: String): T = Json.decodeFromString(string)

@@ -1,39 +1,40 @@
 package ru.cityron.presentation.screens.editScheduler
 
-import androidx.lifecycle.ViewModel
-import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.launch
-import ru.cityron.domain.model.m3.M3Task
+import ru.cityron.R
 import ru.cityron.domain.repository.ConfRepository
-import ru.cityron.domain.usecase.GetM3SchedUseCase
+import ru.cityron.domain.usecase.GetM3AllUseCase
+import ru.cityron.presentation.mvi.BaseSharedViewModel
+import ru.cityron.presentation.mvi.SnackbarResult
 import javax.inject.Inject
 
 @HiltViewModel
 class EditSchedulerViewModel @Inject constructor(
-    private val getM3SchedUseCase: GetM3SchedUseCase,
-    private val confRepository: ConfRepository
-) : ViewModel() {
+    private val confRepository: ConfRepository,
+    private val getM3AllUseCase: GetM3AllUseCase,
+) : BaseSharedViewModel<EditSchedulerViewState, EditSchedulerViewAction, EditSchedulerViewIntent>(
+    initialState = EditSchedulerViewState()
+) {
 
-    private val _task = MutableStateFlow<M3Task?>(null)
-    private val _localTask = MutableStateFlow<M3Task?>(null)
-    val localTask = _localTask.asStateFlow()
+    override fun intent(viewEvent: EditSchedulerViewIntent) {
+        when (viewEvent) {
+            is EditSchedulerViewIntent.Launch -> launch(viewEvent.value)
+            is EditSchedulerViewIntent.OnSaveClick -> onSaveClick()
+            is EditSchedulerViewIntent.OnSnackbarDismiss -> onSnackbarDismiss()
+            is EditSchedulerViewIntent.OnHourChange -> onHourChanged(viewEvent.value)
+            is EditSchedulerViewIntent.OnMinChange -> onMinChanged(viewEvent.value)
+            is EditSchedulerViewIntent.OnDayChange -> onDayChanged(viewEvent.value)
+            is EditSchedulerViewIntent.OnModeChange -> onModeChanged(viewEvent.value)
+            is EditSchedulerViewIntent.OnFanChange -> onFanChanged(viewEvent.value)
+            is EditSchedulerViewIntent.OnTempChange -> onTempChanged(viewEvent.value)
+            is EditSchedulerViewIntent.OnPowerChange -> onPowerChanged(viewEvent.value)
+        }
+    }
 
-    private val _isChanged = MutableStateFlow(false)
-    val isChanged = _isChanged.asStateFlow()
-
-    fun fetchTask(id: Int) {
-        viewModelScope.launch(Dispatchers.IO) {
-            launch {
-                localTask.collect {
-                    _isChanged.emit(_task.value != it)
-                }
-            }
-
-            val sched = getM3SchedUseCase()
+    private fun launch(id: Int) {
+        withViewModelScope {
+            val all = getM3AllUseCase()
+            val sched = all.sched
             val task = when (id) {
                 0 -> sched.task0
                 1 -> sched.task1
@@ -47,43 +48,118 @@ class EditSchedulerViewModel @Inject constructor(
                 9 -> sched.task9
                 else -> throw RuntimeException()
             }
-            _task.emit(task)
-            _localTask.emit(task)
+
+            viewState = viewState.copy(
+                id = id,
+
+                hourOld = task.hour,
+                hour = task.hour,
+                hourValues = (0..23).toList(),
+
+                minOld = task.min,
+                min = task.min,
+                minValues = (0..59).toList(),
+
+                dayOld = task.day,
+                day = task.day,
+
+                modeOld = task.mode,
+                mode = task.mode,
+
+                fanOld = task.fan,
+                fan = task.fan,
+
+                tempOld = task.temp,
+                temp = task.temp,
+                tempValues = (5..40).toList(),
+
+                powerOld = task.power,
+                power = task.power,
+            )
         }
     }
 
-    fun onHourChanged(hour: Int) {
-        _localTask.value = localTask.value?.copy(hour = hour)
+    private fun onSnackbarDismiss() {
+        viewAction = null
     }
 
-    fun onMinChanged(min: Int) {
-        _localTask.value = localTask.value?.copy(min = min)
+    private fun onHourChanged(value: Int) {
+        viewState = viewState.copy(hour = value)
+        updateIsChanged()
     }
 
-    fun onDayChanged(day: Int) {
-        _localTask.value = localTask.value?.copy(day = day)
+    private fun onMinChanged(value: Int) {
+        viewState = viewState.copy(min = value)
+        updateIsChanged()
     }
 
-    fun onModeChanged(mode: Int) {
-        _localTask.value = localTask.value?.copy(mode = mode)
+    private fun onDayChanged(value: Int) {
+        viewState = viewState.copy(day = value)
+        updateIsChanged()
     }
 
-    fun onFanChanged(fan: Int) {
-        _localTask.value = localTask.value?.copy(fan = fan)
+    private fun onModeChanged(value: Int) {
+        viewState = viewState.copy(mode = value)
+        updateIsChanged()
     }
 
-    fun onTempChanged(temp: Int) {
-        _localTask.value = localTask.value?.copy(temp = temp)
+    private fun onFanChanged(value: Int) {
+        viewState = viewState.copy(fan = value)
+        updateIsChanged()
     }
 
-    fun onPowerChanged(power: Int) {
-        _localTask.value = localTask.value?.copy(power = power)
+    private fun onTempChanged(value: Int) {
+        viewState = viewState.copy(temp = value)
+        updateIsChanged()
     }
 
-    fun onSaveClick() {
-        viewModelScope.launch(Dispatchers.IO) {
+    private fun onPowerChanged(value: Int) {
+        viewState = viewState.copy(power = value)
+        updateIsChanged()
+    }
 
+    private fun updateIsChanged() {
+        viewState = viewState.copy(
+            isChanged = viewState.power != viewState.powerOld
+                    || viewState.hour != viewState.hourOld
+                    || viewState.day != viewState.dayOld
+                    || viewState.mode != viewState.modeOld
+                    || viewState.fan != viewState.fanOld
+                    || viewState.temp != viewState.tempOld
+                    || viewState.min != viewState.minOld
+        )
+    }
 
+    private fun onSaveClick() {
+        withViewModelScope {
+            val (label, isError) = try {
+                if (viewState.hour != viewState.hourOld)
+                    confRepository.conf("task${viewState.id}-hour", viewState.hour)
+
+                if (viewState.min != viewState.minOld)
+                    confRepository.conf("task${viewState.id}-min", viewState.min)
+
+                if (viewState.day != viewState.dayOld)
+                    confRepository.conf("task${viewState.id}-day", viewState.day)
+
+                if (viewState.mode != viewState.modeOld)
+                    confRepository.conf("task${viewState.id}-mode", viewState.mode)
+
+                if (viewState.fan != viewState.fanOld)
+                    confRepository.conf("task${viewState.id}-fan", viewState.fan)
+
+                if (viewState.temp != viewState.tempOld)
+                    confRepository.conf("task${viewState.id}-temp", viewState.temp)
+
+                if (viewState.power != viewState.powerOld)
+                    confRepository.conf("task${viewState.id}-power", viewState.power)
+
+                R.string.success_save_settings to false
+            } catch (_: Exception) {
+                R.string.error_save_settings to true
+            }
+            viewAction = EditSchedulerViewAction.ShowSnackbar(SnackbarResult(label, isError))
+            viewState = viewState.copy(isChanged = isError)
         }
     }
 

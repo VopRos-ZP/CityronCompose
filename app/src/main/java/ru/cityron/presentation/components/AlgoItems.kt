@@ -72,7 +72,7 @@ fun AlgoNumberItem(
                 .widthIn(max = 96.dp)
                 .heightIn(min = 44.dp),
             value = value,
-            onValueChange = onValueChange,
+            onValueChange = { if (it != null) onValueChange(it) },
             transform = { it.toInt() },
             keyboardType = KeyboardType.Number,
             enabled = enabled,
@@ -120,7 +120,7 @@ fun AlgoBooleanItem(
 fun <T> TextFieldItem(
     modifier: Modifier = Modifier,
     value: T,
-    onValueChange: (T) -> Unit,
+    onValueChange: (T?) -> Unit,
     transform: (String) -> T,
     keyboardType: KeyboardType,
     enabled: Boolean = true,
@@ -176,7 +176,12 @@ fun <T> TextFieldItem(
         }
     }
     LaunchedEffect(textValue) {
-        onValueChange(transform(textValue))
+        val newValue = try {
+            transform(textValue)
+        } catch (_: Exception) {
+            null
+        }
+        onValueChange(newValue)
     }
 }
 

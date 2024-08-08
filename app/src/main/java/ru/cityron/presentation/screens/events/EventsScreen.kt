@@ -29,7 +29,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import kotlinx.coroutines.delay
 import ru.cityron.R
 import ru.cityron.domain.model.Event
 import ru.cityron.domain.model.EventWithDate
@@ -40,8 +39,7 @@ fun EventsScreen(
     viewModel: EventsScreenViewModel = hiltViewModel(),
     onFilterClick: () -> Unit,
 ) {
-    val isFiltered by viewModel.isFiltered.collectAsState()
-    val eventsState = viewModel.events.collectAsState()
+    val state by viewModel.state().collectAsState()
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -50,10 +48,10 @@ fun EventsScreen(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         FilterButton(
-            isFiltered = isFiltered,
+            isFiltered = state.isFiltered,
             onClick = onFilterClick
         )
-        when (val events = eventsState.value) {
+        when (val events = state.events) {
             null -> Loader()
             emptyList<EventWithDate>() -> Box(
                 modifier = Modifier.fillMaxSize(),
@@ -74,10 +72,8 @@ fun EventsScreen(
             }
         }
     }
-    LaunchedEffect(key1 = Unit) {
-        viewModel.fetchEventsFromStore()
-        delay(1000)
-        viewModel.fetchEvents()
+    LaunchedEffect(state.count, state.types, state.reasons, state.sources) {
+        viewModel.intent(EventsViewIntent.Launch)
     }
 }
 

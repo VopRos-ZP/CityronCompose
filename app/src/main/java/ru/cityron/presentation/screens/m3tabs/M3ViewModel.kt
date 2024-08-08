@@ -43,14 +43,14 @@ class M3ViewModel @Inject constructor(
                 _controller.value = currentRepository.current
             }
             launch {
-                m3Repository.state.collect {
+                m3Repository.all.collect {
                     updateState {
                         copy(
-                            temp = it.set.temp,
-                            tempPv = it.algo.tempPv,
-                            fan = it.set.fan,
-                            isPowerOn = it.set.power == 1,
-                            isShowAlarms = it.alarms != 0,
+                            temp = it.state.set.temp,
+                            tempPv = it.state.algo.tempPv,
+                            fan = it.state.set.fan,
+                            isPowerOn = it.state.set.power == 1,
+                            isShowAlarms = it.state.alarms != 0,
                         )
                     }
                 }

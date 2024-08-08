@@ -9,6 +9,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import ru.cityron.data.local.EventsStore
 import ru.cityron.data.room.controller.ControllerDatabase
+import ru.cityron.data.room.event.EventDatabase
 import ru.cityron.data.room.ip.IpDatabase
 import javax.inject.Singleton
 
@@ -34,6 +35,16 @@ object RoomModule {
         context = context,
         klass = IpDatabase::class.java,
         name = "ip"
+    ).fallbackToDestructiveMigration().build()
+
+    @Provides
+    @Singleton
+    fun provideEventDatabase(
+        @ApplicationContext context: Context
+    ): EventDatabase = Room.databaseBuilder(
+        context = context,
+        klass = EventDatabase::class.java,
+        name = "event"
     ).fallbackToDestructiveMigration().build()
 
     @Provides

@@ -19,7 +19,6 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.OutlinedButton
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -36,61 +35,51 @@ fun FindScreen(
     onClick: () -> Unit,
     onAddClick: (Controller) -> Unit,
     onCustomClick: () -> Unit,
+    viewModel: FindViewModel = hiltViewModel()
 ) {
-    val viewModel: FindViewModel = hiltViewModel()
-    val infoList by viewModel.infoList.collectAsState()
+    val state by viewModel.state().collectAsState()
     DrawerScaffold(
         title = "Поиск контроллеров",
-        onClick = onClick,
-        onSettingsClick = null
+        onClick = onClick
     ) {
-        FindScreenContent(infoList, viewModel::addController, onCustomClick)
-    }
-    LaunchedEffect(key1 = Unit) {
-        viewModel.fetchInfoList()
-    }
-}
-
-@Composable
-private fun FindScreenContent(
-    infoList: Map<Controller, Boolean>,
-    onClick: (Controller) -> Unit,
-    onCustomClick: () -> Unit,
-) {
-    Box(
-        contentAlignment = Alignment.Center,
-        modifier = Modifier.background(MaterialTheme.colors.background)
-    ) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.spacedBy(20.dp),
-            contentPadding = PaddingValues(20.dp),
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.background(MaterialTheme.colors.background)
         ) {
-            infoList.map { (controller, added) ->
-                item {
-                    ControllerItem(
-                        controller = controller,
-                        added = added
-                    ) { onClick(controller) }
+            LazyColumn(
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(20.dp),
+                contentPadding = PaddingValues(20.dp),
+            ) {
+                state.controllers.map { (controller, added) ->
+                    item {
+                        ControllerItem(
+                            controller = controller,
+                            added = added,
+                            onClick = { viewModel.intent(FindViewIntent.OnAddClick(controller)) }
+                        )
+                    }
                 }
-            }
-            item {
-                OutlinedButton(
-                    modifier = Modifier.fillMaxWidth(),
-                    onClick = onCustomClick,
-                    shape = RoundedCornerShape(4.dp),
-                    border = BorderStroke(width = 1.dp, color = MaterialTheme.colors.secondary),
-                    colors = ButtonDefaults.outlinedButtonColors(
-                        backgroundColor = Color.Transparent,
-                        contentColor = MaterialTheme.colors.onPrimary
-                    )
-                ) {
-                    Text(
-                        modifier = Modifier.fillMaxSize().padding(vertical = 14.dp),
-                        text = "Добавить контроллер вручную",
-                        textAlign = TextAlign.Center,
-                        style = MaterialTheme.typography.body2
-                    )
+                item {
+                    OutlinedButton(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = onCustomClick,
+                        shape = RoundedCornerShape(4.dp),
+                        border = BorderStroke(width = 1.dp, color = MaterialTheme.colors.secondary),
+                        colors = ButtonDefaults.outlinedButtonColors(
+                            backgroundColor = Color.Transparent,
+                            contentColor = MaterialTheme.colors.onPrimary
+                        )
+                    ) {
+                        Text(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(vertical = 14.dp),
+                            text = "Добавить контроллер вручную",
+                            textAlign = TextAlign.Center,
+                            style = MaterialTheme.typography.body2
+                        )
+                    }
                 }
             }
         }

@@ -1,7 +1,7 @@
 package ru.cityron.presentation.screens.editAlarm
 
 data class EditAlarmViewState(
-    val i: Int = 0,
+    val i: Int = 1,
     val actionOld: Int = 1,
     val action: Int = actionOld,
 

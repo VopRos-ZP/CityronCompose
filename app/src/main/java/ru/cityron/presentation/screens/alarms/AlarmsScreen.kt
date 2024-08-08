@@ -17,7 +17,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -39,7 +38,6 @@ fun AlarmsScreen(
 ) {
     val alarmsStrings = stringArrayResource(id = R.array.alarms_m3)
     val state by viewModel.state().collectAsState()
-    val viewAction = viewModel.action().collectAsState(initial = null)
     BackScaffold(
         title = "Аварии",
         onClick = onClick
@@ -54,15 +52,9 @@ fun AlarmsScreen(
                     text = alarmsStrings[alarm.i - 1],
                     isChecked = alarm.en == 1,
                     onCheckedChange = { viewModel.intent(AlarmsViewIntent.OnAlarmEnChange(alarm, it)) },
-                    onClick = { viewModel.intent(AlarmsViewIntent.OnAlarmClick(alarm)) }
+                    onClick = { onEditAlarmClick(alarm.i) }
                 )
             }
-        }
-    }
-    LaunchedEffect(viewAction.value) {
-        when (val action = viewAction.value) {
-            is AlarmsViewAction.OnNavigate -> onEditAlarmClick(action.id)
-            null -> {}
         }
     }
 }

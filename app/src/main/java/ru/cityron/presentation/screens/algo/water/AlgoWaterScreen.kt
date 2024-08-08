@@ -69,14 +69,14 @@ fun AlgoWaterScreen(
                 text = "Время прогрева",
                 textUnit = "мин",
                 value = state.timeWarmUp,
-                isError = state.timeWarmUpInRange,
+                isError = !state.timeWarmUpInRange,
                 onValueChange = { viewModel.intent(AlgoWaterViewIntent.OnTimeWarmUpChange(it)) }
             )
             AlgoNumberItem(
                 text = "Время разморозки",
                 textUnit = "мин",
                 value = state.timeDefrost,
-                isError = state.timeDefrostInRange,
+                isError = !state.timeDefrostInRange,
                 onValueChange = { viewModel.intent(AlgoWaterViewIntent.OnTimeDefrostChange(it)) }
             )
         }

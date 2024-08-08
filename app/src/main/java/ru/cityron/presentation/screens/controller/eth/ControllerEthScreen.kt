@@ -13,6 +13,8 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -20,28 +22,32 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ru.cityron.presentation.components.AlgoBooleanItem
-import ru.cityron.presentation.components.BackScaffoldWithState
+import ru.cityron.presentation.components.BackScaffold
 import ru.cityron.presentation.components.BottomSaveButton
 import ru.cityron.presentation.components.TextFieldItem
+import ru.cityron.presentation.components.rememberSnackbarResult
 
 @Composable
 fun ControllerEthScreen(
     onClick: () -> Unit,
     viewModel: ControllerEthViewModel = hiltViewModel()
 ) {
-    val stateState = viewModel.state.collectAsState()
-    BackScaffoldWithState(
+    val state by viewModel.state().collectAsState()
+    val viewAction = viewModel.action().collectAsState(initial = null)
+    var snackbarResult by rememberSnackbarResult()
+    BackScaffold(
         title = "Сетевой интерфейс Eth",
         onClick = onClick,
-        state = stateState,
+        snackbarResult = snackbarResult,
+        onDismissSnackbar = { if (!isError) viewModel.intent(ControllerEthViewIntent.OnSnackbarDismiss) },
         bottomBar = {
-            if (stateState.value?.isChanged == true) {
-                BottomSaveButton {
+            if (state.isChanged) {
+                BottomSaveButton(enabled = state.ipIsCorrect && state.maskIsCorrect && state.gwIsCorrect && state.macIsCorrect) {
                     viewModel.intent(ControllerEthViewIntent.OnSaveClick)
                 }
             }
         }
-    ) { state ->
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -75,12 +81,13 @@ fun ControllerEthScreen(
                         modifier = Modifier.weight(1f),
                         value = state.ip,
                         onValueChange = {
-                            viewModel.intent(ControllerEthViewIntent.OnIpChange(it))
+                            if (it != null) viewModel.intent(ControllerEthViewIntent.OnIpChange(it))
                         },
                         transform = { it },
                         keyboardType = KeyboardType.Number,
                         placeholder = state.ipOld,
-                        enabled = enabled
+                        enabled = enabled,
+                        isError = !state.ipIsCorrect
                     )
                 }
                 Row(
@@ -96,12 +103,13 @@ fun ControllerEthScreen(
                         modifier = Modifier.weight(1f),
                         value = state.mask,
                         onValueChange = {
-                            viewModel.intent(ControllerEthViewIntent.OnMaskChange(it))
+                            if (it != null) viewModel.intent(ControllerEthViewIntent.OnMaskChange(it))
                         },
                         transform = { it },
                         keyboardType = KeyboardType.Number,
                         placeholder = state.maskOld,
-                        enabled = enabled
+                        enabled = enabled,
+                        isError = !state.maskIsCorrect
                     )
                 }
                 Row(
@@ -117,12 +125,13 @@ fun ControllerEthScreen(
                         modifier = Modifier.weight(1f),
                         value = state.gw,
                         onValueChange = {
-                            viewModel.intent(ControllerEthViewIntent.OnGwChange(it))
+                            if (it != null) viewModel.intent(ControllerEthViewIntent.OnGwChange(it))
                         },
                         transform = { it },
                         keyboardType = KeyboardType.Number,
                         placeholder = state.gwOld,
-                        enabled = enabled
+                        enabled = enabled,
+                        isError = !state.gwIsCorrect
                     )
                 }
                 Row(
@@ -138,17 +147,21 @@ fun ControllerEthScreen(
                         modifier = Modifier.weight(1f),
                         value = state.mac,
                         onValueChange = {
-                            viewModel.intent(ControllerEthViewIntent.OnMacChange(it))
+                            if (it != null) viewModel.intent(ControllerEthViewIntent.OnMacChange(it))
                         },
                         transform = { it },
                         keyboardType = KeyboardType.Text,
-                        placeholder = state.macOld
+                        placeholder = state.macOld,
+                        isError = !state.macIsCorrect
                     )
                 }
             }
         }
     }
-    LaunchedEffect(Unit) {
-        viewModel.intent(ControllerEthViewIntent.Launch)
+    LaunchedEffect(viewAction.value) {
+        when (val action = viewAction.value) {
+            is ControllerEthViewAction.ShowSnackbar -> snackbarResult = action.result
+            null -> viewModel.intent(ControllerEthViewIntent.Launch)
+        }
     }
 }

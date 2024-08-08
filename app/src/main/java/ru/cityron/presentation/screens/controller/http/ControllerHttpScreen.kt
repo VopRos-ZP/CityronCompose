@@ -12,33 +12,39 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ru.cityron.presentation.components.AlgoBooleanItem
-import ru.cityron.presentation.components.BackScaffoldWithState
+import ru.cityron.presentation.components.BackScaffold
 import ru.cityron.presentation.components.BottomSaveButton
 import ru.cityron.presentation.components.PasswordField
+import ru.cityron.presentation.components.rememberSnackbarResult
 
 @Composable
 fun ControllerHttpScreen(
     onClick: () -> Unit,
     viewModel: ControllerHttpViewModel = hiltViewModel()
 ) {
-    val stateState = viewModel.state.collectAsState()
-    BackScaffoldWithState(
+    val state by viewModel.state().collectAsState()
+    val viewAction = viewModel.action().collectAsState(initial = null)
+    var snackbarResult by rememberSnackbarResult()
+    BackScaffold(
         title = "Доступ к  веб-интерфейсу",
         onClick = onClick,
-        state = stateState,
+        snackbarResult = snackbarResult,
+        onDismissSnackbar = { if (!isError) viewModel.intent(ControllerHttpViewIntent.OnSnackbarDismiss) },
         bottomBar = {
-            if (stateState.value?.isChanged == true) {
+            if (state.isChanged) {
                 BottomSaveButton {
                     viewModel.intent(ControllerHttpViewIntent.OnSaveClick)
                 }
             }
         }
-    ) { state ->
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -92,7 +98,10 @@ fun ControllerHttpScreen(
             }
         }
     }
-    LaunchedEffect(Unit) {
-        viewModel.intent(ControllerHttpViewIntent.Launch)
+    LaunchedEffect(viewAction.value) {
+        when (val action = viewAction.value) {
+            is ControllerHttpViewAction.ShowSnackbar -> snackbarResult = action.result
+            null -> viewModel.intent(ControllerHttpViewIntent.Launch)
+        }
     }
 }

@@ -75,38 +75,40 @@ class EditAlarmViewModel @Inject constructor(
     }
 
     private fun onActionChange(value: Int) {
-        viewState = viewState.copy(
-            action = value,
-            isChanged = value != viewState.actionOld
-                    || viewState.delay != viewState.delayOld
-                    || viewState.value != viewState.valueOld
-        )
+        viewState = viewState.copy(action = value)
+        updateIsChanged()
     }
 
     private fun onDelayChange(value: Int) {
-        viewState = viewState.copy(
-            delay = value,
-            isChanged = value != viewState.delayOld
-                    || viewState.action != viewState.actionOld
-                    || viewState.value != viewState.valueOld
-        )
+        viewState = viewState.copy(delay = value)
+        updateIsChanged()
     }
 
     private fun onValueChange(value: Int) {
+        viewState = viewState.copy(value = value)
+        updateIsChanged()
+    }
+
+    private fun updateIsChanged() {
         viewState = viewState.copy(
-            value = value,
-            isChanged = value != viewState.valueOld
+            isChanged = viewState.action != viewState.actionOld
                     || viewState.delay != viewState.delayOld
-                    || viewState.action != viewState.actionOld
+                    || viewState.value != viewState.valueOld
         )
     }
 
     private fun onSaveClick() {
         withViewModelScope {
             val (label, isError) = try {
-                confRepository.conf("alarm${viewState.i}-delay", "${viewState.delay}\n")
-                confRepository.conf("alarm${viewState.i}-value", "${viewState.value}\n")
-                confRepository.conf("alarm${viewState.i}-action", "${viewState.action}\n")
+                if (viewState.delay != viewState.delayOld)
+                    confRepository.conf("alarm${viewState.i}-delay", viewState.delay)
+
+                if (viewState.value != viewState.valueOld)
+                    confRepository.conf("alarm${viewState.i}-value", viewState.value)
+
+                if (viewState.action != viewState.actionOld)
+                    confRepository.conf("alarm${viewState.i}-action", viewState.action)
+
                 R.string.success_save_settings to false
             } catch (_: Exception) {
                 R.string.error_save_settings to true

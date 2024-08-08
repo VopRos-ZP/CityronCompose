@@ -13,12 +13,16 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.AlertDialog
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
+import androidx.compose.material.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
@@ -28,8 +32,10 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ru.cityron.R
 import ru.cityron.domain.utils.Time
+import ru.cityron.domain.utils.fromFrequencyToIndex
 import ru.cityron.domain.utils.utilsBitGet
-import ru.cityron.presentation.components.BackScaffoldWithState
+import ru.cityron.presentation.components.BackScaffold
+import ru.cityron.ui.theme.AccentRed
 import ru.cityron.ui.theme.LightGrey
 
 @Composable
@@ -41,11 +47,11 @@ fun ControllerSettingsScreen(
     onMetricClick: () -> Unit,
     viewModel: ControllerSettingsViewModel = hiltViewModel()
 ) {
-    BackScaffoldWithState(
+    val state by viewModel.state().collectAsState()
+    BackScaffold(
         title = "Контроллер",
         onClick = onClick,
-        state = viewModel.state.collectAsState()
-    ) { state ->
+    ) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             verticalArrangement = Arrangement.spacedBy(20.dp),
@@ -80,6 +86,56 @@ fun ControllerSettingsScreen(
                     onClick = onMetricClick
                 )
             }
+            item {
+                DeleteControllerItem {
+                    viewModel.intent(ControllerSettingsViewIntent.OnIsShowDeleteDialogChange(true))
+                }
+            }
+        }
+        if (state.isShowDeleteDialog) {
+            AlertDialog(
+                shape = RoundedCornerShape(4.dp),
+                backgroundColor = MaterialTheme.colors.primary,
+                contentColor = MaterialTheme.colors.onPrimary,
+                text = {
+                    Text(
+                        text = "Вы уверены, что хотите \n" +
+                                "удалить контроллер \n" +
+                                "с данного устройства?",
+                        color = MaterialTheme.colors.onPrimary,
+                        style = MaterialTheme.typography.body1
+                    )
+                },
+                onDismissRequest = {
+                    viewModel.intent(ControllerSettingsViewIntent.OnIsShowDeleteDialogChange(false))
+                },
+                confirmButton = {
+                    TextButton(
+                        colors = ButtonDefaults.textButtonColors(
+                            contentColor = AccentRed
+                        ),
+                        onClick = { viewModel.intent(ControllerSettingsViewIntent.OnConfirmDeleteClick) }
+                    ) {
+                        Text(
+                            text = "Удалить",
+                            style = MaterialTheme.typography.button
+                        )
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        colors = ButtonDefaults.textButtonColors(
+                            contentColor = MaterialTheme.colors.onPrimary
+                        ),
+                        onClick = { viewModel.intent(ControllerSettingsViewIntent.OnIsShowDeleteDialogChange(false)) }
+                    ) {
+                        Text(
+                            text = "Отмена",
+                            style = MaterialTheme.typography.button
+                        )
+                    }
+                }
+            )
         }
     }
     LaunchedEffect(Unit) {
@@ -143,7 +199,7 @@ fun EthItem(
     dhcp: Int,
     onClick: () -> Unit
 ) {
-    SettingItem(title = "Сетевой интерфейс Ethernet", onClick = onClick) {
+    SettingItem(title = "Сетевой интерфейс", onClick = onClick) {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(
                 text = "Локальный IP-адрес",
@@ -219,17 +275,9 @@ fun MetricItem(
         .joinToString()
     val frequencies = stringArrayResource(id = R.array.metric_frequency)
 
-    val index = when (frequency) {
-        1 -> 0
-        3 -> 1
-        6 -> 2
-        6 * 5 -> 3
-        6 * 10 -> 4
-        6 * 30 -> 5
-        else -> 0
-    }
+    val index = frequency.fromFrequencyToIndex()
 
-    SettingItem(title = "Журнал метрик контроллера", onClick = onClick) {
+    SettingItem(title = "Журнал метрик", onClick = onClick) {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(
                 text = "Значение температур",
@@ -254,6 +302,27 @@ fun MetricItem(
                 style = MaterialTheme.typography.h5
             )
         }
+    }
+}
+
+@Composable
+fun DeleteControllerItem(
+    onClick: () -> Unit
+) {
+    TextButton(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(4.dp),
+        onClick = onClick,
+        contentPadding = PaddingValues(vertical = 14.dp),
+        colors = ButtonDefaults.textButtonColors(
+            backgroundColor = AccentRed,
+            contentColor = MaterialTheme.colors.onPrimary,
+        ),
+    ) {
+        Text(
+            text = "Удалить контроллер",
+            style = MaterialTheme.typography.body2
+        )
     }
 }
 

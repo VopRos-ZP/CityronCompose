@@ -24,7 +24,6 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.rememberDrawerState
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -45,16 +44,15 @@ import ru.cityron.presentation.navigation.Screen
 import ru.cityron.presentation.navigation.graph.RootNavGraph
 import ru.cityron.presentation.navigation.rememberNavigationState
 import ru.cityron.ui.theme.Green
-import ru.cityron.ui.theme.Orange
-import ru.cityron.ui.theme.Red
 
 @Composable
-fun RootScreen() {
+fun RootScreen(
+    viewModel: RootViewModel = hiltViewModel()
+) {
     val scope = rememberCoroutineScope()
     val navigationState = rememberNavigationState()
     val drawerState = rememberDrawerState(DrawerValue.Open)
-    val viewModel: RootViewModel = hiltViewModel()
-    val controllers by viewModel.controllers.collectAsState()
+    val state by viewModel.state().collectAsState()
     val navBackStackEntry by navigationState.navHostController.currentBackStackEntryAsState()
 
     ModalDrawer(
@@ -76,14 +74,14 @@ fun RootScreen() {
                     color = MaterialTheme.colors.secondary,
                     style = MaterialTheme.typography.h1
                 )
-                controllers.forEach { (controller, source) ->
+                state.controllers.forEach { (controller, source) ->
                     ControllerDrawerItem(
                         controller = controller,
                         source = source,
-                        selected = navBackStackEntry?.destination?.hierarchy?.any { it.route == controller.name } ?: false,
+                        selected = navBackStackEntry?.destination?.hierarchy?.any { it.route == controller.idCpu } ?: false,
                         onClick = {
-                            viewModel.selectController(controller to source)
-                            navigationState.navigateTo(controller.name)
+                            viewModel.intent(RootViewIntent.OnSelectController(controller to source))
+                            navigationState.navigateTo(controller.idCpu)
                             scope.launch { drawerState.close() }
                         }
                     )
@@ -108,7 +106,7 @@ fun RootScreen() {
     ) {
         RootNavGraph(
             navHostController = navigationState.navHostController,
-            controllers = controllers.keys.toList(),
+            controllers = state.controllers.keys.toList(),
             onDrawer = { scope.launch { drawerState.open() } },
             onBack = { navigationState.navigateUp() },
             onAddClick = { navigationState.navigate(Screen.AddController.route) },
@@ -138,9 +136,6 @@ fun RootScreen() {
             onMetricClick = { navigationState.navigate(Screen.ControllerMetric.route) },
         )
     }
-    LaunchedEffect(Unit) {
-        viewModel.fetchControllers()
-    }
 }
 
 @Composable
@@ -157,8 +152,8 @@ fun ControllerDrawerItem(
         selected = selected,
         status = when (source.status) {
             Status.ONLINE -> Green
-            Status.OFFLINE -> Orange
-            Status.ALERT -> Red
+            Status.OFFLINE -> MaterialTheme.colors.secondary
+            Status.ALERT -> MaterialTheme.colors.error
         }
     )
 }

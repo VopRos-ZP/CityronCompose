@@ -48,21 +48,21 @@ fun AlgoTimingsScreen(
                 text = "Открытие заслонки",
                 textUnit = "сек",
                 value = state.timeOpenDamper,
-                isError = state.timeOpenDamperInRange,
+                isError = !state.timeOpenDamperInRange,
                 onValueChange = { viewModel.intent(AlgoTimingsViewIntent.OnTimeOpenDamperChange(it)) }
             )
             AlgoNumberItem(
                 text = "Разгон вентилятора",
                 textUnit = "сек",
                 value = state.timeAccelerFan,
-                isError = state.timeAccelerFanInRange,
+                isError = !state.timeAccelerFanInRange,
                 onValueChange = { viewModel.intent(AlgoTimingsViewIntent.OnTimeAccelerFanChange(it)) }
             )
             AlgoNumberItem(
                 text = "Продува ТЭНа",
                 textUnit = "сек",
                 value = state.timeBlowHeat,
-                isError = state.timeBlowHeatInRange,
+                isError = !state.timeBlowHeatInRange,
                 onValueChange = { viewModel.intent(AlgoTimingsViewIntent.OnTimeBlowHeatChange(it)) }
             )
         }

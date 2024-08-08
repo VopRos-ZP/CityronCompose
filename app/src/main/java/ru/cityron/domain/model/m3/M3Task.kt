@@ -12,5 +12,5 @@ data class M3Task(
     val mode: Int = 0,
     val on: Int = 0,
     val power: Int = 0,
-    val temp: Int = 50
+    val temp: Int = 22
 )

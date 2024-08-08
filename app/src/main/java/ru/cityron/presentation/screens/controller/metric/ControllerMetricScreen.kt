@@ -13,6 +13,8 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.text.style.TextAlign
@@ -20,10 +22,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ru.cityron.R
-import ru.cityron.domain.utils.toInt
 import ru.cityron.domain.utils.utilsBitGet
-import ru.cityron.presentation.components.BackScaffoldWithState
+import ru.cityron.presentation.components.BackScaffold
 import ru.cityron.presentation.components.BottomSaveButton
+import ru.cityron.presentation.components.rememberSnackbarResult
 import ru.cityron.presentation.screens.editScheduler.DayChip
 import ru.cityron.presentation.screens.editScheduler.TitledContent
 import kotlin.math.pow
@@ -33,21 +35,25 @@ fun ControllerMetricScreen(
     onClick: () -> Unit,
     viewModel: ControllerMetricViewModel = hiltViewModel()
 ) {
-    val stateState = viewModel.state.collectAsState()
     val valuesStrings = stringArrayResource(id = R.array.metric_values)
     val frequencyStrings = stringArrayResource(id = R.array.metric_frequency_short)
-    BackScaffoldWithState(
+
+    val state by viewModel.state().collectAsState()
+    val viewAction = viewModel.action().collectAsState(initial = null)
+    var snackbarResult by rememberSnackbarResult()
+    BackScaffold(
         title = "Журнал метрик",
         onClick = onClick,
-        state = stateState,
+        snackbarResult = snackbarResult,
+        onDismissSnackbar = { if (!isError) viewModel.intent(ControllerMetricViewIntent.OnSnackbarDismiss) },
         bottomBar = {
-            if (stateState.value?.isChanged == true) {
+            if (state.isChanged) {
                 BottomSaveButton {
                     viewModel.intent(ControllerMetricViewIntent.OnSaveClick)
                 }
             }
         }
-    ) { state ->
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -104,11 +110,7 @@ fun ControllerMetricScreen(
                             day = frequencyStrings[i],
                             isSelected = state.frequency == i,
                             onClick = {
-                                viewModel.intent(
-                                    ControllerMetricViewIntent.OnFrequencyChange(
-                                        i
-                                    )
-                                )
+                                viewModel.intent(ControllerMetricViewIntent.OnFrequencyChange(i))
                             }
                         )
                     }
@@ -123,11 +125,7 @@ fun ControllerMetricScreen(
                             day = frequencyStrings[i],
                             isSelected = state.frequency == i,
                             onClick = {
-                                viewModel.intent(
-                                    ControllerMetricViewIntent.OnFrequencyChange(
-                                        i
-                                    )
-                                )
+                                viewModel.intent(ControllerMetricViewIntent.OnFrequencyChange(i))
                             }
                         )
                     }
@@ -146,7 +144,10 @@ fun ControllerMetricScreen(
             )
         }
     }
-    LaunchedEffect(Unit) {
-        viewModel.intent(ControllerMetricViewIntent.Launch)
+    LaunchedEffect(viewAction.value) {
+        when (val action = viewAction.value) {
+            is ControllerMetricViewAction.ShowSnackbar -> snackbarResult = action.result
+            null -> viewModel.intent(ControllerMetricViewIntent.Launch)
+        }
     }
 }

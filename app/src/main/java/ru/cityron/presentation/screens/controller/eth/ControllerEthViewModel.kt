@@ -1,96 +1,145 @@
 package ru.cityron.presentation.screens.controller.eth
 
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
+import ru.cityron.R
 import ru.cityron.domain.repository.ConfRepository
 import ru.cityron.domain.usecase.GetM3AllUseCase
-import ru.cityron.presentation.mvi.MviViewModel
+import ru.cityron.domain.utils.isValidIPAddress
+import ru.cityron.domain.utils.isValidMac
+import ru.cityron.presentation.mvi.BaseSharedViewModel
+import ru.cityron.presentation.mvi.SnackbarResult
 import javax.inject.Inject
 
 @HiltViewModel
 class ControllerEthViewModel @Inject constructor(
     private val confRepository: ConfRepository,
     private val getM3AllUseCase: GetM3AllUseCase,
-) : MviViewModel<ControllerEthViewState, ControllerEthViewIntent>() {
+) : BaseSharedViewModel<ControllerEthViewState, ControllerEthViewAction, ControllerEthViewIntent>(
+    initialState = ControllerEthViewState()
+) {
 
-    override fun intent(intent: ControllerEthViewIntent) {
-        when (intent) {
+    override fun intent(viewEvent: ControllerEthViewIntent) {
+        when (viewEvent) {
             is ControllerEthViewIntent.Launch -> launch()
             is ControllerEthViewIntent.OnSaveClick -> onSaveClick()
-            is ControllerEthViewIntent.OnFDhcpChange -> updateState {
-                copy(
-                    fDhcp = intent.value,
-                    isChanged = isChanged || intent.value != fDhcpOld
-                )
-            }
-            is ControllerEthViewIntent.OnIpChange -> updateState {
-                copy(
-                    ip = intent.value,
-                    isChanged = isChanged || intent.value != ipOld
-                )
-            }
-            is ControllerEthViewIntent.OnMaskChange -> updateState {
-                copy(
-                    mask = intent.value,
-                    isChanged = isChanged || intent.value != maskOld
-                )
-            }
-            is ControllerEthViewIntent.OnGwChange -> updateState {
-                copy(
-                    gw = intent.value,
-                    isChanged = isChanged || intent.value != gwOld
-                )
-            }
-            is ControllerEthViewIntent.OnMacChange -> updateState {
-                copy(
-                    mac = intent.value,
-                    isChanged = isChanged || intent.value != macOld
-                )
-            }
+            is ControllerEthViewIntent.OnSnackbarDismiss -> onSnackbarDismiss()
+            is ControllerEthViewIntent.OnFDhcpChange -> onFDhcpChange(viewEvent.value)
+            is ControllerEthViewIntent.OnIpChange -> onIpChange(viewEvent.value)
+            is ControllerEthViewIntent.OnMaskChange -> onMaskChange(viewEvent.value)
+            is ControllerEthViewIntent.OnGwChange -> onGwChange(viewEvent.value)
+            is ControllerEthViewIntent.OnMacChange -> onMacChange(viewEvent.value)
         }
     }
 
     private fun launch() {
-        updateState({ copy() }, ControllerEthViewState())
-        scope.launch {
-            try {
-                val settings = getM3AllUseCase().settings
-                updateState {
-                    copy(
-                        fDhcpOld = settings.eth.fDhcp,
-                        fDhcp = settings.eth.fDhcp,
+        withViewModelScope {
+            val all = getM3AllUseCase()
+            viewState = viewState.copy(
+                fDhcpOld = all.settings.eth.fDhcp,
+                fDhcp = all.settings.eth.fDhcp,
 
-                        ipOld = settings.eth.ip,
-                        ip = settings.eth.ip,
+                ipOld = all.settings.eth.ip,
+                ip = all.settings.eth.ip,
 
-                        maskOld = settings.eth.mask,
-                        mask = settings.eth.mask,
+                maskOld = all.settings.eth.mask,
+                mask = all.settings.eth.mask,
 
-                        gwOld = settings.eth.gw,
-                        gw = settings.eth.gw,
+                gwOld = all.settings.eth.gw,
+                gw = all.settings.eth.gw,
 
-                        macOld = settings.eth.mac2,
-                        mac = settings.eth.mac2,
-                    )
-                }
-            }  catch (_: Exception) {}
+                macOld = all.settings.eth.mac2,
+                mac = all.settings.eth.mac2,
+            )
         }
     }
 
+    private fun onSnackbarDismiss() {
+        viewAction = null
+    }
+
+    private fun onFDhcpChange(value: Int) {
+        viewState = viewState.copy(
+            fDhcp = value,
+            isChanged = value != viewState.fDhcpOld
+                    || viewState.ip != viewState.ipOld
+                    || viewState.mask != viewState.maskOld
+                    || viewState.gw != viewState.gwOld
+                    || viewState.mac != viewState.macOld
+        )
+    }
+
+    private fun onIpChange(value: String) {
+        viewState = viewState.copy(
+            ip = value,
+            ipIsCorrect = value.isValidIPAddress(),
+            isChanged = value != viewState.ipOld
+                    || viewState.fDhcp != viewState.fDhcpOld
+                    || viewState.mask != viewState.maskOld
+                    || viewState.gw != viewState.gwOld
+                    || viewState.mac != viewState.macOld
+        )
+    }
+
+    private fun onMaskChange(value: String) {
+        viewState = viewState.copy(
+            mask = value,
+            maskIsCorrect = value.isValidIPAddress(),
+            isChanged = value != viewState.maskOld
+                    || viewState.fDhcp != viewState.fDhcpOld
+                    || viewState.ip != viewState.ipOld
+                    || viewState.gw != viewState.gwOld
+                    || viewState.mac != viewState.macOld
+        )
+    }
+
+    private fun onGwChange(value: String) {
+        viewState = viewState.copy(
+            gw = value,
+            gwIsCorrect = value.isValidIPAddress(),
+            isChanged = value != viewState.gwOld
+                    || viewState.fDhcp != viewState.fDhcpOld
+                    || viewState.mask != viewState.maskOld
+                    || viewState.ip != viewState.ipOld
+                    || viewState.mac != viewState.macOld
+        )
+    }
+
+    private fun onMacChange(value: String) {
+        viewState = viewState.copy(
+            mac = value,
+            macIsCorrect = value.isValidMac(),
+            isChanged = value != viewState.macOld
+                    || viewState.fDhcp != viewState.fDhcpOld
+                    || viewState.mask != viewState.maskOld
+                    || viewState.gw != viewState.gwOld
+                    || viewState.ip != viewState.ipOld
+        )
+    }
+
     private fun onSaveClick() {
-        scope.launch {
-            try {
-                state.value?.let {
-                    confRepository.conf("eth-fDhcp", it.fDhcp)
-                    confRepository.conf("eth-ip", it.ip)
-                    confRepository.conf("eth-mask", it.mask)
-                    confRepository.conf("eth-gw", it.gw)
-                    confRepository.conf("eth-mac2", it.mac)
-                    updateState { copy(isChanged = false) }
-                }
+        withViewModelScope {
+            val (label, isError) = try {
+                if (viewState.fDhcp != viewState.fDhcpOld)
+                    confRepository.conf("eth-fDhcp", viewState.fDhcp)
+
+                if (viewState.ip != viewState.ipOld)
+                    confRepository.conf("eth-ip", viewState.ip)
+
+                if (viewState.mask != viewState.maskOld)
+                    confRepository.conf("eth-mask", viewState.mask)
+
+                if (viewState.gw != viewState.gwOld)
+                    confRepository.conf("eth-gw", viewState.gw)
+
+                if (viewState.mac != viewState.macOld)
+                    confRepository.conf("eth-mac2", viewState.mac)
+
+                R.string.success_save_settings to false
             } catch (_: Exception) {
-                updateState { copy(isChanged = true) }
+                R.string.error_save_settings to true
             }
+            viewAction = ControllerEthViewAction.ShowSnackbar(SnackbarResult(label, isError))
+            viewState = viewState.copy(isChanged = isError)
         }
     }
 

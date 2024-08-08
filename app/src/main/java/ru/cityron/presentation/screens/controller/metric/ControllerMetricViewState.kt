@@ -1,11 +1,11 @@
 package ru.cityron.presentation.screens.controller.metric
 
 data class ControllerMetricViewState(
-    val valuesBitsOld: Int = 0,
-    val valuesBits: Int = 0,
+    val valuesBitsOld: Int = 1,
+    val valuesBits: Int = valuesBitsOld,
 
-    val frequencyOld: Int = 0,
-    val frequency: Int = 0,
+    val frequencyOld: Int = 2,
+    val frequency: Int = frequencyOld,
 
     val capacity: Int = 62,
 
