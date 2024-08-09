@@ -117,6 +117,7 @@ fun RootScreen(
             onSettingsClick = { navigationState.navigate(Screen.Settings.route) },
             onChangeName = { navigationState.navigate(Screen.ChangeName.route) },
             onAuthClick = { navigationState.navigate(Screen.Auth.route) },
+            onAuthRoleClick = { navigationState.navigate(it.route) },
             onAlgoClick = { navigationState.navigate(Screen.Algo.route) },
             onAlarmClick = { navigationState.navigate(Screen.Alarms.route) },
             onControllerClick = { navigationState.navigate(Screen.Controller.route) },

@@ -56,7 +56,7 @@ fun FindScreen(
                         ControllerItem(
                             controller = controller,
                             added = added,
-                            onClick = { viewModel.intent(FindViewIntent.OnAddClick(controller)) }
+                            onClick = { onAddClick(controller) /*viewModel.intent(FindViewIntent.OnAddClick(controller))*/ }
                         )
                     }
                 }

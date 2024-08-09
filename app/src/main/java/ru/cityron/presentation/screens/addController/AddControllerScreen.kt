@@ -9,6 +9,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -17,14 +18,17 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import ru.cityron.presentation.components.BackScaffold
 import ru.cityron.presentation.components.CodeField
 
 @Composable
 fun AddControllerScreen(
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    onAuthClick: () -> Unit,
+    viewModel: AddControllerViewModel = hiltViewModel()
 ) {
-    var code by remember { mutableStateOf("") }
+    val state by viewModel.state().collectAsState()
     BackScaffold(title = "Добавить контроллер", onClick = onClick) {
         Column(
             modifier = Modifier
@@ -38,16 +42,20 @@ fun AddControllerScreen(
                 textAlign = TextAlign.Center
             )
             CodeField(
-                value = code,
-                onValueChange = { code = it },
+                value = state.code,
+                onValueChange = { viewModel.intent(AddControllerViewIntent.OnCodeChange(it)) },
                 length = 4,
                 cursorColor = MaterialTheme.colors.primaryVariant
             )
         }
     }
     // checks verification code
-    LaunchedEffect(key1 = code) {
-        // if confirmed goto LoginScreen
+    LaunchedEffect(state.code) {
+        if (state.code.length == 4) {
+            // if confirmed goto LoginScreen
+            viewModel.intent(AddControllerViewIntent.OnCodeChange(""))
+            onAuthClick()
+        }
     }
 }
 

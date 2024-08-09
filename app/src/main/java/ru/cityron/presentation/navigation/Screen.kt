@@ -7,8 +7,10 @@ sealed class Screen(val route: String) {
     data object Find : Screen(ROUTE_FIND)
     data object AddController : Screen(ROUTE_ADD_CONTROLLER)
     data object AddCustom : Screen(ROUTE_ADD_CUSTOM)
+    data class AuthRole(val role: Int) : Screen("$ROUTE_AUTH/$role")
+
     data object ChangeName : Screen(ROUTE_CHANGE_NAME)
-    data object Auth : Screen(ROUTE_CHANGE_NAME)
+    data object Auth : Screen(ROUTE_AUTH)
     data object Algo : Screen(ROUTE_ALGO)
     data object Alarms : Screen(ROUTE_ALARMS)
     data object Controller : Screen(ROUTE_CONTROLLER)
@@ -43,6 +45,7 @@ sealed class Screen(val route: String) {
         const val ROUTE_FIND = "find"
         const val ROUTE_ADD_CONTROLLER = "add_controller"
         const val ROUTE_ADD_CUSTOM = "add_custom"
+        const val ROUTE_AUTH = "auth"
         const val ROUTE_CHANGE_NAME = "change_name"
         const val ROUTE_ALERTS = "alerts"
         const val ROUTE_ALARMS = "alarms"

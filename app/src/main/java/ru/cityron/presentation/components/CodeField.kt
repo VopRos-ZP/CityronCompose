@@ -16,7 +16,6 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.input.KeyboardType
@@ -30,15 +29,14 @@ fun CodeField(
     value: String,
     length: Int,
     modifier: Modifier = Modifier,
-    boxWidth: Dp = 38.dp,
-    boxHeight: Dp = 48.dp,
+    boxWidth: Dp = 36.dp,
     enabled: Boolean = true,
     keyboardOptions: KeyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
     keyboardActions: KeyboardActions = KeyboardActions(),
     onValueChange: (String) -> Unit,
-    cursorColor: Color = Color.Black,
+    cursorColor: Color = MaterialTheme.colors.onPrimary,
+    spaceBetweenBoxes: Dp = 12.dp,
 ) {
-    val spaceBetweenBoxes = 8.dp
     BasicTextField(
         modifier = modifier,
         value = value,
@@ -54,10 +52,7 @@ fun CodeField(
         cursorBrush = SolidColor(cursorColor),
         decorationBox = {
             Row(
-                modifier = Modifier.size(
-                    width = (boxWidth + spaceBetweenBoxes) * length,
-                    height = boxHeight
-                ),
+                modifier = Modifier.width(boxWidth * length + spaceBetweenBoxes * (length - 1)),
                 horizontalArrangement = Arrangement.spacedBy(spaceBetweenBoxes),
             ) {
                 repeat(length) { index ->
@@ -72,7 +67,7 @@ fun CodeField(
                         )
                         Box(
                             modifier = Modifier
-                                .size(boxWidth, 2.dp)
+                                .size(boxWidth, 3.dp)
                                 .background(
                                     color = MaterialTheme.colors.primaryVariant,
                                     shape = RoundedCornerShape(3.dp)
@@ -81,5 +76,6 @@ fun CodeField(
                     }
                 }
             }
-        })
+        }
+    )
 }

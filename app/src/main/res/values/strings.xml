@@ -7,6 +7,16 @@
     <string name="error_add_controller">Устройство не найдено.</string>
     <string name="error_save_settings">Не удалось применить настройки.</string>
 
+    <string-array name="auth_role">
+        <item>Пользователь</item>
+        <item>Алминистратор</item>
+    </string-array>
+
+    <string-array name="auth_role_title">
+        <item>ПОЛЬЗОВАТЕЛЕМ</item>
+        <item>АДМИНИСТРАТОРОМ</item>
+    </string-array>
+
     <string-array name="sources">
         <item>Журнал контроллера</item>
         <item>Журнал сервера</item>

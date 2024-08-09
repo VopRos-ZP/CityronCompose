@@ -22,6 +22,7 @@ fun RootNavGraph(
     onSettingsClick: () -> Unit,
     onChangeName: () -> Unit,
     onAuthClick: () -> Unit,
+    onAuthRoleClick: (Screen) -> Unit,
     onAlgoClick: () -> Unit,
     onAlarmClick: () -> Unit,
     onControllerClick: () -> Unit,
@@ -49,7 +50,9 @@ fun RootNavGraph(
             onDrawer = onDrawer,
             onBack = onBack,
             onAddClick = onAddClick,
-            onCustomClick = onCustomClick
+            onCustomClick = onCustomClick,
+            onAuthClick = onAuthClick,
+            onAuthRoleClick = onAuthRoleClick
         )
         controllers.forEach { controller ->
             if (controller.name.startsWith("M3")) {
