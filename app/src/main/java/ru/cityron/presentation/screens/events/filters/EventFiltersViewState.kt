@@ -1,7 +1,6 @@
 package ru.cityron.presentation.screens.events.filters
 
 data class EventFiltersViewState(
-    val id: Int = 0,
     val countOld: Int = 1,
     val count: Int = countOld,
 

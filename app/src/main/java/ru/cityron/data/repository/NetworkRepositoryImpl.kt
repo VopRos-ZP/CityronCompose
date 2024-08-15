@@ -23,13 +23,13 @@ class NetworkRepositoryImpl @Inject constructor(
         suffix: String,
         httpSend: suspend (String) -> String
     ): String {
-        val (controller, source) = when (val cur = currentRepository.current) {
+        val controller = when (val cur = currentRepository.current.value) {
             null -> throw RuntimeException("Current controller can't be null")
             else -> cur
         }
-        return when (source) {
-            is DataSource.Local -> httpSend("http://${controller.ipAddress}/$suffix")
-            is DataSource.Remote -> httpSend("https://rcserver.ru/rc/${controller.idCpu}/$suffix")
+        return when (controller.status.source) {
+            DataSource.LOCAL -> httpSend("http://${controller.ipAddress}/$suffix")
+            DataSource.REMOTE -> httpSend("https://rcserver.ru/rc/${controller.idCpu}/$suffix")
         }
     }
 

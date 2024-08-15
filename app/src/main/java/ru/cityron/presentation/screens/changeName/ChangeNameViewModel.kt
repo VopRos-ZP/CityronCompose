@@ -26,12 +26,16 @@ class ChangeNameViewModel @Inject constructor(
     }
 
     private fun launch() {
-        val oldName = currentRepository.current?.first?.name
-            ?.split(" (")?.get(1)
-            ?.replace(")", "") ?: ""
-        viewState = when (oldName == currentRepository.current?.first?.idUsr) {
-            true -> viewState.copy(oldName = "", name = "")
-            else -> viewState.copy(oldName = oldName, name = oldName)
+        withViewModelScope {
+            currentRepository.current.collect {
+                val oldName = it?.name
+                    ?.split(" (")?.get(1)
+                    ?.replace(")", "") ?: ""
+                viewState = when (oldName == it?.idUsr) {
+                    true -> viewState.copy(oldName = "", name = "")
+                    else -> viewState.copy(oldName = oldName, name = oldName)
+                }
+            }
         }
     }
 

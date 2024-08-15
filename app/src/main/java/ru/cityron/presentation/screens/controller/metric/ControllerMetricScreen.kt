@@ -71,7 +71,7 @@ fun ControllerMetricScreen(
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(11.dp)
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     valuesStrings.mapIndexed { i, s ->
                         val selected = utilsBitGet(state.valuesBits, i)

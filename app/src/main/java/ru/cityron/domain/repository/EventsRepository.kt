@@ -1,6 +1,6 @@
 package ru.cityron.domain.repository
 
-import ru.cityron.domain.model.EventWithDate
+import ru.cityron.domain.model.Event
 
 interface EventsRepository {
     suspend fun fetchEvents(
@@ -8,5 +8,5 @@ interface EventsRepository {
         types: Int,
         sources: Int,
         reasons: Int
-    ): List<EventWithDate>
+    ): List<Event>
 }

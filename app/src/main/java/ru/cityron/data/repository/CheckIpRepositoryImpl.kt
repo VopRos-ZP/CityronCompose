@@ -15,18 +15,19 @@ class CheckIpRepositoryImpl @Inject constructor(
 ) : CheckIpRepository {
 
     override suspend fun checkIpAddress(ip: String): Boolean {
-        try {
-            currentRepository.current = Controller(
+        return try {
+            val controller = Controller(
                 id = 0,
                 name = "",
                 ipAddress = ip,
                 idCpu = "",
-                idUsr = ""
-            ) to DataSource.Local(Status.ONLINE)
-            val body = networkRepository.get(JSON_STATE)
-            return body.contains("error").not()
+                idUsr = "",
+                status = Status.Online(DataSource.LOCAL)
+            )
+            currentRepository.setCurrentController(controller)
+            networkRepository.get(JSON_STATE).contains("error").not()
         } catch (_: Exception) {
-            return false
+            false
         }
     }
 

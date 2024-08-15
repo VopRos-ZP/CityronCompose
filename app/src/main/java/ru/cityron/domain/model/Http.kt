@@ -1,11 +1,17 @@
 package ru.cityron.domain.model
 
+import kotlinx.serialization.SerialName
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class Http(
-    val fP1: Int = 0,
-    val fP2: Int = 0,
-    val p1: String = "",
-    val p2: String = ""
+    val fPr: Int = 0,
+    val fPu: Int = 0,
+    val fPw: Int = 0,
+    @SerialName("Pr")
+    val pr: String = "",
+    @SerialName("Pu")
+    val pu: String = "",
+    @SerialName("Pw")
+    val pw: String = "",
 )

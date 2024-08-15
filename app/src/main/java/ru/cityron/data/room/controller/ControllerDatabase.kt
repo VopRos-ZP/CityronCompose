@@ -4,9 +4,13 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 
 @Database(
-    version = 2,
+    version = 5,
     entities = [ControllerDto::class]
 )
 abstract class ControllerDatabase : RoomDatabase() {
     abstract val dao: ControllerDao
+
+    companion object {
+        const val NAME = "controllers"
+    }
 }

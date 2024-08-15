@@ -1,16 +1,21 @@
 package ru.cityron.presentation.screens.controller.http
 
 data class ControllerHttpViewState(
-    val fP1: Int = 0,
-    val visibilityP1: Boolean = false,
-    val fP2: Int = 0,
-    val visibilityP2: Boolean = false,
+    val fPr: Int = 0,
+    val visibilityPr: Boolean = false,
+    val fPu: Int = 0,
+    val visibilityPu: Boolean = false,
+    val fPw: Int = 0,
+    val visibilityPw: Boolean = false,
 
-    val p1Old: String = "",
-    val p1: String = p1Old,
+    val prOld: String = "",
+    val pr: String = prOld,
 
-    val p2Old: String = "",
-    val p2: String = p2Old,
+    val puOld: String = "",
+    val pu: String = puOld,
+
+    val pwOld: String = "",
+    val pw: String = pwOld,
 
     val isChanged: Boolean = false,
 )

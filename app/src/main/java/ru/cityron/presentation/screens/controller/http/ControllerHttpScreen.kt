@@ -63,17 +63,38 @@ fun ControllerHttpScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 AlgoBooleanItem(
-                    text = "Пароль на чтение",
-                    value = state.fP1,
-                    onValueChange = { viewModel.intent(ControllerHttpViewIntent.OnFP1Change(it)) }
+                    text = "Пароль Просмотр",
+                    value = state.fPr,
+                    onValueChange = { viewModel.intent(ControllerHttpViewIntent.OnFPrChange(it)) }
                 )
-                AnimatedVisibility(visible = state.fP1 == 1) {
+                AnimatedVisibility(visible = state.fPr == 1) {
                     PasswordField(
                         modifier = Modifier.fillMaxWidth(),
-                        visibility = state.visibilityP1,
-                        onVisibilityChange = { viewModel.intent(ControllerHttpViewIntent.OnVisibilityP1Change) },
-                        value = state.p1,
-                        onValueChange = { viewModel.intent(ControllerHttpViewIntent.OnP1Change(it)) }
+                        visibility = state.visibilityPr,
+                        onVisibilityChange = { viewModel.intent(ControllerHttpViewIntent.OnVisibilityPrChange) },
+                        value = state.pr,
+                        onValueChange = { viewModel.intent(ControllerHttpViewIntent.OnPrChange(it)) }
+                    )
+                }
+            }
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .animateContentSize(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                AlgoBooleanItem(
+                    text = "Пароль Пользователь",
+                    value = state.fPu,
+                    onValueChange = { viewModel.intent(ControllerHttpViewIntent.OnFPuChange(it)) }
+                )
+                AnimatedVisibility(visible = state.fPu == 1) {
+                    PasswordField(
+                        modifier = Modifier.fillMaxWidth(),
+                        visibility = state.visibilityPu,
+                        onVisibilityChange = { viewModel.intent(ControllerHttpViewIntent.OnVisibilityPuChange) },
+                        value = state.pu,
+                        onValueChange = { viewModel.intent(ControllerHttpViewIntent.OnPuChange(it)) }
                     )
                 }
             }
@@ -82,17 +103,17 @@ fun ControllerHttpScreen(
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 AlgoBooleanItem(
-                    text = "Пароль на изменение",
-                    value = state.fP2,
-                    onValueChange = { viewModel.intent(ControllerHttpViewIntent.OnFP2Change(it)) }
+                    text = "Пароль Администратор",
+                    value = state.fPw,
+                    onValueChange = { viewModel.intent(ControllerHttpViewIntent.OnFPwChange(it)) }
                 )
-                AnimatedVisibility(visible = state.fP2 == 1) {
+                AnimatedVisibility(visible = state.fPw == 1) {
                     PasswordField(
                         modifier = Modifier.fillMaxWidth(),
-                        visibility = state.visibilityP2,
-                        onVisibilityChange = { viewModel.intent(ControllerHttpViewIntent.OnVisibilityP2Change) },
-                        value = state.p2,
-                        onValueChange = { viewModel.intent(ControllerHttpViewIntent.OnP2Change(it)) }
+                        visibility = state.visibilityPw,
+                        onVisibilityChange = { viewModel.intent(ControllerHttpViewIntent.OnVisibilityPwChange) },
+                        value = state.pw,
+                        onValueChange = { viewModel.intent(ControllerHttpViewIntent.OnPwChange(it)) }
                     )
                 }
             }

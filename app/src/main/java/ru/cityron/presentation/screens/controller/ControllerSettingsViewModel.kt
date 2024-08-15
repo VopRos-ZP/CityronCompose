@@ -1,15 +1,24 @@
 package ru.cityron.presentation.screens.controller
 
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.launch
 import ru.cityron.domain.repository.CurrentRepository
-import ru.cityron.domain.repository.M3Repository
-import ru.cityron.domain.usecase.DeleteControllerUseCase
+import ru.cityron.domain.usecase.controller.DeleteControllerUseCase
+import ru.cityron.domain.usecase.all.settings.eth.GetM3SettingsEthUseCase
+import ru.cityron.domain.usecase.all.settings.http.GetM3SettingsHttpUseCase
+import ru.cityron.domain.usecase.all.settings.metric.GetM3SettingsMetricUseCase
+import ru.cityron.domain.usecase.all.settings.time.GetM3SettingsTimeUseCase
+import ru.cityron.domain.usecase.all.state.GetM3StateUseCase
 import ru.cityron.presentation.mvi.BaseSharedViewModel
 import javax.inject.Inject
 
 @HiltViewModel
 class ControllerSettingsViewModel @Inject constructor(
-    private val m3Repository: M3Repository,
+    private val getM3StateUseCase: GetM3StateUseCase,
+    private val getM3SettingsTimeUseCase: GetM3SettingsTimeUseCase,
+    private val getM3SettingsMetricUseCase: GetM3SettingsMetricUseCase,
+    private val getM3SettingsEthUseCase: GetM3SettingsEthUseCase,
+    private val getM3SettingsHttpUseCase: GetM3SettingsHttpUseCase,
     private val currentRepository: CurrentRepository,
     private val deleteControllerUseCase: DeleteControllerUseCase,
 ) : BaseSharedViewModel<ControllerSettingsViewState, Any, ControllerSettingsViewIntent>(
@@ -26,18 +35,45 @@ class ControllerSettingsViewModel @Inject constructor(
 
     private fun launch() {
         withViewModelScope {
-            m3Repository.all.collect { all ->
-                viewState = viewState.copy(
-                    rtcTime = all.state.rtcTime,
-                    zone = all.settings.time.zone,
-                    timeSntp = all.settings.time.fSntp,
-                    ipLoc = all.state.ipLoc,
-                    ethDhcp = all.settings.eth.fDhcp,
-                    httpP1 = all.settings.http.p1,
-                    httpP2 = all.settings.http.p2,
-                    metricVal = all.settings.metric.valuesBits,
-                    metricFrequency = all.settings.metric.frequency,
-                )
+            launch {
+                getM3StateUseCase.flow.collect {
+                    viewState = viewState.copy(
+                        rtcTime = it.rtcTime,
+                        ipLoc = it.ipLoc
+                    )
+                }
+            }
+            launch {
+                getM3SettingsHttpUseCase.flow.collect {
+                    viewState = viewState.copy(
+                        httpPr = it.pr,
+                        httpPu = it.pu,
+                        httpPw = it.pw,
+                    )
+                }
+            }
+            launch {
+                getM3SettingsEthUseCase.flow.collect {
+                    viewState = viewState.copy(
+                        ethDhcp = it.fDhcp
+                    )
+                }
+            }
+            launch {
+                getM3SettingsTimeUseCase.flow.collect {
+                    viewState = viewState.copy(
+                        zone = it.zone,
+                        timeSntp = it.fSntp,
+                    )
+                }
+            }
+            launch {
+                getM3SettingsMetricUseCase.flow.collect {
+                    viewState = viewState.copy(
+                        metricVal = it.valuesBits,
+                        metricFrequency = it.frequency,
+                    )
+                }
             }
         }
     }
@@ -48,8 +84,10 @@ class ControllerSettingsViewModel @Inject constructor(
 
     private fun onDeleteClick() {
         withViewModelScope {
-            deleteControllerUseCase(currentRepository.current!!.first.id)
-            currentRepository.current = null
+            currentRepository.current.value?.let {
+                deleteControllerUseCase(it.id)
+                currentRepository.setCurrentController(null)
+            }
         }
     }
 

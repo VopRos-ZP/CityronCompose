@@ -1,22 +1,26 @@
 package ru.cityron.presentation.screens.root
 
+import android.util.Log
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import ru.cityron.data.room.event.EventDatabase
-import ru.cityron.data.room.event.EventDto
 import ru.cityron.domain.model.Controller
-import ru.cityron.domain.model.DataSource
-import ru.cityron.domain.repository.ConnectivityRepository
 import ru.cityron.domain.repository.CurrentRepository
-import ru.cityron.domain.utils.Filters
+import ru.cityron.domain.usecase.controller.GetControllersUseCase
+import ru.cityron.domain.usecase.def.GetDefaultUseCase
+import ru.cityron.domain.usecase.def.UpsertDefaultUseCase
+import ru.cityron.domain.usecase.events.DeleteEventsUseCase
+import ru.cityron.domain.usecase.events.GetFiltersUseCase
+import ru.cityron.domain.usecase.events.UpsertEventsUseCase
 import ru.cityron.presentation.mvi.BaseSharedViewModel
 import javax.inject.Inject
 
 @HiltViewModel
 class RootViewModel @Inject constructor(
-    private val connectivityRepository: ConnectivityRepository,
     private val currentRepository: CurrentRepository,
-    private val eventDatabase: EventDatabase,
+    private val getControllersUseCase: GetControllersUseCase,
+    private val getDefaultUseCase: GetDefaultUseCase,
+    private val upsertDefaultUseCase: UpsertDefaultUseCase
 ) : BaseSharedViewModel<RootViewState, Any, RootViewIntent>(
     initialState = RootViewState()
 ) {
@@ -24,27 +28,9 @@ class RootViewModel @Inject constructor(
     init {
         withViewModelScope {
             launch {
-                if (eventDatabase.dao.fetchAll().isEmpty()) {
-                    eventDatabase.dao.upsert(EventDto(
-                        id = 0,
-                        count = Filters.COUNT,
-                        types = Filters.TYPES,
-                        reasons = Filters.REASONS,
-                        sources = Filters.SOURCES
-                    ))
-                }
-            }
-            launch {
-                connectivityRepository.controllersDataSources.collect {
-                    if (currentRepository.current != null) {
-                        val oldController = currentRepository.current!!.first
-                        val founded = it.keys.toList().find { c -> c.idCpu == oldController.idCpu }
-                        if (oldController != founded && founded != null) {
-                            val source = it[founded]
-                            currentRepository.current = if (source != null) founded to source else null
-                        }
-                    }
-                    viewState = viewState.copy(controllers = it)
+                getDefaultUseCase {
+                    upsertDefaultUseCase()
+                    getDefaultUseCase.setIsFirstLaunch(false)
                 }
             }
         }
@@ -52,12 +38,24 @@ class RootViewModel @Inject constructor(
 
     override fun intent(viewEvent: RootViewIntent) {
         when (viewEvent) {
+            is RootViewIntent.Launch -> launch()
             is RootViewIntent.OnSelectController -> onSelectController(viewEvent.value)
         }
     }
 
-    private fun onSelectController(pair: Pair<Controller, DataSource>) {
-        currentRepository.current = pair
+    private fun launch() {
+        withViewModelScope {
+            while (true) {
+                viewState  = viewState.copy(controllers = getControllersUseCase())
+                delay(1000)
+            }
+        }
+    }
+
+    private fun onSelectController(pair: Controller) {
+        withViewModelScope {
+            currentRepository.setCurrentController(pair)
+        }
     }
 
 }

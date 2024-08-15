@@ -1,5 +1,6 @@
 package ru.cityron.domain.utils
 
+import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 
 fun toTime(num: Int): String = if (num < 10) "0$num" else "$num"
@@ -37,4 +38,10 @@ fun Int.fromIndexToFrequency(): Int = when (this) {
     else -> 1
 }
 
+val json = Json {
+    ignoreUnknownKeys = true
+}
+
 inline fun <reified T> fromJson(string: String): T = Json.decodeFromString(string)
+
+inline fun <reified T> toJson(t: T): String = Json.encodeToString(t)

@@ -5,16 +5,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import ru.cityron.domain.model.Controller
 import ru.cityron.domain.model.Info
 import ru.cityron.domain.model.Ip
 import ru.cityron.domain.model.m3.M3All
-import ru.cityron.domain.repository.ControllerRepository
 import ru.cityron.domain.repository.HttpRepository
 import ru.cityron.domain.repository.IpRepository
 import ru.cityron.domain.repository.UdpRepository
+import ru.cityron.domain.usecase.controller.GetControllersUseCase
 import ru.cityron.domain.utils.Path.JSON_ALL
 import ru.cityron.domain.utils.fromJson
 import java.net.SocketTimeoutException
@@ -26,22 +27,8 @@ class GetInfoListUseCase @Inject constructor(
     private val udpRepository: UdpRepository,
     private val httpRepository: HttpRepository,
     private val ipRepository: IpRepository,
-    private val controllerRepository: ControllerRepository
+    private val getControllersUseCase: GetControllersUseCase
 ) {
-
-    private val atlasTestInfo = Info(
-        cmd = "info",
-        type = 4,
-        idUsr = "C4A6DA8D",
-        idCpu = "335541503437330734545957", // 4A0F41503437330634545957
-        devName = "atlas",
-        name = "",
-        usePass = 0,
-        dhcp = 1,
-        ip = "192.168.1.163",
-        mask = "255.255.255.0",
-        setIp = "192.168.1.163"
-    )
 
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
@@ -51,7 +38,6 @@ class GetInfoListUseCase @Inject constructor(
             while (true) {
                 list.clear()
 
-                list.add(atlasTestInfo)
                 val infoList = getInfoListByIps(ipRepository.fetchAll())
                 try {
                     infoList.add(udpRepository.receive())
@@ -62,14 +48,14 @@ class GetInfoListUseCase @Inject constructor(
                         list.add(info)
                     }
                 }
-                emit(list.associateWith { i -> controllerRepository.fetchAll().map(Controller::idCpu).contains(i.idCpu) })
+                emit(list.associateWith { i -> getControllersUseCase().map(Controller::idCpu).contains(i.idCpu) })
                 udpRepository.close()
                 delay(1000)
             }
         } catch (e: Exception) {
             e.printStackTrace()
         }
-    }.stateIn(
+    }.distinctUntilChanged().stateIn(
         scope = coroutineScope,
         started = SharingStarted.Lazily,
         initialValue = emptyMap()

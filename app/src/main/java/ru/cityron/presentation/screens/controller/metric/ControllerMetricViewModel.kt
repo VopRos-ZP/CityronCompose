@@ -3,7 +3,7 @@ package ru.cityron.presentation.screens.controller.metric
 import dagger.hilt.android.lifecycle.HiltViewModel
 import ru.cityron.R
 import ru.cityron.domain.repository.ConfRepository
-import ru.cityron.domain.usecase.GetM3AllUseCase
+import ru.cityron.domain.usecase.all.settings.metric.GetM3SettingsMetricUseCase
 import ru.cityron.domain.utils.fromFrequencyToIndex
 import ru.cityron.domain.utils.fromIndexToFrequency
 import ru.cityron.domain.utils.toInt
@@ -15,7 +15,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ControllerMetricViewModel @Inject constructor(
     private val confRepository: ConfRepository,
-    private val getM3AllUseCase: GetM3AllUseCase,
+    private val getM3SettingsMetricUseCase: GetM3SettingsMetricUseCase
 ) : BaseSharedViewModel<ControllerMetricViewState, ControllerMetricViewAction, ControllerMetricViewIntent>(
     initialState = ControllerMetricViewState()
 ) {
@@ -32,19 +32,18 @@ class ControllerMetricViewModel @Inject constructor(
 
     private fun launch() {
         withViewModelScope {
-            val settings = getM3AllUseCase().settings
+            val metric = getM3SettingsMetricUseCase()
             viewState = viewState.copy(
-                valuesBitsOld = settings.metric.valuesBits,
-                valuesBits = settings.metric.valuesBits,
+                valuesBitsOld = metric.valuesBits,
+                valuesBits = metric.valuesBits,
 
-                frequencyOld = settings.metric.frequency.fromFrequencyToIndex(),
-                frequency = settings.metric.frequency.fromFrequencyToIndex(),
+                frequencyOld = metric.frequency.fromFrequencyToIndex(),
+                frequency = metric.frequency.fromFrequencyToIndex(),
 
-                capacity = getCapacity(settings.metric.valuesBits)
+                capacity = getCapacity(metric.valuesBits)
             )
         }
     }
-
 
     private fun getCapacity(bits: Int): Int = when (bits) {
         in listOf(1, 2, 4) -> 62

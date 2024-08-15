@@ -3,7 +3,7 @@ package ru.cityron.presentation.screens.algo.electric
 import dagger.hilt.android.lifecycle.HiltViewModel
 import ru.cityron.R
 import ru.cityron.domain.repository.ConfRepository
-import ru.cityron.domain.usecase.GetM3AllUseCase
+import ru.cityron.domain.usecase.algo.electric.GetAlgoElectricUseCase
 import ru.cityron.presentation.mvi.BaseSharedViewModel
 import ru.cityron.presentation.mvi.SnackbarResult
 import javax.inject.Inject
@@ -11,7 +11,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AlgoElectricViewModel @Inject constructor(
     private val confRepository: ConfRepository,
-    private val getM3AllUseCase: GetM3AllUseCase
+    private val getAlgoElectricUseCase: GetAlgoElectricUseCase
 ) : BaseSharedViewModel<AlgoElectricViewState, AlgoElectricViewAction, AlgoElectricViewIntent>(
     initialState = AlgoElectricViewState()
 ) {
@@ -39,12 +39,12 @@ class AlgoElectricViewModel @Inject constructor(
 
     private fun launch() {
         withViewModelScope {
-            val all = getM3AllUseCase()
+            val algo = getAlgoElectricUseCase()
             viewState = viewState.copy(
-                heatPwmPeriodOld = all.settings.algo.heatPwmPeriod,
-                heatPwmPeriod = all.settings.algo.heatPwmPeriod,
-                min = all.static.settingsMin.algo.heatPwmPeriod,
-                max = all.static.settingsMax.algo.heatPwmPeriod,
+                heatPwmPeriodOld = algo.heatPwmPeriod,
+                heatPwmPeriod = algo.heatPwmPeriod,
+                min = algo.heatPwmPeriodMin,
+                max = algo.heatPwmPeriodMax,
             )
         }
     }
@@ -52,7 +52,9 @@ class AlgoElectricViewModel @Inject constructor(
     private fun onSaveClick() {
         withViewModelScope {
             val (label, isError) = try {
-                confRepository.conf("algo-heatPwmPeriod", viewState.heatPwmPeriod)
+                if (viewState.heatPwmPeriod != viewState.heatPwmPeriodOld)
+                    confRepository.conf("algo-heatPwmPeriod", viewState.heatPwmPeriod)
+
                 R.string.success_save_settings to false
             } catch (_: Exception) {
                 R.string.error_save_settings to true

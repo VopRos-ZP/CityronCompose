@@ -3,7 +3,8 @@ package ru.cityron.presentation.screens.controller.datetime
 import dagger.hilt.android.lifecycle.HiltViewModel
 import ru.cityron.R
 import ru.cityron.domain.repository.ConfRepository
-import ru.cityron.domain.usecase.GetM3AllUseCase
+import ru.cityron.domain.usecase.all.settings.time.GetM3SettingsTimeUseCase
+import ru.cityron.domain.usecase.all.state.GetM3StateUseCase
 import ru.cityron.domain.utils.Time
 import ru.cityron.domain.utils.Time.stringToSeconds
 import ru.cityron.domain.utils.isValidDate
@@ -16,7 +17,8 @@ import javax.inject.Inject
 @HiltViewModel
 class ControllerDatetimeViewModel @Inject constructor(
     private val confRepository: ConfRepository,
-    private val getM3AllUseCase: GetM3AllUseCase,
+    private val getM3StateUseCase: GetM3StateUseCase,
+    private val getM3SettingsTimeUseCase: GetM3SettingsTimeUseCase,
 ) : BaseSharedViewModel<ControllerDatetimeViewState, ControllerDatetimeViewAction, ControllerDatetimeViewIntent>(
     initialState = ControllerDatetimeViewState()
 ) {
@@ -36,17 +38,18 @@ class ControllerDatetimeViewModel @Inject constructor(
 
     private fun launch() {
         withViewModelScope {
-            val all = getM3AllUseCase()
-            val zone = all.settings.time.zone
-            val datetime = Time.secondsToString(all.state.rtcTime, zone, Time.formatDatetime).split(" ")
+            val time = getM3SettingsTimeUseCase()
+            val state = getM3StateUseCase()
+            val zone = time.zone
+            val datetime = Time.secondsToString(state.rtcTime, zone, Time.formatDatetime).split(" ")
 
             viewState = viewState.copy(
-                timeFSntpOld = all.settings.time.fSntp,
-                timeFSntp = all.settings.time.fSntp,
+                timeFSntpOld = time.fSntp,
+                timeFSntp = time.fSntp,
 
-                timeIpOld = all.settings.time.ip,
-                timeIp = all.settings.time.ip,
-                timeIpIsCorrect = all.settings.time.ip.isValidIPAddress(),
+                timeIpOld = time.ip,
+                timeIp = time.ip,
+                timeIpIsCorrect = time.ip.isValidIPAddress(),
 
                 dateOld = datetime[0],
                 date = datetime[0],
@@ -58,7 +61,7 @@ class ControllerDatetimeViewModel @Inject constructor(
 
                 timeZoneOld = zone,
                 timeZone = zone,
-                timeZoneRange = (all.static.settingsMin.time.zone..all.static.settingsMax.time.zone)
+                timeZoneRange = (time.zoneMin..time.zoneMax)
             )
         }
     }
@@ -68,56 +71,42 @@ class ControllerDatetimeViewModel @Inject constructor(
     }
 
     private fun onTimeFSntpChange(value: Int) {
-        viewState = viewState.copy(
-            timeFSntp = value,
-            isChanged = value != viewState.timeFSntpOld
-                    || viewState.timeIp != viewState.timeIpOld
-                    || viewState.date != viewState.dateOld
-                    || viewState.time != viewState.timeOld
-                    || viewState.timeZone != viewState.timeZoneOld
-        )
+        viewState = viewState.copy(timeFSntp = value)
+        updateIsChanged()
     }
 
     private fun onTimeIpChange(value: String) {
         viewState = viewState.copy(
             timeIp = value,
             timeIpIsCorrect = value.isValidIPAddress(),
-            isChanged = value != viewState.timeIpOld
-                    || viewState.timeFSntp != viewState.timeFSntpOld
-                    || viewState.date != viewState.dateOld
-                    || viewState.time != viewState.timeOld
-                    || viewState.timeZone != viewState.timeZoneOld
         )
+        updateIsChanged()
     }
 
     private fun onDateChange(value: String) {
         viewState = viewState.copy(
             date = value,
             dateIsCorrect = value.isValidDate(),
-            isChanged = value != viewState.dateOld
-                    || viewState.timeIp != viewState.timeIpOld
-                    || viewState.timeFSntp != viewState.timeFSntpOld
-                    || viewState.time != viewState.timeOld
-                    || viewState.timeZone != viewState.timeZoneOld
         )
+        updateIsChanged()
     }
 
     private fun onTimeChange(value: String) {
         viewState = viewState.copy(
             time = value,
             timeIsCorrect = value.isValidTime(),
-            isChanged = value != viewState.timeOld
-                    || viewState.timeIp != viewState.timeIpOld
-                    || viewState.date != viewState.dateOld
-                    || viewState.timeFSntp != viewState.timeFSntpOld
-                    || viewState.timeZone != viewState.timeZoneOld
         )
+        updateIsChanged()
     }
 
     private fun onTimeZoneChange(value: Int) {
+        viewState = viewState.copy(timeZone = value)
+        updateIsChanged()
+    }
+
+    private fun updateIsChanged() {
         viewState = viewState.copy(
-            timeZone = value,
-            isChanged = value != viewState.timeZoneOld
+            isChanged = viewState.timeZone != viewState.timeZoneOld
                     || viewState.timeIp != viewState.timeIpOld
                     || viewState.date != viewState.dateOld
                     || viewState.time != viewState.timeOld

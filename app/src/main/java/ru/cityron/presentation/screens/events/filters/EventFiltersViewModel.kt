@@ -1,19 +1,18 @@
 package ru.cityron.presentation.screens.events.filters
 
-import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
-import ru.cityron.data.local.EventsStore
-import ru.cityron.data.room.event.EventDatabase
-import ru.cityron.data.room.event.EventDto
+import ru.cityron.domain.model.Filter
+import ru.cityron.domain.usecase.events.GetFiltersUseCase
+import ru.cityron.domain.usecase.events.UpsertFilterUseCase
 import ru.cityron.presentation.mvi.BaseSharedViewModel
 import javax.inject.Inject
 
 @HiltViewModel
 class EventFiltersViewModel @Inject constructor(
-    private val eventDatabase: EventDatabase,
+    private val getFiltersUseCase: GetFiltersUseCase,
+    private val upsertFilterUseCase: UpsertFilterUseCase,
 ) : BaseSharedViewModel<EventFiltersViewState, Any, EventFiltersViewIntent>(
-    initialState = EventFiltersViewState(isChanged = true)
+    initialState = EventFiltersViewState()
 ) {
 
     override fun intent(viewEvent: EventFiltersViewIntent) {
@@ -29,25 +28,18 @@ class EventFiltersViewModel @Inject constructor(
 
     private fun launch() {
         withViewModelScope {
-            var dto = eventDatabase.dao.fetchAll().last()
-            viewState = viewState.copy(
-                id = dto.id,
-                count = dto.count,
-                types = dto.types,
-                reasons = dto.reasons,
-                sources = dto.sources
-            )
-            while (true) {
-                dto = eventDatabase.dao.fetchAll().last()
+            getFiltersUseCase.flow.collect { filter ->
                 viewState = viewState.copy(
-                    id = dto.id,
-                    countOld = dto.count,
-                    typesOld = dto.types,
-                    reasonsOld = dto.reasons,
-                    sourcesOld = dto.sources,
+                    countOld = filter.count,
+                    count = filter.count,
+                    typesOld = filter.types,
+                    types = filter.types,
+                    reasonsOld = filter.reasons,
+                    reasons = filter.reasons,
+                    sourcesOld = filter.sources,
+                    sources = filter.sources,
                 )
                 updateIsChanged()
-                delay(1000)
             }
         }
     }
@@ -82,16 +74,15 @@ class EventFiltersViewModel @Inject constructor(
     }
 
     private fun onSaveClick() {
-        withViewModelScope(viewModelScope) {
-            val dto = EventDto(
-                id = viewState.id,
-                count = viewState.count,
-                types = viewState.types,
-                sources = viewState.sources,
-                reasons = viewState.reasons
+        withViewModelScope {
+            upsertFilterUseCase(
+                Filter(
+                    count = viewState.count,
+                    types = viewState.types,
+                    sources = viewState.sources,
+                    reasons = viewState.reasons
+                )
             )
-            eventDatabase.dao.upsert(dto)
-            updateIsChanged()
         }
     }
 

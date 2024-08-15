@@ -3,7 +3,7 @@ package ru.cityron.presentation.screens.algo.pi1
 import ru.cityron.R
 import dagger.hilt.android.lifecycle.HiltViewModel
 import ru.cityron.domain.repository.ConfRepository
-import ru.cityron.domain.usecase.GetM3AllUseCase
+import ru.cityron.domain.usecase.algo.pi.GetAlgoPiUseCase
 import ru.cityron.presentation.mvi.BaseSharedViewModel
 import ru.cityron.presentation.mvi.SnackbarResult
 import javax.inject.Inject
@@ -11,7 +11,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AlgoPi1ViewModel @Inject constructor(
     private val confRepository: ConfRepository,
-    private val getM3AllUseCase: GetM3AllUseCase,
+    private val getAlgoPiUseCase: GetAlgoPiUseCase,
 ) : BaseSharedViewModel<AlgoPi1ViewState, AlgoPi1ViewAction, AlgoPi1ViewIntent>(
     initialState = AlgoPi1ViewState()
 ) {
@@ -30,22 +30,22 @@ class AlgoPi1ViewModel @Inject constructor(
 
     private fun launch() {
         withViewModelScope {
-            val all = getM3AllUseCase()
+            val algo = getAlgoPiUseCase(id = 1)
             viewState = viewState.copy(
-                piAutoEnOld = all.settings.algo.piAutoEn,
-                piAutoEn = all.settings.algo.piAutoEn,
+                piAutoEnOld = algo.piAutoEn!!,
+                piAutoEn = algo.piAutoEn,
 
-                piKofPOld = all.settings.algo.piKofP,
-                piKofP = all.settings.algo.piKofP,
-                piKofPRange = (all.static.settingsMin.algo.piKofP..all.static.settingsMax.algo.piKofP),
+                piKofPOld = algo.piKofP,
+                piKofP = algo.piKofP,
+                piKofPRange = (algo.piKofPMin..algo.piKofPMax),
 
-                piKofIOld = all.settings.algo.piKofI,
-                piKofI = all.settings.algo.piKofI,
-                piKofIRange = (all.static.settingsMin.algo.piKofI..all.static.settingsMax.algo.piKofI),
+                piKofIOld = algo.piKofI,
+                piKofI = algo.piKofI,
+                piKofIRange = (algo.piKofIMin..algo.piKofIMax),
 
-                piErrOld = all.settings.algo.piErr,
-                piErr = all.settings.algo.piErr,
-                piErrRange = (all.static.settingsMin.algo.piErr..all.static.settingsMax.algo.piErr),
+                piErrOld = algo.piErr,
+                piErr = algo.piErr,
+                piErrRange = (algo.piErrMin..algo.piErrMax),
             )
         }
     }
@@ -55,42 +55,37 @@ class AlgoPi1ViewModel @Inject constructor(
     }
 
     private fun onPiAutoEnChange(value: Int) {
-        viewState = viewState.copy(
-            piAutoEn = value,
-            isChanged = value != viewState.piAutoEnOld
-                    || viewState.piKofP != viewState.piKofPOld
-                    || viewState.piKofI != viewState.piKofIOld
-                    || viewState.piErr != viewState.piErrOld
-        )
+        viewState = viewState.copy(piAutoEn = value)
+        updateIsChanged()
     }
 
     private fun onPi1KofPChange(value: Int) {
         viewState = viewState.copy(
             piKofP = value,
             piKofPInRange = value in viewState.piKofPRange,
-            isChanged = value != viewState.piKofPOld
-                    || viewState.piAutoEn != viewState.piAutoEnOld
-                    || viewState.piKofI != viewState.piKofIOld
-                    || viewState.piErr != viewState.piErrOld
         )
+        updateIsChanged()
     }
 
     private fun onPi1KofIChange(value: Int) {
         viewState = viewState.copy(
             piKofI = value,
             piKofIInRange = value in viewState.piKofIRange,
-            isChanged = value != viewState.piKofIOld
-                    || viewState.piAutoEn != viewState.piAutoEnOld
-                    || viewState.piKofP != viewState.piKofPOld
-                    || viewState.piErr != viewState.piErrOld
         )
+        updateIsChanged()
     }
 
     private fun onPi1ErrChange(value: Int) {
         viewState = viewState.copy(
             piErr = value,
             piErrInRange = value in viewState.piErrRange,
-            isChanged = value != viewState.piErrOld
+        )
+        updateIsChanged()
+    }
+
+    private fun updateIsChanged() {
+        viewState = viewState.copy(
+            isChanged = viewState.piErr != viewState.piErrOld
                     || viewState.piAutoEn != viewState.piAutoEnOld
                     || viewState.piKofI != viewState.piKofIOld
                     || viewState.piKofP != viewState.piKofPOld
@@ -100,10 +95,18 @@ class AlgoPi1ViewModel @Inject constructor(
     private fun onSaveClick() {
         withViewModelScope {
             val (label, isError) = try {
-                confRepository.conf("algo-piAutoEn", viewState.piAutoEn)
-                confRepository.conf("algo-piKofP", viewState.piKofP)
-                confRepository.conf("algo-piKofI", viewState.piKofI)
-                confRepository.conf("algo-piErr", viewState.piErr)
+                if (viewState.piAutoEn != viewState.piAutoEnOld)
+                    confRepository.conf("algo-piAutoEn", viewState.piAutoEn)
+
+                if (viewState.piKofP != viewState.piKofPOld)
+                    confRepository.conf("algo-piKofP", viewState.piKofP)
+
+                if (viewState.piKofI != viewState.piKofIOld)
+                    confRepository.conf("algo-piKofI", viewState.piKofI)
+
+                if (viewState.piErr != viewState.piErrOld)
+                    confRepository.conf("algo-piErr", viewState.piErr)
+
                 R.string.success_save_settings to false
             } catch (_: Exception) {
                 R.string.error_save_settings to true

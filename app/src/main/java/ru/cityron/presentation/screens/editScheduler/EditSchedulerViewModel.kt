@@ -3,7 +3,7 @@ package ru.cityron.presentation.screens.editScheduler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import ru.cityron.R
 import ru.cityron.domain.repository.ConfRepository
-import ru.cityron.domain.usecase.GetM3AllUseCase
+import ru.cityron.domain.usecase.all.sched.GetM3TasksUseCase
 import ru.cityron.presentation.mvi.BaseSharedViewModel
 import ru.cityron.presentation.mvi.SnackbarResult
 import javax.inject.Inject
@@ -11,7 +11,7 @@ import javax.inject.Inject
 @HiltViewModel
 class EditSchedulerViewModel @Inject constructor(
     private val confRepository: ConfRepository,
-    private val getM3AllUseCase: GetM3AllUseCase,
+    private val getM3TasksUseCase: GetM3TasksUseCase,
 ) : BaseSharedViewModel<EditSchedulerViewState, EditSchedulerViewAction, EditSchedulerViewIntent>(
     initialState = EditSchedulerViewState()
 ) {
@@ -33,21 +33,7 @@ class EditSchedulerViewModel @Inject constructor(
 
     private fun launch(id: Int) {
         withViewModelScope {
-            val all = getM3AllUseCase()
-            val sched = all.sched
-            val task = when (id) {
-                0 -> sched.task0
-                1 -> sched.task1
-                2 -> sched.task2
-                3 -> sched.task3
-                4 -> sched.task4
-                5 -> sched.task5
-                6 -> sched.task6
-                7 -> sched.task7
-                8 -> sched.task8
-                9 -> sched.task9
-                else -> throw RuntimeException()
-            }
+            val task = getM3TasksUseCase(id)
 
             viewState = viewState.copy(
                 id = id,

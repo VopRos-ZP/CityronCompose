@@ -1,14 +1,14 @@
 package ru.cityron.presentation.screens.alerts
 
 import dagger.hilt.android.lifecycle.HiltViewModel
-import ru.cityron.domain.repository.M3Repository
+import ru.cityron.domain.usecase.all.state.GetM3StateUseCase
 import ru.cityron.domain.utils.utilsBitGet
 import ru.cityron.presentation.mvi.BaseSharedViewModel
 import javax.inject.Inject
 
 @HiltViewModel
 class AlertsViewModel @Inject constructor(
-    private val m3Repository: M3Repository
+    private val getM3StateUseCase: GetM3StateUseCase
 ) : BaseSharedViewModel<AlertsViewState, Any, AlertsViewIntent>(
     initialState = AlertsViewState()
 ) {
@@ -21,9 +21,9 @@ class AlertsViewModel @Inject constructor(
 
     private fun onAlertsArrayChange(titles: List<String>) {
         withViewModelScope {
-            m3Repository.all.collect { all ->
+            getM3StateUseCase.flow.collect {
                 viewState = viewState.copy(
-                    alerts = titles.filterIndexed { i, _ -> utilsBitGet(all.state.alarms, i) }
+                    alerts = titles.filterIndexed { i, _ -> utilsBitGet(it.alarms, i) }
                 )
             }
         }

@@ -2,8 +2,8 @@ package ru.cityron.presentation.screens.addCustom
 
 import dagger.hilt.android.lifecycle.HiltViewModel
 import ru.cityron.R
-import ru.cityron.domain.usecase.AddIpUseCase
-import ru.cityron.domain.usecase.CheckIpAddressUseCase
+import ru.cityron.domain.usecase.ip.AddIpUseCase
+import ru.cityron.domain.usecase.ip.CheckIpAddressUseCase
 import ru.cityron.domain.utils.isValidIPAddress
 import ru.cityron.presentation.mvi.BaseSharedViewModel
 import ru.cityron.presentation.mvi.SnackbarResult

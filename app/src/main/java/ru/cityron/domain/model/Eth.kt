@@ -8,5 +8,5 @@ data class Eth(
     val gw: String = "",
     val ip: String = "",
     val mac2: String = "",
-    val mask: String = ""
+    val mask: String = "",
 )

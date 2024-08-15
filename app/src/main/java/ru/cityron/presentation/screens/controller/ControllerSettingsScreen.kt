@@ -75,8 +75,9 @@ fun ControllerSettingsScreen(
             }
             item {
                 WebInterfaceItem(
-                    httpP1 = state.httpP1,
-                    httpP2 = state.httpP2,
+                    httpPr = state.httpPr,
+                    httpPu = state.httpPu,
+                    httpPw = state.httpPw,
                     onClick = onWebClick
                 )
             }
@@ -236,31 +237,44 @@ fun EthItem(
 
 @Composable
 fun WebInterfaceItem(
-    httpP1: String,
-    httpP2: String,
+    httpPr: String,
+    httpPu: String,
+    httpPw: String,
     onClick: () -> Unit
 ) {
     SettingItem(title = "Доступ к веб-интерфейсу", onClick = onClick) {
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(
-                text = "Пароль на чтение",
+                text = "Пароль Просмотр",
                 color = LightGrey,
                 style = MaterialTheme.typography.h4
             )
             Text(
-                text = httpP1,
+                text = httpPr,
                 color = MaterialTheme.colors.onPrimary,
                 style = MaterialTheme.typography.h5
             )
         }
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
             Text(
-                text = "Пароль на изменение",
+                text = "Пароль Пользователь",
                 color = LightGrey,
                 style = MaterialTheme.typography.h4
             )
             Text(
-                text = httpP2,
+                text = httpPu,
+                color = MaterialTheme.colors.onPrimary,
+                style = MaterialTheme.typography.h5
+            )
+        }
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            Text(
+                text = "Пароль Админитратор",
+                color = LightGrey,
+                style = MaterialTheme.typography.h4
+            )
+            Text(
+                text = httpPw,
                 color = MaterialTheme.colors.onPrimary,
                 style = MaterialTheme.typography.h5
             )

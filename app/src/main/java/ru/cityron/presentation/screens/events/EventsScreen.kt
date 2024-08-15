@@ -13,7 +13,6 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -28,6 +27,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ru.cityron.R
 import ru.cityron.domain.model.Event
@@ -65,8 +65,8 @@ fun EventsScreen(
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                     contentPadding = PaddingValues(bottom = 20.dp)
                 ) {
-                    items(events) {
-                        DateWithEventListItem(eventWithDate = it)
+                    events.groupBy { it.date }.map { (date, event) ->
+                        item { DateWithEventListItem(date, event) }
                     }
                 }
             }
@@ -118,29 +118,27 @@ fun FilterButton(
 }
 
 @Composable
-fun DateWithEventListItem(eventWithDate: EventWithDate) {
+fun DateWithEventListItem(title: String, events: List<Event>) {
     Column(
         modifier = Modifier.fillMaxWidth(),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Text(
-            text = eventWithDate.day,
+            text = title,
             fontWeight = FontWeight.Bold,
             style = MaterialTheme.typography.h5
         )
-        eventWithDate.event.map {
-            EventTextItem(it)
-        }
+        events.map { EventTextItem(it) }
     }
 }
 
 @Composable
 fun EventTextItem(event: Event) {
-    val (icon, color) = when (event.type) {
-        "Авария" -> R.drawable.danger to MaterialTheme.colors.error
-        "Конфигуарция" -> R.drawable.config to MaterialTheme.colors.secondary
-        "Сервис" -> R.drawable.setting_2 to MaterialTheme.colors.secondary
-        "Работа" -> R.drawable.tick_circle to MaterialTheme.colors.secondary
+    val color = when (event.type) {
+        R.drawable.danger -> MaterialTheme.colors.error
+        R.drawable.config -> MaterialTheme.colors.secondary
+        R.drawable.setting_2 -> MaterialTheme.colors.secondary
+        R.drawable.tick_circle -> MaterialTheme.colors.secondary
         else -> throw RuntimeException("Type ${event.type} not found")
     }
     Row(
@@ -149,14 +147,16 @@ fun EventTextItem(event: Event) {
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Icon(
-            painter = painterResource(id = icon),
-            contentDescription = event.type,
+            painter = painterResource(id = event.type),
+            contentDescription = null,
             tint = color,
             modifier = Modifier.size(24.dp)
         )
         Text(
-            text = "${event.time} ${event.result}",
-            style = MaterialTheme.typography.body1
+            text = "${event.time} ${event.text}",
+            style = MaterialTheme.typography.body1.copy(
+                letterSpacing = 0.sp
+            )
         )
     }
 }

@@ -3,7 +3,7 @@ package ru.cityron.presentation.screens.alarms
 import dagger.hilt.android.lifecycle.HiltViewModel
 import ru.cityron.domain.model.Alarm
 import ru.cityron.domain.repository.ConfRepository
-import ru.cityron.domain.repository.M3Repository
+import ru.cityron.domain.usecase.all.alarms.GetM3AlarmsUseCase
 import ru.cityron.domain.utils.toInt
 import ru.cityron.presentation.mvi.BaseSharedViewModel
 import javax.inject.Inject
@@ -11,21 +11,15 @@ import javax.inject.Inject
 @HiltViewModel
 class AlarmsViewModel @Inject constructor(
     private val confRepository: ConfRepository,
-    private val m3Repository: M3Repository
+    private val getM3AlarmsUseCase: GetM3AlarmsUseCase,
 ) : BaseSharedViewModel<AlarmsViewState, AlarmsViewAction, AlarmsViewIntent>(
     initialState = AlarmsViewState()
 ) {
 
     init {
         withViewModelScope {
-            m3Repository.all.collect { all ->
-                val s = all.settings
-                val alarms = listOf(
-                    s.alarm1, s.alarm2, s.alarm3, s.alarm4, s.alarm5,
-                    s.alarm6, s.alarm7, s.alarm8, s.alarm9
-                ).mapIndexed { i, alarm -> alarm.copy(i = i + 1) }
-
-                viewState = viewState.copy(alarms = alarms)
+            getM3AlarmsUseCase.flow.collect {
+                viewState = viewState.copy(alarms = it)
             }
         }
     }

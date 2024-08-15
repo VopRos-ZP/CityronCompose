@@ -1,8 +1,9 @@
 package ru.cityron.domain.repository
 
+import kotlinx.coroutines.flow.StateFlow
 import ru.cityron.domain.model.Controller
-import ru.cityron.domain.model.DataSource
 
 interface CurrentRepository {
-    var current: Pair<Controller, DataSource>?
+    val current: StateFlow<Controller?>
+    fun setCurrentController(current: Controller?)
 }

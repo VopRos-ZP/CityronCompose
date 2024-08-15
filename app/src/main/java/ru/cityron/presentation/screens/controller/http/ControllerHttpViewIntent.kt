@@ -4,10 +4,13 @@ sealed interface ControllerHttpViewIntent {
     data object Launch : ControllerHttpViewIntent
     data object OnSaveClick : ControllerHttpViewIntent
     data object OnSnackbarDismiss : ControllerHttpViewIntent
-    data object OnVisibilityP1Change : ControllerHttpViewIntent
-    data object OnVisibilityP2Change : ControllerHttpViewIntent
-    data class OnFP1Change(val value: Int) : ControllerHttpViewIntent
-    data class OnFP2Change(val value: Int) : ControllerHttpViewIntent
-    data class OnP1Change(val value: String) : ControllerHttpViewIntent
-    data class OnP2Change(val value: String) : ControllerHttpViewIntent
+    data object OnVisibilityPrChange : ControllerHttpViewIntent
+    data object OnVisibilityPuChange : ControllerHttpViewIntent
+    data object OnVisibilityPwChange : ControllerHttpViewIntent
+    data class OnFPrChange(val value: Int) : ControllerHttpViewIntent
+    data class OnFPuChange(val value: Int) : ControllerHttpViewIntent
+    data class OnFPwChange(val value: Int) : ControllerHttpViewIntent
+    data class OnPrChange(val value: String) : ControllerHttpViewIntent
+    data class OnPuChange(val value: String) : ControllerHttpViewIntent
+    data class OnPwChange(val value: String) : ControllerHttpViewIntent
 }

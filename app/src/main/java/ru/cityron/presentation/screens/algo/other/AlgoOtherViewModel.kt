@@ -1,10 +1,9 @@
 package ru.cityron.presentation.screens.algo.other
 
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.launch
 import ru.cityron.R
 import ru.cityron.domain.repository.ConfRepository
-import ru.cityron.domain.usecase.GetM3AllUseCase
+import ru.cityron.domain.usecase.algo.other.GetAlgoOtherUseCase
 import ru.cityron.presentation.mvi.BaseSharedViewModel
 import ru.cityron.presentation.mvi.SnackbarResult
 import javax.inject.Inject
@@ -12,7 +11,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AlgoOtherViewModel @Inject constructor(
     private val confRepository: ConfRepository,
-    private val getM3AllUseCase: GetM3AllUseCase,
+    private val getAlgoOtherUseCase: GetAlgoOtherUseCase,
 ) : BaseSharedViewModel<AlgoOtherViewState, AlgoOtherViewAction, AlgoOtherViewIntent>(
     initialState = AlgoOtherViewState()
 ) {
@@ -31,24 +30,24 @@ class AlgoOtherViewModel @Inject constructor(
     }
 
     private fun launch() {
-        scope.launch {
-            val all = getM3AllUseCase()
+        withViewModelScope {
+            val algo = getAlgoOtherUseCase()
             viewState = viewState.copy(
-                tempControlOld = all.settings.algo.tempControl,
-                tempControl = all.settings.algo.tempControl,
+                tempControlOld = algo.tempControl,
+                tempControl = algo.tempControl,
 
-                filterEnOld = all.settings.algo.filterEn,
-                filterEn = all.settings.algo.filterEn,
+                filterEnOld = algo.filterEn,
+                filterEn = algo.filterEn,
 
-                autoStartEnOld = all.settings.algo.autoStartEn,
-                autoStartEn = all.settings.algo.autoStartEn,
+                autoStartEnOld = algo.autoStartEn,
+                autoStartEn = algo.autoStartEn,
 
-                isDistPowerOld = all.settings.algo.isDistPower,
-                isDistPower = all.settings.algo.isDistPower,
+                isDistPowerOld = algo.isDistPower,
+                isDistPower = algo.isDistPower,
 
-                alarmRestartCountOld = all.settings.algo.alarmRestartCount,
-                alarmRestartCount = all.settings.algo.alarmRestartCount,
-                alarmRestartCountRange = (all.static.settingsMin.algo.alarmRestartCount..all.static.settingsMax.algo.alarmRestartCount)
+                alarmRestartCountOld = algo.alarmRestartCount,
+                alarmRestartCount = algo.alarmRestartCount,
+                alarmRestartCountRange = (algo.alarmRestartCountMin..algo.alarmRestartCountMax)
             )
         }
     }
@@ -58,54 +57,36 @@ class AlgoOtherViewModel @Inject constructor(
     }
 
     private fun onTempControlChange(value: Int) {
-        viewState = viewState.copy(
-            tempControl = value,
-            isChanged = value != viewState.tempControlOld
-                    || viewState.filterEn != viewState.filterEnOld
-                    || viewState.autoStartEn != viewState.autoStartEnOld
-                    || viewState.isDistPower != viewState.isDistPowerOld
-                    || viewState.alarmRestartCount != viewState.alarmRestartCountOld
-        )
+        viewState = viewState.copy(tempControl = value)
+        updateIsChanged()
     }
 
     private fun onFilterEnChange(value: Int) {
-        viewState = viewState.copy(
-            filterEn = value,
-            isChanged = value != viewState.filterEnOld
-                    || viewState.tempControl != viewState.tempControlOld
-                    || viewState.autoStartEn != viewState.autoStartEnOld
-                    || viewState.isDistPower != viewState.isDistPowerOld
-                    || viewState.alarmRestartCount != viewState.alarmRestartCountOld
-        )
+        viewState = viewState.copy(filterEn = value)
+        updateIsChanged()
     }
 
     private fun onAutoStartEnChange(value: Int) {
-        viewState = viewState.copy(
-            autoStartEn = value,
-            isChanged = value != viewState.autoStartEnOld
-                    || viewState.filterEn != viewState.filterEnOld
-                    || viewState.tempControl != viewState.tempControlOld
-                    || viewState.isDistPower != viewState.isDistPowerOld
-                    || viewState.alarmRestartCount != viewState.alarmRestartCountOld
-        )
+        viewState = viewState.copy(autoStartEn = value)
+        updateIsChanged()
     }
 
     private fun onIsDistPowerChange(value: Int) {
-        viewState = viewState.copy(
-            isDistPower = value,
-            isChanged = value != viewState.isDistPowerOld
-                    || viewState.filterEn != viewState.filterEnOld
-                    || viewState.autoStartEn != viewState.autoStartEnOld
-                    || viewState.tempControl != viewState.tempControlOld
-                    || viewState.alarmRestartCount != viewState.alarmRestartCountOld
-        )
+        viewState = viewState.copy(isDistPower = value)
+        updateIsChanged()
     }
 
     private fun onAlarmRestartCountChange(value: Int) {
         viewState = viewState.copy(
             alarmRestartCount = value,
             alarmRestartCountInRange = value in viewState.alarmRestartCountRange,
-            isChanged = value != viewState.alarmRestartCountOld
+        )
+        updateIsChanged()
+    }
+
+    private fun updateIsChanged() {
+        viewState = viewState.copy(
+            isChanged = viewState.alarmRestartCount != viewState.alarmRestartCountOld
                     || viewState.filterEn != viewState.filterEnOld
                     || viewState.autoStartEn != viewState.autoStartEnOld
                     || viewState.isDistPower != viewState.isDistPowerOld
@@ -116,11 +97,21 @@ class AlgoOtherViewModel @Inject constructor(
     private fun onSaveClick() {
         withViewModelScope {
             val (label, isError) = try {
-                confRepository.conf("algo-tempControl", viewState.tempControl)
-                confRepository.conf("algo-filterEn", viewState.filterEn)
-                confRepository.conf("algo-autoStartEn", viewState.autoStartEn)
-                confRepository.conf("algo-isDistPower", viewState.isDistPower)
-                confRepository.conf("algo-alarmRestartCount", viewState.alarmRestartCount)
+                if (viewState.tempControl != viewState.tempControlOld)
+                    confRepository.conf("algo-tempControl", viewState.tempControl)
+
+                if (viewState.filterEn != viewState.filterEnOld)
+                    confRepository.conf("algo-filterEn", viewState.filterEn)
+
+                if (viewState.autoStartEn != viewState.autoStartEnOld)
+                    confRepository.conf("algo-autoStartEn", viewState.autoStartEn)
+
+                if (viewState.isDistPower != viewState.isDistPowerOld)
+                    confRepository.conf("algo-isDistPower", viewState.isDistPower)
+
+                if (viewState.alarmRestartCount != viewState.alarmRestartCountOld)
+                    confRepository.conf("algo-alarmRestartCount", viewState.alarmRestartCount)
+
                 R.string.success_save_settings to false
             } catch (_: Exception) {
                 R.string.error_save_settings to true

@@ -3,7 +3,7 @@ package ru.cityron.presentation.screens.algo.water
 import dagger.hilt.android.lifecycle.HiltViewModel
 import ru.cityron.R
 import ru.cityron.domain.repository.ConfRepository
-import ru.cityron.domain.usecase.GetM3AllUseCase
+import ru.cityron.domain.usecase.algo.water.GetAlgoWaterUseCase
 import ru.cityron.presentation.mvi.BaseSharedViewModel
 import ru.cityron.presentation.mvi.SnackbarResult
 import javax.inject.Inject
@@ -11,7 +11,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AlgoWaterViewModel @Inject constructor(
     private val confRepository: ConfRepository,
-    private val getM3AllUseCase: GetM3AllUseCase,
+    private val getAlgoWaterUseCase: GetAlgoWaterUseCase,
 ) : BaseSharedViewModel<AlgoWaterViewState, AlgoWaterViewAction, AlgoWaterViewIntent>(
     initialState = AlgoWaterViewState()
 ) {
@@ -30,19 +30,21 @@ class AlgoWaterViewModel @Inject constructor(
 
     private fun launch() {
         withViewModelScope {
-            val all = getM3AllUseCase()
+            val algo = getAlgoWaterUseCase()
             viewState = viewState.copy(
-                modeZimaLetoSourceOld = all.settings.algo.modeZimaLetoSource,
-                modeZimaLetoSource = all.settings.algo.modeZimaLetoSource,
+                modeZimaLetoSourceOld = algo.modeZimaLetoSource,
+                modeZimaLetoSource = algo.modeZimaLetoSource,
 
-                modeZimaLetoUserOld = all.settings.algo.modeZimaLetoUser,
-                modeZimaLetoUser = all.settings.algo.modeZimaLetoUser,
+                modeZimaLetoUserOld = algo.modeZimaLetoUser,
+                modeZimaLetoUser = algo.modeZimaLetoUser,
 
-                timeWarmUpOld = all.settings.algo.timeWarmUp,
-                timeWarmUp = all.settings.algo.timeWarmUp,
+                timeWarmUpOld = algo.timeWarmUp,
+                timeWarmUp = algo.timeWarmUp,
+                timeWarmUpRange = (algo.timeWarmUpMin..algo.timeWarmUpMax),
 
-                timeDefrostOld = all.settings.algo.timeDefrost,
-                timeDefrost = all.settings.algo.timeDefrost,
+                timeDefrostOld = algo.timeDefrost,
+                timeDefrost = algo.timeDefrost,
+                timeDefrostRange = (algo.timeDefrostMin..algo.timeDefrostMax),
             )
         }
     }
@@ -52,41 +54,34 @@ class AlgoWaterViewModel @Inject constructor(
     }
 
     private fun onModeZimaLetoSourceChange(value: Int) {
-        viewState = viewState.copy(
-            modeZimaLetoSource = value,
-            isChanged = value != viewState.modeZimaLetoSourceOld
-                    || viewState.modeZimaLetoUser != viewState.modeZimaLetoUserOld
-                    || viewState.timeWarmUp != viewState.timeWarmUpOld
-                    || viewState.timeDefrost != viewState.timeDefrostOld
-        )
+        viewState = viewState.copy(modeZimaLetoSource = value)
+        updateIsChanged()
     }
 
     private fun onModeZimaLetoUserChange(value: Int) {
-        viewState = viewState.copy(
-            modeZimaLetoUser = value,
-            isChanged = value != viewState.modeZimaLetoUserOld
-                    || viewState.modeZimaLetoSource != viewState.modeZimaLetoSourceOld
-                    || viewState.timeWarmUp != viewState.timeWarmUpOld
-                    || viewState.timeDefrost != viewState.timeDefrostOld
-        )
+        viewState = viewState.copy(modeZimaLetoUser = value)
+        updateIsChanged()
     }
 
     private fun onTimeWarmUpChange(value: Int) {
         viewState = viewState.copy(
             timeWarmUp = value,
             timeWarmUpInRange = value in viewState.timeWarmUpRange,
-            isChanged = value != viewState.timeWarmUpOld
-                    || viewState.modeZimaLetoSource != viewState.modeZimaLetoSourceOld
-                    || viewState.modeZimaLetoUser != viewState.modeZimaLetoUserOld
-                    || viewState.timeDefrost != viewState.timeDefrostOld
         )
+        updateIsChanged()
     }
 
     private fun onTimeDefrostChange(value: Int) {
         viewState = viewState.copy(
             timeDefrost = value,
             timeDefrostInRange = value in viewState.timeDefrostRange,
-            isChanged = value != viewState.timeDefrostOld
+        )
+        updateIsChanged()
+    }
+
+    private fun updateIsChanged() {
+        viewState = viewState.copy(
+            isChanged = viewState.timeDefrost != viewState.timeDefrostOld
                     || viewState.modeZimaLetoSource != viewState.modeZimaLetoSourceOld
                     || viewState.modeZimaLetoUser != viewState.modeZimaLetoUserOld
                     || viewState.timeWarmUp != viewState.timeWarmUpOld
@@ -96,10 +91,18 @@ class AlgoWaterViewModel @Inject constructor(
     private fun onSaveClick() {
         withViewModelScope {
             val (label, isError) = try {
-                confRepository.conf("algo-modeZimaLetoSource", viewState.modeZimaLetoSource)
-                confRepository.conf("algo-modeZimaLetoUser", viewState.modeZimaLetoUser)
-                confRepository.conf("algo-timeWarmUp", viewState.timeWarmUp)
-                confRepository.conf("algo-timeDefrost", viewState.timeDefrost)
+                if (viewState.modeZimaLetoSource != viewState.modeZimaLetoSourceOld)
+                    confRepository.conf("algo-modeZimaLetoSource", viewState.modeZimaLetoSource)
+
+                if (viewState.modeZimaLetoUser != viewState.modeZimaLetoUserOld)
+                    confRepository.conf("algo-modeZimaLetoUser", viewState.modeZimaLetoUser)
+
+                if (viewState.timeWarmUp != viewState.timeWarmUpOld)
+                    confRepository.conf("algo-timeWarmUp", viewState.timeWarmUp)
+
+                if (viewState.timeDefrost != viewState.timeDefrostOld)
+                    confRepository.conf("algo-timeDefrost", viewState.timeDefrost)
+
                 R.string.success_save_settings to false
             } catch (_: Exception) {
                 R.string.error_save_settings to true

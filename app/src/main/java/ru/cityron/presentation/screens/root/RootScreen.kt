@@ -24,6 +24,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.rememberDrawerState
 import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
@@ -38,7 +39,6 @@ import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.compose.currentBackStackEntryAsState
 import kotlinx.coroutines.launch
 import ru.cityron.domain.model.Controller
-import ru.cityron.domain.model.DataSource
 import ru.cityron.domain.model.Status
 import ru.cityron.presentation.navigation.Screen
 import ru.cityron.presentation.navigation.graph.RootNavGraph
@@ -74,13 +74,12 @@ fun RootScreen(
                     color = MaterialTheme.colors.secondary,
                     style = MaterialTheme.typography.h1
                 )
-                state.controllers.forEach { (controller, source) ->
+                state.controllers.forEach { controller ->
                     ControllerDrawerItem(
                         controller = controller,
-                        source = source,
                         selected = navBackStackEntry?.destination?.hierarchy?.any { it.route == controller.idCpu } ?: false,
                         onClick = {
-                            viewModel.intent(RootViewIntent.OnSelectController(controller to source))
+                            viewModel.intent(RootViewIntent.OnSelectController(controller))
                             navigationState.navigateTo(controller.idCpu)
                             scope.launch { drawerState.close() }
                         }
@@ -106,7 +105,7 @@ fun RootScreen(
     ) {
         RootNavGraph(
             navHostController = navigationState.navHostController,
-            controllers = state.controllers.keys.toList(),
+            controllers = state.controllers,
             onDrawer = { scope.launch { drawerState.open() } },
             onBack = { navigationState.navigateUp() },
             onAddClick = { navigationState.navigate(Screen.AddController.route) },
@@ -137,24 +136,26 @@ fun RootScreen(
             onMetricClick = { navigationState.navigate(Screen.ControllerMetric.route) },
         )
     }
+    LaunchedEffect(Unit) {
+        viewModel.intent(RootViewIntent.Launch)
+    }
 }
 
 @Composable
 fun ControllerDrawerItem(
     controller: Controller,
-    source: DataSource,
     selected: Boolean,
     onClick: () -> Unit
 ) {
     DrawerItem(
         text = controller.name,
         onClick = onClick,
-        enabled = source.status != Status.OFFLINE,
+        enabled = controller.status != Status.Offline,
         selected = selected,
-        status = when (source.status) {
-            Status.ONLINE -> Green
-            Status.OFFLINE -> MaterialTheme.colors.secondary
-            Status.ALERT -> MaterialTheme.colors.error
+        status = when (controller.status) {
+            is Status.Online -> Green
+            is Status.Alert -> MaterialTheme.colors.error
+            is Status.Offline -> MaterialTheme.colors.secondary
         }
     )
 }

@@ -3,7 +3,7 @@ package ru.cityron.presentation.screens.algo.fan2
 import dagger.hilt.android.lifecycle.HiltViewModel
 import ru.cityron.R
 import ru.cityron.domain.repository.ConfRepository
-import ru.cityron.domain.usecase.GetM3AllUseCase
+import ru.cityron.domain.usecase.algo.fan.GetAlgoFanUseCase
 import ru.cityron.presentation.mvi.BaseSharedViewModel
 import ru.cityron.presentation.mvi.SnackbarResult
 import javax.inject.Inject
@@ -11,7 +11,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AlgoFan2ViewModel @Inject constructor(
     private val confRepository: ConfRepository,
-    private val getM3AllUseCase: GetM3AllUseCase,
+    private val getAlgoFanUseCase: GetAlgoFanUseCase,
 ) : BaseSharedViewModel<AlgoFan2ViewState, AlgoFan2ViewAction, AlgoFan2ViewIntent>(
     initialState = AlgoFan2ViewState()
 ) {
@@ -28,17 +28,17 @@ class AlgoFan2ViewModel @Inject constructor(
 
     private fun launch() {
         withViewModelScope {
-            val all = getM3AllUseCase()
+            val algo = getAlgoFanUseCase(2)
             viewState = viewState.copy(
-                fan2SpeedMinOld = all.settings.algo.fan2SpeedMin,
-                fan2SpeedMin = all.settings.algo.fan2SpeedMin,
-                fan2SpeedMinMin = all.static.settingsMin.algo.fan2SpeedMin,
-                fan2SpeedMinMax = all.static.settingsMax.algo.fan2SpeedMin,
+                fan2SpeedMinOld = algo.fanSpeedMin,
+                fan2SpeedMin = algo.fanSpeedMin,
+                fan2SpeedMinMin = algo.fanSpeedMinMin,
+                fan2SpeedMinMax = algo.fanSpeedMinMax,
 
-                fan2SpeedMaxOld = all.settings.algo.fan2SpeedMax,
-                fan2SpeedMax = all.settings.algo.fan2SpeedMax,
-                fan2SpeedMaxMin = all.static.settingsMin.algo.fan2SpeedMax,
-                fan2SpeedMaxMax = all.static.settingsMax.algo.fan2SpeedMax,
+                fan2SpeedMaxOld = algo.fanSpeedMax,
+                fan2SpeedMax = algo.fanSpeedMax,
+                fan2SpeedMaxMin = algo.fanSpeedMaxMin,
+                fan2SpeedMaxMax = algo.fanSpeedMaxMax,
             )
         }
     }
@@ -66,8 +66,12 @@ class AlgoFan2ViewModel @Inject constructor(
     private fun onSaveClick() {
         withViewModelScope {
             val (label, isError) = try {
-                confRepository.conf("algo-fan2SpeedMin", viewState.fan2SpeedMin)
-                confRepository.conf("algo-fan2SpeedMax", viewState.fan2SpeedMax)
+                if (viewState.fan2SpeedMin != viewState.fan2SpeedMinOld)
+                    confRepository.conf("algo-fan2SpeedMin", viewState.fan2SpeedMin)
+
+                if (viewState.fan2SpeedMax != viewState.fan2SpeedMaxOld)
+                    confRepository.conf("algo-fan2SpeedMax", viewState.fan2SpeedMax)
+
                 R.string.success_save_settings to false
             } catch (_: Exception) {
                 R.string.error_save_settings to true

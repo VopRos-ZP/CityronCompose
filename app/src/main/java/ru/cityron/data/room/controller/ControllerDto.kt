@@ -3,6 +3,8 @@ package ru.cityron.data.room.controller
 import androidx.room.ColumnInfo
 import androidx.room.Entity
 import androidx.room.PrimaryKey
+import ru.cityron.domain.model.DataSource
+import ru.cityron.domain.model.Status
 
 @Entity(tableName = "controllers")
 data class ControllerDto(
@@ -15,4 +17,5 @@ data class ControllerDto(
     val idCpu: String,
     @ColumnInfo(name = "id_usr")
     val idUsr: String,
+    val status: String,
 )

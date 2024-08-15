@@ -7,7 +7,6 @@ import dagger.hilt.components.SingletonComponent
 import ru.cityron.data.repository.CheckIpRepositoryImpl
 import ru.cityron.data.repository.ConfRepositoryImpl
 import ru.cityron.data.repository.ConnectivityRepositoryImpl
-import ru.cityron.data.repository.ControllerRepositoryImpl
 import ru.cityron.data.repository.CurrentRepositoryImpl
 import ru.cityron.data.repository.EventsRepositoryImpl
 import ru.cityron.data.repository.HttpRepositoryImpl
@@ -19,7 +18,6 @@ import ru.cityron.data.repository.UdpRepositoryImpl
 import ru.cityron.domain.repository.CheckIpRepository
 import ru.cityron.domain.repository.ConfRepository
 import ru.cityron.domain.repository.ConnectivityRepository
-import ru.cityron.domain.repository.ControllerRepository
 import ru.cityron.domain.repository.CurrentRepository
 import ru.cityron.domain.repository.EventsRepository
 import ru.cityron.domain.repository.HttpRepository
@@ -33,10 +31,6 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 interface RepositoryModule {
-
-    @Binds
-    @Singleton
-    fun bindControllerRepository(controllerRepositoryImpl: ControllerRepositoryImpl):  ControllerRepository
 
     @Binds
     @Singleton

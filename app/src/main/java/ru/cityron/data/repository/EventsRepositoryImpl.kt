@@ -1,9 +1,9 @@
 package ru.cityron.data.repository
 
 import kotlinx.serialization.json.Json
+import ru.cityron.R
 import ru.cityron.data.model.EventList
 import ru.cityron.domain.model.Event
-import ru.cityron.domain.model.EventWithDate
 import ru.cityron.domain.repository.EventsRepository
 import ru.cityron.domain.repository.NetworkRepository
 import ru.cityron.domain.utils.Path.JSON_EVENTS
@@ -22,7 +22,7 @@ class EventsRepositoryImpl @Inject constructor(
         types: Int,
         sources: Int,
         reasons: Int
-    ): List<EventWithDate> {
+    ): List<Event> {
         val params = mapOf(
             "count" to count,
             "types" to types,
@@ -32,21 +32,19 @@ class EventsRepositoryImpl @Inject constructor(
 
         val events = Json.decodeFromString<EventList>(networkRepository.get("$JSON_EVENTS&$params")).events
 
-        val result = mutableMapOf<String, List<Event>>()
-
-        events.data.map {
+        return events.data.map {
             val datetime = secondsToString(it[0].toLong(), events.zone, Time.formatDatetime).split(" ")
             Event(
                 date = datetime.first(),
                 time = datetime.last(),
                 type = when (it[1]) {
-                    0 -> "Авария"
-                    1 -> "Конфигуарция"
-                    2 -> "Сервис"
-                    3 -> "Работа"
-                    else -> ""
+                    0 -> R.drawable.danger//"Авария"
+                    1 -> R.drawable.config//"Конфигуарция"
+                    2 -> R.drawable.setting_2//"Сервис"
+                    3 -> R.drawable.tick_circle//"Работа"
+                    else -> throw RuntimeException("")
                 },
-                result = when (Pair(it[1], it[3])) {
+                text = when (Pair(it[1], it[3])) {
                     // Тип авария
                     Pair(0, 0) -> "Питание отключено"
                     Pair(0, 1) -> "Авария приточного вентилятора (DI1)"
@@ -85,10 +83,7 @@ class EventsRepositoryImpl @Inject constructor(
                     else -> ""
                 }
             )
-        }.forEach {
-            result[it.date] = (result[it.date]?.toMutableList() ?: mutableListOf()).apply { add(it) }
         }
-        return result.map { (date, events) -> EventWithDate(date, events) }
     }
 
 }

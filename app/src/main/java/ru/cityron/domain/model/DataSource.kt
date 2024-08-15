@@ -3,12 +3,16 @@ package ru.cityron.domain.model
 import kotlinx.serialization.Serializable
 
 @Serializable
-sealed class DataSource(open val status: Status) {
-    data class Local(override val status: Status) : DataSource(status)
-    data class Remote(override val status: Status) : DataSource(status)
+enum class DataSource {
+    LOCAL, REMOTE;
 }
 
 @Serializable
-enum class Status {
-    ONLINE, ALERT, OFFLINE;
+sealed class Status(open val source: DataSource) {
+    @Serializable
+    data class Online(private val ds: DataSource) : Status(ds)
+    @Serializable
+    data class Alert(private val db: DataSource) : Status(db)
+    @Serializable
+    data object Offline : Status(DataSource.LOCAL)
 }

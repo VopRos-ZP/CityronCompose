@@ -1,12 +1,13 @@
 package ru.cityron.presentation.screens.events
 
-import ru.cityron.domain.model.EventWithDate
+import ru.cityron.domain.model.Event
+import ru.cityron.domain.utils.Filters
 
 data class EventsViewState(
-    val events: List<EventWithDate>? = null,
-    val count: Int = 1,
-    val types: Int = 0,
-    val sources: Int = 0,
-    val reasons: Int = 0,
+    val events: List<Event>? = null,
+    val count: Int = Filters.COUNT,
+    val types: Int = Filters.TYPES,
+    val sources: Int = Filters.SOURCES,
+    val reasons: Int = Filters.REASONS,
     val isFiltered: Boolean = false,
 )

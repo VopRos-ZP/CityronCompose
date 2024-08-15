@@ -3,7 +3,7 @@ package ru.cityron.presentation.screens.algo.pi2
 import dagger.hilt.android.lifecycle.HiltViewModel
 import ru.cityron.R
 import ru.cityron.domain.repository.ConfRepository
-import ru.cityron.domain.usecase.GetM3AllUseCase
+import ru.cityron.domain.usecase.algo.pi.GetAlgoPiUseCase
 import ru.cityron.presentation.mvi.BaseSharedViewModel
 import ru.cityron.presentation.mvi.SnackbarResult
 import javax.inject.Inject
@@ -11,7 +11,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AlgoPi2ViewModel @Inject constructor(
     private val confRepository: ConfRepository,
-    private val getM3AllUseCase: GetM3AllUseCase,
+    private val getAlgoPiUseCase: GetAlgoPiUseCase,
 ) : BaseSharedViewModel<AlgoPi2ViewState, AlgoPi2ViewAction, AlgoPi2ViewIntent>(
     initialState = AlgoPi2ViewState()
 ) {
@@ -29,19 +29,19 @@ class AlgoPi2ViewModel @Inject constructor(
 
     private fun launch() {
         withViewModelScope {
-            val all = getM3AllUseCase()
+            val algo = getAlgoPiUseCase(2)
             viewState = viewState.copy(
-                pi2KofPOld = all.settings.algo.pi2KofP,
-                pi2KofP = all.settings.algo.pi2KofP,
-                pi2KofPRange = (all.static.settingsMin.algo.pi2KofP..all.static.settingsMax.algo.pi2KofP),
+                pi2KofPOld = algo.piKofP,
+                pi2KofP = algo.piKofP,
+                pi2KofPRange = (algo.piKofPMin..algo.piKofPMax),
 
-                pi2KofIOld = all.settings.algo.pi2KofI,
-                pi2KofI = all.settings.algo.pi2KofI,
-                pi2KofIRange = (all.static.settingsMin.algo.pi2KofI..all.static.settingsMax.algo.pi2KofI),
+                pi2KofIOld = algo.piKofI,
+                pi2KofI = algo.piKofI,
+                pi2KofIRange = (algo.piKofIMin..algo.piKofIMax),
 
-                pi2ErrOld = all.settings.algo.pi2Err,
-                pi2Err = all.settings.algo.pi2Err,
-                pi2ErrRange = (all.static.settingsMin.algo.pi2Err..all.static.settingsMax.algo.pi2Err),
+                pi2ErrOld = algo.piErr,
+                pi2Err = algo.piErr,
+                pi2ErrRange = (algo.piErrMin..algo.piErrMax),
             )
         }
     }
@@ -54,27 +54,29 @@ class AlgoPi2ViewModel @Inject constructor(
         viewState = viewState.copy(
             pi2KofP = value,
             pi2KofPInRange = value in viewState.pi2KofPRange,
-            isChanged = value != viewState.pi2KofPOld
-                    || viewState.pi2KofI != viewState.pi2KofIOld
-                    || viewState.pi2Err != viewState.pi2ErrOld
         )
+        updateIsChanged()
     }
 
     private fun onPi2KofIChange(value: Int) {
         viewState = viewState.copy(
             pi2KofI = value,
             pi2KofIInRange = value in viewState.pi2KofIRange,
-            isChanged = value != viewState.pi2KofIOld
-                    || viewState.pi2KofP != viewState.pi2KofPOld
-                    || viewState.pi2Err != viewState.pi2ErrOld
         )
+        updateIsChanged()
     }
 
     private fun onPi2ErrChange(value: Int) {
         viewState = viewState.copy(
             pi2Err = value,
             pi2ErrInRange = value in viewState.pi2ErrRange,
-            isChanged = value != viewState.pi2ErrOld
+        )
+        updateIsChanged()
+    }
+
+    private fun updateIsChanged() {
+        viewState = viewState.copy(
+            isChanged = viewState.pi2Err != viewState.pi2ErrOld
                     || viewState.pi2KofI != viewState.pi2KofIOld
                     || viewState.pi2KofP != viewState.pi2KofPOld
         )
@@ -83,9 +85,15 @@ class AlgoPi2ViewModel @Inject constructor(
     private fun onSaveClick() {
         withViewModelScope {
             val (label, isError) = try {
-                confRepository.conf("algo-pi2KofP", viewState.pi2KofP)
-                confRepository.conf("algo-pi2KofI", viewState.pi2KofI)
-                confRepository.conf("algo-pi2Err", viewState.pi2Err)
+                if (viewState.pi2KofP != viewState.pi2KofPOld)
+                    confRepository.conf("algo-pi2KofP", viewState.pi2KofP)
+
+                if (viewState.pi2KofI != viewState.pi2KofIOld)
+                    confRepository.conf("algo-pi2KofI", viewState.pi2KofI)
+
+                if (viewState.pi2Err != viewState.pi2ErrOld)
+                    confRepository.conf("algo-pi2Err", viewState.pi2Err)
+
                 R.string.success_save_settings to false
             } catch (_: Exception) {
                 R.string.error_save_settings to true

@@ -12,7 +12,8 @@ android {
 
     defaultConfig {
         applicationId = "ru.cityron"
-        minSdk = 28
+        minSdk = 26
+        targetSdk = 34
         versionCode = 1
         versionName = "1.0"
 
@@ -53,6 +54,12 @@ android {
 }
 
 dependencies {
+    /** Hilt **/
+    implementation(libs.hilt.android)
+    implementation(libs.hilt.work)
+    implementation(libs.androidx.hilt.navigation)
+    ksp(libs.hilt.compiler)
+    /** Core **/
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)
@@ -60,6 +67,8 @@ dependencies {
     implementation(libs.androidx.ui)
     implementation(libs.androidx.material)
     implementation(libs.androidx.navigation)
+
+    implementation(libs.datastore)
     /** Serialization **/
     implementation(libs.kotlinx.serialization)
     implementation(libs.gson)
@@ -73,10 +82,6 @@ dependencies {
     implementation(libs.room.ktx)
     implementation(libs.room.runtime)
     ksp(libs.room.compiler)
-
-    implementation(libs.datastore)
-    /** Hilt **/
-    implementation(libs.hilt.android)
-    implementation(libs.androidx.hilt.navigation)
-    ksp(libs.hilt.compiler)
+    /** WorkManager **/
+    implementation(libs.work.runtime)
 }

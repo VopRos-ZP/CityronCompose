@@ -3,7 +3,7 @@ package ru.cityron.presentation.screens.editAlarm
 import dagger.hilt.android.lifecycle.HiltViewModel
 import ru.cityron.R
 import ru.cityron.domain.repository.ConfRepository
-import ru.cityron.domain.usecase.GetM3AllUseCase
+import ru.cityron.domain.usecase.all.alarms.GetM3AlarmsUseCase
 import ru.cityron.presentation.mvi.BaseSharedViewModel
 import ru.cityron.presentation.mvi.SnackbarResult
 import javax.inject.Inject
@@ -11,7 +11,7 @@ import javax.inject.Inject
 @HiltViewModel
 class EditAlarmViewModel @Inject constructor(
     private val confRepository: ConfRepository,
-    private val getM3AllUseCase: GetM3AllUseCase,
+    private val getM3AlarmsUseCase: GetM3AlarmsUseCase,
 ) : BaseSharedViewModel<EditAlarmViewState, EditAlarmViewAction, EditAlarmViewIntent>(
     initialState = EditAlarmViewState()
 ) {
@@ -29,30 +29,7 @@ class EditAlarmViewModel @Inject constructor(
 
     private fun launch(id: Int) {
         withViewModelScope {
-            val all = getM3AllUseCase()
-
-            val minAlarms = all.static.settingsMin.let {
-                listOf(
-                    it.alarm1, it.alarm2, it.alarm3, it.alarm4, it.alarm5,
-                    it.alarm6, it.alarm7, it.alarm8, it.alarm9
-                ).mapIndexed { i, alarm -> alarm.copy(i = i + 1) }
-            }
-            val maxAlarms = all.static.settingsMax.let {
-                listOf(
-                    it.alarm1, it.alarm2, it.alarm3, it.alarm4, it.alarm5,
-                    it.alarm6, it.alarm7, it.alarm8, it.alarm9
-                ).mapIndexed { i, alarm -> alarm.copy(i = i + 1) }
-            }
-            val alarms = all.settings.let {
-                listOf(
-                    it.alarm1, it.alarm2, it.alarm3, it.alarm4, it.alarm5,
-                    it.alarm6, it.alarm7, it.alarm8, it.alarm9
-                ).mapIndexed { i, alarm -> alarm.copy(i = i + 1) }
-            }
-
-            val minAlarm = minAlarms[id - 1]
-            val maxAlarm = maxAlarms[id - 1]
-            val alarm = alarms[id - 1]
+            val alarm = getM3AlarmsUseCase(id)
 
             viewState = viewState.copy(
                 i = id,
@@ -61,11 +38,11 @@ class EditAlarmViewModel @Inject constructor(
 
                 delayOld = alarm.delay,
                 delay = alarm.delay,
-                delayValues = (minAlarm.delay..maxAlarm.delay).toList(),
+                delayValues = (alarm.delayMin..alarm.delayMax).toList(),
 
                 valueOld = alarm.value,
                 value = alarm.value,
-                valueValues = (minAlarm.value..maxAlarm.value).toList()
+                valueValues = (alarm.valueMin..alarm.valueMax).toList()
             )
         }
     }

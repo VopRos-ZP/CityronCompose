@@ -8,7 +8,9 @@ import androidx.room.RoomDatabase
     version = 1
 )
 abstract class IpDatabase : RoomDatabase() {
-
     abstract val dao: IpDao
 
+    companion object {
+        const val NAME = "ip"
+    }
 }

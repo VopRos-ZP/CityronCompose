@@ -3,7 +3,7 @@ package ru.cityron.presentation.screens.controller.http
 import dagger.hilt.android.lifecycle.HiltViewModel
 import ru.cityron.R
 import ru.cityron.domain.repository.ConfRepository
-import ru.cityron.domain.usecase.GetM3AllUseCase
+import ru.cityron.domain.usecase.all.settings.http.GetM3SettingsHttpUseCase
 import ru.cityron.presentation.mvi.BaseSharedViewModel
 import ru.cityron.presentation.mvi.SnackbarResult
 import javax.inject.Inject
@@ -11,7 +11,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ControllerHttpViewModel @Inject constructor(
     private val confRepository: ConfRepository,
-    private val getM3AllUseCase: GetM3AllUseCase
+    private val getM3SettingsHttpUseCase: GetM3SettingsHttpUseCase,
 ) : BaseSharedViewModel<ControllerHttpViewState, ControllerHttpViewAction, ControllerHttpViewIntent>(
     initialState = ControllerHttpViewState()
 ) {
@@ -21,27 +21,34 @@ class ControllerHttpViewModel @Inject constructor(
             is ControllerHttpViewIntent.Launch -> launch()
             is ControllerHttpViewIntent.OnSaveClick -> onSaveClick()
             is ControllerHttpViewIntent.OnSnackbarDismiss -> onSnackbarDismiss()
-            is ControllerHttpViewIntent.OnVisibilityP1Change -> onVisibilityP1Change()
-            is ControllerHttpViewIntent.OnVisibilityP2Change -> onVisibilityP2Change()
-            is ControllerHttpViewIntent.OnFP1Change -> onFP1Change(viewEvent.value)
-            is ControllerHttpViewIntent.OnFP2Change -> onFP2Change(viewEvent.value)
-            is ControllerHttpViewIntent.OnP1Change -> onP1Change(viewEvent.value)
-            is ControllerHttpViewIntent.OnP2Change -> onP2Change(viewEvent.value)
+            is ControllerHttpViewIntent.OnVisibilityPrChange -> onVisibilityPrChange()
+            is ControllerHttpViewIntent.OnVisibilityPuChange -> onVisibilityPuChange()
+            is ControllerHttpViewIntent.OnVisibilityPwChange -> onVisibilityPwChange()
+            is ControllerHttpViewIntent.OnFPrChange -> onFPrChange(viewEvent.value)
+            is ControllerHttpViewIntent.OnFPuChange -> onFPuChange(viewEvent.value)
+            is ControllerHttpViewIntent.OnFPwChange -> onFPwChange(viewEvent.value)
+            is ControllerHttpViewIntent.OnPrChange -> onPrChange(viewEvent.value)
+            is ControllerHttpViewIntent.OnPuChange -> onPuChange(viewEvent.value)
+            is ControllerHttpViewIntent.OnPwChange -> onPwChange(viewEvent.value)
         }
     }
 
     private fun launch() {
         withViewModelScope {
-            val settings = getM3AllUseCase().settings
+            val http = getM3SettingsHttpUseCase()
             viewState = viewState.copy(
-                fP1 = settings.http.fP1,
-                fP2 = settings.http.fP2,
+                fPr = http.fPr,
+                fPu = http.fPu,
+                fPw = http.fPw,
 
-                p1Old = settings.http.p1,
-                p1 = settings.http.p1,
+                prOld = http.pr,
+                pr = http.pr,
 
-                p2Old = settings.http.p2,
-                p2 = settings.http.p2,
+                puOld = http.pu,
+                pu = http.pu,
+
+                pwOld = http.pw,
+                pw = http.pw,
             )
         }
     }
@@ -50,47 +57,68 @@ class ControllerHttpViewModel @Inject constructor(
         viewAction = null
     }
 
-    private fun onVisibilityP1Change() {
-        viewState = viewState.copy(visibilityP1 = !viewState.visibilityP1)
+    private fun onVisibilityPrChange() {
+        viewState = viewState.copy(visibilityPr = !viewState.visibilityPr)
     }
 
-    private fun onVisibilityP2Change() {
-        viewState = viewState.copy(visibilityP2 = !viewState.visibilityP2)
+    private fun onVisibilityPuChange() {
+        viewState = viewState.copy(visibilityPu = !viewState.visibilityPu)
     }
 
-    private fun onFP1Change(value: Int) {
-        viewState = viewState.copy(fP1 = value)
+    private fun onVisibilityPwChange() {
+        viewState = viewState.copy(visibilityPw = !viewState.visibilityPw)
     }
 
-    private fun onFP2Change(value: Int) {
-        viewState = viewState.copy(fP2 = value)
+    private fun onFPrChange(value: Int) {
+        viewState = viewState.copy(fPr = value)
     }
 
-    private fun onP1Change(value: String) {
+    private fun onFPuChange(value: Int) {
+        viewState = viewState.copy(fPu = value)
+    }
+
+    private fun onFPwChange(value: Int) {
+        viewState = viewState.copy(fPw = value)
+    }
+
+    private fun onPrChange(value: String) {
+        viewState = viewState.copy(pr = value)
+        updateIsChanged()
+    }
+
+    private fun onPuChange(value: String) {
+        viewState = viewState.copy(pu = value)
+        updateIsChanged()
+    }
+
+    private fun onPwChange(value: String) {
+        viewState = viewState.copy(pw = value)
+        updateIsChanged()
+    }
+
+    private fun updateIsChanged() {
         viewState = viewState.copy(
-            p1 = value,
-            isChanged = value != viewState.p1Old || viewState.p2 != viewState.p2Old
-        )
-    }
-
-    private fun onP2Change(value: String) {
-        viewState = viewState.copy(
-            p2 = value,
-            isChanged = value != viewState.p2Old || viewState.p1 != viewState.p1Old
+            isChanged = viewState.pr != viewState.prOld
+                    || viewState.pu != viewState.puOld
+                    || viewState.pw != viewState.pwOld
         )
     }
 
     private fun onSaveClick() {
         withViewModelScope {
             val (label, isError) = try {
-                confRepository.conf("http-fP1", viewState.fP1)
-                confRepository.conf("http-fP2", viewState.fP2)
+                confRepository.conf("http-fPr", viewState.fPr)
+                confRepository.conf("http-fPu", viewState.fPu)
+                confRepository.conf("http-fPw", viewState.fPw)
 
-                if (viewState.p1 != viewState.p1Old)
-                    confRepository.conf("http-p1", viewState.p1)
+                if (viewState.pr != viewState.prOld)
+                    confRepository.conf("http-Pu", viewState.pr)
 
-                if (viewState.p2 != viewState.p2Old)
-                    confRepository.conf("http-p2", viewState.p2)
+                if (viewState.pu != viewState.puOld)
+                    confRepository.conf("http-Pu", viewState.pu)
+
+                if (viewState.pw != viewState.pwOld)
+                    confRepository.conf("http-Pw", viewState.pw)
 
                 R.string.success_save_settings to false
             } catch (_: Exception) {

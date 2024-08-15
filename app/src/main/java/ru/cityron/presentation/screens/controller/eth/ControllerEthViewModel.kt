@@ -3,7 +3,7 @@ package ru.cityron.presentation.screens.controller.eth
 import dagger.hilt.android.lifecycle.HiltViewModel
 import ru.cityron.R
 import ru.cityron.domain.repository.ConfRepository
-import ru.cityron.domain.usecase.GetM3AllUseCase
+import ru.cityron.domain.usecase.all.settings.eth.GetM3SettingsEthUseCase
 import ru.cityron.domain.utils.isValidIPAddress
 import ru.cityron.domain.utils.isValidMac
 import ru.cityron.presentation.mvi.BaseSharedViewModel
@@ -13,7 +13,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ControllerEthViewModel @Inject constructor(
     private val confRepository: ConfRepository,
-    private val getM3AllUseCase: GetM3AllUseCase,
+    private val getM3SettingsEthUseCase: GetM3SettingsEthUseCase,
 ) : BaseSharedViewModel<ControllerEthViewState, ControllerEthViewAction, ControllerEthViewIntent>(
     initialState = ControllerEthViewState()
 ) {
@@ -33,22 +33,22 @@ class ControllerEthViewModel @Inject constructor(
 
     private fun launch() {
         withViewModelScope {
-            val all = getM3AllUseCase()
+            val eth = getM3SettingsEthUseCase()
             viewState = viewState.copy(
-                fDhcpOld = all.settings.eth.fDhcp,
-                fDhcp = all.settings.eth.fDhcp,
+                fDhcpOld = eth.fDhcp,
+                fDhcp = eth.fDhcp,
 
-                ipOld = all.settings.eth.ip,
-                ip = all.settings.eth.ip,
+                ipOld = eth.ip,
+                ip = eth.ip,
 
-                maskOld = all.settings.eth.mask,
-                mask = all.settings.eth.mask,
+                maskOld = eth.mask,
+                mask = eth.mask,
 
-                gwOld = all.settings.eth.gw,
-                gw = all.settings.eth.gw,
+                gwOld = eth.gw,
+                gw = eth.gw,
 
-                macOld = all.settings.eth.mac2,
-                mac = all.settings.eth.mac2,
+                macOld = eth.mac2,
+                mac = eth.mac2,
             )
         }
     }
@@ -58,57 +58,45 @@ class ControllerEthViewModel @Inject constructor(
     }
 
     private fun onFDhcpChange(value: Int) {
-        viewState = viewState.copy(
-            fDhcp = value,
-            isChanged = value != viewState.fDhcpOld
-                    || viewState.ip != viewState.ipOld
-                    || viewState.mask != viewState.maskOld
-                    || viewState.gw != viewState.gwOld
-                    || viewState.mac != viewState.macOld
-        )
+        viewState = viewState.copy(fDhcp = value)
+        updateIsChanged()
     }
 
     private fun onIpChange(value: String) {
         viewState = viewState.copy(
             ip = value,
             ipIsCorrect = value.isValidIPAddress(),
-            isChanged = value != viewState.ipOld
-                    || viewState.fDhcp != viewState.fDhcpOld
-                    || viewState.mask != viewState.maskOld
-                    || viewState.gw != viewState.gwOld
-                    || viewState.mac != viewState.macOld
         )
+        updateIsChanged()
     }
 
     private fun onMaskChange(value: String) {
         viewState = viewState.copy(
             mask = value,
             maskIsCorrect = value.isValidIPAddress(),
-            isChanged = value != viewState.maskOld
-                    || viewState.fDhcp != viewState.fDhcpOld
-                    || viewState.ip != viewState.ipOld
-                    || viewState.gw != viewState.gwOld
-                    || viewState.mac != viewState.macOld
         )
+        updateIsChanged()
     }
 
     private fun onGwChange(value: String) {
         viewState = viewState.copy(
             gw = value,
             gwIsCorrect = value.isValidIPAddress(),
-            isChanged = value != viewState.gwOld
-                    || viewState.fDhcp != viewState.fDhcpOld
-                    || viewState.mask != viewState.maskOld
-                    || viewState.ip != viewState.ipOld
-                    || viewState.mac != viewState.macOld
         )
+        updateIsChanged()
     }
 
     private fun onMacChange(value: String) {
         viewState = viewState.copy(
             mac = value,
-            macIsCorrect = value.isValidMac(),
-            isChanged = value != viewState.macOld
+            macIsCorrect = value.isValidMac()
+        )
+        updateIsChanged()
+    }
+
+    private fun updateIsChanged() {
+        viewState = viewState.copy(
+            isChanged = viewState.mac != viewState.macOld
                     || viewState.fDhcp != viewState.fDhcpOld
                     || viewState.mask != viewState.maskOld
                     || viewState.gw != viewState.gwOld
