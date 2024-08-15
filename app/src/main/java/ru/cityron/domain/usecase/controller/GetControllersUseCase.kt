@@ -7,6 +7,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import ru.cityron.data.room.all.Table
 import ru.cityron.data.room.controller.ControllerDatabase
 import ru.cityron.data.room.controller.toController
 import ru.cityron.domain.model.Controller
@@ -22,13 +23,23 @@ class GetControllersUseCase @Inject constructor(
 
     suspend operator fun invoke() = controllerDatabase.dao.fetchAll().map { it.toController() }
 
+    fun listenOne(id: Int = Table.ID) = controllerDatabase.dao.listenOne(id)
+        .map { it.toController() }
+        .distinctUntilChanged()
+        .stateIn(
+            scope = coroutineScope,
+            started = SharingStarted.Lazily,
+            initialValue = Controller()
+        )
+
     val controllers: Flow<List<Controller>> = controllerDatabase.dao
-            .listenAll()
-            .map { list -> list.map { it.toController() } }
-            .stateIn(
-                scope = coroutineScope,
-                started = SharingStarted.Lazily,
-                initialValue = emptyList()
-            )
+        .listenAll()
+        .map { list -> list.map { it.toController() } }
+        .distinctUntilChanged()
+        .stateIn(
+            scope = coroutineScope,
+            started = SharingStarted.Lazily,
+            initialValue = emptyList()
+        )
 
 }

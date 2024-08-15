@@ -12,7 +12,7 @@ class ConfRepositoryImpl @Inject constructor(
 
     override suspend fun conf(key: String, value: Any) {
         val body = networkRepository.post(CONF, body = "$key=$value\n")
-        if (!body.contains("\"result\":\"ok\"")) {
+        if (!body.contains("ok")) {
             Log.e("ConfRepository", body)
             throw RuntimeException() // Error
         }

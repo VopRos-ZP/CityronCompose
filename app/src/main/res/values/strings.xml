@@ -8,11 +8,19 @@
     <string name="error_save_settings">Не удалось применить настройки.</string>
 
     <string-array name="auth_role">
+        <item>Только просмотр</item>
         <item>Пользователь</item>
         <item>Алминистратор</item>
     </string-array>
 
+    <string-array name="auth_role_short">
+        <item>r</item>
+        <item>u</item>
+        <item>w</item>
+    </string-array>
+
     <string-array name="auth_role_title">
+        <item>ТОЛЬКО ПРОСМОТР</item>
         <item>ПОЛЬЗОВАТЕЛЕМ</item>
         <item>АДМИНИСТРАТОРОМ</item>
     </string-array>

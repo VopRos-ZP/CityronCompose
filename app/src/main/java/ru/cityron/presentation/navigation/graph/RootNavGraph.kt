@@ -4,8 +4,8 @@ import androidx.compose.runtime.Composable
 import androidx.navigation.NavHostController
 import ru.cityron.domain.model.Controller
 import ru.cityron.presentation.navigation.Screen
-import ru.cityron.presentation.navigation.slideInOutComposable
 import ru.cityron.presentation.navigation.SlideInOutNavHost
+import ru.cityron.presentation.navigation.slideInOutComposable
 import ru.cityron.presentation.screens.blank.BlankScreen
 
 @Composable
@@ -14,7 +14,6 @@ fun RootNavGraph(
     controllers: List<Controller>,
     onDrawer: () -> Unit,
     onBack: () -> Unit,
-    onAddClick: (Controller) -> Unit,
     onCustomClick: () -> Unit,
     onAlertsClick: () -> Unit,
     onSchedulerClick: () -> Unit,
@@ -22,7 +21,7 @@ fun RootNavGraph(
     onSettingsClick: () -> Unit,
     onChangeName: () -> Unit,
     onAuthClick: () -> Unit,
-    onAuthRoleClick: (Screen) -> Unit,
+    onNavigateClick: (Screen) -> Unit,
     onAlgoClick: () -> Unit,
     onAlarmClick: () -> Unit,
     onControllerClick: () -> Unit,
@@ -49,10 +48,9 @@ fun RootNavGraph(
         findNavGraph(
             onDrawer = onDrawer,
             onBack = onBack,
-            onAddClick = onAddClick,
             onCustomClick = onCustomClick,
             onAuthClick = onAuthClick,
-            onAuthRoleClick = onAuthRoleClick
+            onNavigateClick = onNavigateClick
         )
         controllers.forEach { controller ->
             if (controller.name.startsWith("M3")) {

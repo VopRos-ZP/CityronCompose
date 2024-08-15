@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -17,14 +18,24 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import ru.cityron.presentation.components.BackScaffold
 import ru.cityron.presentation.components.CodeField
+import ru.cityron.presentation.navigation.Screen
 
 @Composable
 fun AddControllerScreen(
     onClick: () -> Unit,
-    onAuthClick: () -> Unit,
+    onNavigateClick: (Screen) -> Unit,
+    accessLevel: String,
     viewModel: AddControllerViewModel = hiltViewModel()
 ) {
     val state by viewModel.state().collectAsState()
+    val viewAction = viewModel.action().collectAsState(initial = null)
+
+    viewAction.value?.let {
+        when (it) {
+            is AddControllerViewAction.Success -> onNavigateClick(Screen.AuthRole(accessLevel))
+        }
+    }
+
     BackScaffold(title = "Добавить контроллер", onClick = onClick) {
         Column(
             modifier = Modifier
@@ -45,12 +56,13 @@ fun AddControllerScreen(
             )
         }
     }
-    // checks verification code
+    DisposableEffect(Unit) {
+        viewModel.intent(AddControllerViewIntent.Launch(accessLevel))
+        onDispose { viewModel.intent(AddControllerViewIntent.OnDispose) }
+    }
     LaunchedEffect(state.code) {
         if (state.code.length == 4) {
-            // if confirmed goto LoginScreen
-            viewModel.intent(AddControllerViewIntent.OnCodeChange(""))
-            onAuthClick()
+            viewModel.intent(AddControllerViewIntent.OnCodeChangeFinish)
         }
     }
 }

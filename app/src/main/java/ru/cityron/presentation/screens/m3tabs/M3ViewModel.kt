@@ -1,10 +1,14 @@
 package ru.cityron.presentation.screens.m3tabs
 
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import ru.cityron.domain.model.Controller
 import ru.cityron.domain.repository.ConfRepository
 import ru.cityron.domain.repository.CurrentRepository
 import ru.cityron.domain.usecase.all.state.GetM3StateUseCase
+import ru.cityron.domain.usecase.controller.GetControllersUseCase
 import ru.cityron.domain.usecase.events.DeleteEventsUseCase
 import ru.cityron.domain.usecase.events.GetFiltersUseCase
 import ru.cityron.domain.usecase.events.UpsertEventsUseCase
@@ -16,7 +20,8 @@ import javax.inject.Inject
 
 @HiltViewModel
 class M3ViewModel @Inject constructor(
-    currentRepository: CurrentRepository,
+    private val currentRepository: CurrentRepository,
+    private val getControllersUseCase: GetControllersUseCase,
     private val getM3StateUseCase: GetM3StateUseCase,
     private val confRepository: ConfRepository,
     private val upsertEventsUseCase: UpsertEventsUseCase,
@@ -26,7 +31,8 @@ class M3ViewModel @Inject constructor(
     initialState = M3TempViewState()
 ) {
 
-    val controller = currentRepository.current
+    private val _controller = MutableStateFlow(Controller())
+    val controller = _controller.asStateFlow()
 
     override fun intent(viewEvent: M3TempViewIntent) {
         when (viewEvent) {
@@ -41,12 +47,17 @@ class M3ViewModel @Inject constructor(
     private fun launch() {
         withViewModelScope {
             launch {
-                controller.collect { controller ->
-                    if (controller != null) {
-                        getFiltersUseCase.flow.collect {
-                            deleteEventsUseCase()
-                            upsertEventsUseCase(it)
-                        }
+                currentRepository.current.value?.let { controller ->
+                    getControllersUseCase.listenOne(controller.id).collect {
+                        _controller.value = it
+                    }
+                }
+            }
+            launch {
+                controller.collect {
+                    getFiltersUseCase.flow.collect {
+                        deleteEventsUseCase()
+                        upsertEventsUseCase(it)
                     }
                 }
             }

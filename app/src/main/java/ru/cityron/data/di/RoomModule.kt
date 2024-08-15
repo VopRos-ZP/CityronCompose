@@ -2,12 +2,12 @@ package ru.cityron.data.di
 
 import android.content.Context
 import androidx.room.Room
+import com.fingerprintjs.android.fingerprint.FingerprinterFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
-import ru.cityron.data.local.PreferencesStore
 import ru.cityron.data.room.all.alarms.M3AlarmsDatabase
 import ru.cityron.data.room.all.algo.AlgoDatabase
 import ru.cityron.data.room.all.sched.M3SchedDatabase
@@ -15,6 +15,7 @@ import ru.cityron.data.room.all.settings.M3SettingsDatabase
 import ru.cityron.data.room.all.stat.M3StaticDatabase
 import ru.cityron.data.room.all.state.M3StateDatabase
 import ru.cityron.data.room.controller.ControllerDatabase
+import ru.cityron.data.room.device.DeviceDatabase
 import ru.cityron.data.room.events.EventDatabase
 import ru.cityron.data.room.ip.IpDatabase
 import javax.inject.Singleton
@@ -22,6 +23,12 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object RoomModule {
+
+    @Provides
+    @Singleton
+    fun provideFingerprint(
+        @ApplicationContext context: Context
+    ) = FingerprinterFactory.create(context)
 
     @Provides
     @Singleton
@@ -115,8 +122,12 @@ object RoomModule {
 
     @Provides
     @Singleton
-    fun providePreferencesStore(
+    fun provideDeviceDatabase(
         @ApplicationContext context: Context
-    ): PreferencesStore = PreferencesStore(context)
+    ): DeviceDatabase = Room.databaseBuilder(
+        context = context,
+        klass = DeviceDatabase::class.java,
+        name = DeviceDatabase.NAME
+    ).fallbackToDestructiveMigration().build()
 
 }

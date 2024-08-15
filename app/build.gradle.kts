@@ -6,6 +6,8 @@ plugins {
     alias(libs.plugins.hilt)
 }
 
+android.buildFeatures.buildConfig = true
+
 android {
     namespace = "ru.cityron"
     compileSdk = 34
@@ -31,6 +33,10 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        debug {
+            applicationIdSuffix = ".debug"
+            isDebuggable = true
         }
     }
     compileOptions {
@@ -84,4 +90,7 @@ dependencies {
     ksp(libs.room.compiler)
     /** WorkManager **/
     implementation(libs.work.runtime)
+    /** RuStore **/
+    implementation(platform(libs.rustore.bom))
+    implementation(libs.rustore.pushclient)
 }

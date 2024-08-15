@@ -8,6 +8,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -20,35 +21,53 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import ru.cityron.R
 import ru.cityron.presentation.components.BackScaffold
 import ru.cityron.presentation.components.CodeField
+import ru.cityron.presentation.components.Loader
 
 @Composable
 fun AuthRoleScreen(
-    onClick: () -> Unit, id: Int,
+    onClick: () -> Unit,
+    accessLevel: String,
     viewModel: AuthRoleViewModel = hiltViewModel()
 ) {
-    val roleTitled = stringArrayResource(id = R.array.auth_role_title)[id]
+    val index = stringArrayResource(id = R.array.auth_role_short).indexOf(accessLevel)
+    val roleTitled = stringArrayResource(id = R.array.auth_role_title)[index]
     val state by viewModel.state().collectAsState()
+
     BackScaffold(
         title = "Подключение к контроллеру",
         onClick = onClick
     ) {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(top = 30.dp, start = 20.dp, end = 20.dp),
-            verticalArrangement = Arrangement.spacedBy(72.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "Для входа под $roleTitled необходимо ввести пароль.",
-                style = MaterialTheme.typography.h4.copy(
-                    textAlign = TextAlign.Center
+        if (state.isLoading) {
+            Loader()
+        } else {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(top = 30.dp, start = 20.dp, end = 20.dp),
+                verticalArrangement = Arrangement.spacedBy(72.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "Для входа под $roleTitled необходимо ввести пароль.",
+                    style = MaterialTheme.typography.h4.copy(
+                        textAlign = TextAlign.Center
+                    )
                 )
-            )
-            CodeField(
-                value = state.password,
-                length = state.length,
-                keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
-                onValueChange = { viewModel.intent(AuthRoleViewIntent.OnPasswordChange(it)) }
-            )
+                CodeField(
+                    value = state.password,
+                    length = state.length,
+                    keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Password),
+                    onValueChange = { viewModel.intent(AuthRoleViewIntent.OnPasswordChange(it)) }
+                )
+            }
+        }
+    }
+    LaunchedEffect(Unit) {
+        viewModel.intent(AuthRoleViewIntent.Launch(accessLevel))
+    }
+    LaunchedEffect(state.password) {
+        if (state.password.length == state.length) {
+            viewModel.intent(AuthRoleViewIntent.OnPasswordChangeFinish(accessLevel))
         }
     }
 }

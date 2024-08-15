@@ -6,9 +6,11 @@ import ru.cityron.data.room.all.Table
 @Serializable
 data class Controller(
     val id: Int = Table.ID,
-    val name: String,
-    val ipAddress: String,
-    val idCpu: String,
-    val idUsr: String,
-    val status: Status
+    val name: String = "",
+    val ipAddress: String = "",
+    val idCpu: String = "",
+    val idUsr: String = "",
+    val status: Status = Status.Offline,
+    val num: String = "00",
+    val token: String? = null,
 )

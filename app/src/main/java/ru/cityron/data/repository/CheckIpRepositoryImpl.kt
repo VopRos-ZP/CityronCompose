@@ -22,7 +22,8 @@ class CheckIpRepositoryImpl @Inject constructor(
                 ipAddress = ip,
                 idCpu = "",
                 idUsr = "",
-                status = Status.Online(DataSource.LOCAL)
+                status = Status.Online(DataSource.LOCAL),
+                num = "00"
             )
             currentRepository.setCurrentController(controller)
             networkRepository.get(JSON_STATE).contains("error").not()

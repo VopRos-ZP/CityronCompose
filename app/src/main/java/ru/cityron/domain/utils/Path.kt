@@ -12,7 +12,10 @@ object Path {
     const val JSON_CHART = "json?chart"
     const val JSON_EVENTS = "json?events"
 
-    fun Map<String, Any>.toParameters(): String = map { (k, v) -> "$k=$v" }
-        .joinToString(separator = "&")
+    private const val JOIN_PARAM_SEPARATOR = "&"
+
+    fun List<Any>.toQueryParams(): String = joinToString(separator = JOIN_PARAM_SEPARATOR) { "$it" }
+
+    fun Map<String, Any>.toParameters(): String = map { (k, v) -> "$k=$v" }.joinToString(separator = JOIN_PARAM_SEPARATOR)
 
 }

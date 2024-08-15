@@ -6,7 +6,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
-import kotlin.coroutines.CoroutineContext
 
 abstract class KViewModel : ViewModel() {
 
@@ -21,7 +20,7 @@ abstract class KViewModel : ViewModel() {
 
     val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
-    protected open fun getCoroutineExceptionHandler(): CoroutineExceptionHandler = CoroutineExceptionHandler { _, thr ->  }
+    protected open fun getCoroutineExceptionHandler(): CoroutineExceptionHandler = CoroutineExceptionHandler { _, _ ->  }
 
     fun clear() {
         coroutineTags.forEach { it.value.cancel() }

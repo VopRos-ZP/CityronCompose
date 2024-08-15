@@ -4,7 +4,7 @@ import androidx.room.Database
 import androidx.room.RoomDatabase
 
 @Database(
-    version = 5,
+    version = 6,
     entities = [ControllerDto::class]
 )
 abstract class ControllerDatabase : RoomDatabase() {

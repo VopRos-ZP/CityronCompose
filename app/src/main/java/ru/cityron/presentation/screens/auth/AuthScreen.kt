@@ -27,9 +27,10 @@ import ru.cityron.presentation.navigation.Screen
 @Composable
 fun AuthScreen(
     onClick: () -> Unit,
-    onAuthRoleClick: (Screen) -> Unit,
+    onNavigateClick: (Screen) -> Unit,
 ) {
     val authRoles = stringArrayResource(id = R.array.auth_role)
+    val authRolesShort = stringArrayResource(id = R.array.auth_role_short)
     BackScaffold(
         title = "Вход",
         onClick = onClick
@@ -40,7 +41,7 @@ fun AuthScreen(
         ) {
             authRoles.mapIndexed { i, text ->
                 AuthItem(
-                    onClick = { onAuthRoleClick(Screen.AuthRole(i)) },
+                    onClick = { onNavigateClick(Screen.AddController(authRolesShort[i])) }, // навигация к привязке
                     text = text,
                     backgroundColor = MaterialTheme.colors.primaryVariant,
                     contentColor = MaterialTheme.colors.primary

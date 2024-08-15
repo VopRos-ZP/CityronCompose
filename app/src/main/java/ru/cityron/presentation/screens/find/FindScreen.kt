@@ -33,7 +33,7 @@ import ru.cityron.presentation.components.DrawerScaffold
 @Composable
 fun FindScreen(
     onClick: () -> Unit,
-    onAddClick: (Controller) -> Unit,
+    onAddClick: () -> Unit,
     onCustomClick: () -> Unit,
     viewModel: FindViewModel = hiltViewModel()
 ) {
@@ -56,7 +56,10 @@ fun FindScreen(
                         ControllerItem(
                             controller = controller,
                             added = added,
-                            onClick = { /*onAddClick(controller)*/ viewModel.intent(FindViewIntent.OnAddClick(controller)) }
+                            onClick = {
+                                viewModel.intent(FindViewIntent.OnAddClick(controller))
+                                onAddClick()
+                            }
                         )
                     }
                 }

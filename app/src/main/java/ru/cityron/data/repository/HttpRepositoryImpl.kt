@@ -11,10 +11,17 @@ class HttpRepositoryImpl @Inject constructor(
     private val httpClient: OkHttpClient
 ) : HttpRepository {
 
-    override suspend fun get(url: String): String {
+    override suspend fun get(
+        url: String,
+        token: String?
+    ): String {
         val request = Request.Builder()
             .get()
-            .url(url)
+            .url(url).apply {
+                if (token != null) {
+                    addHeader("token", token)
+                }
+            }
             .build()
         return try {
             httpClient.newCall(request).execute().body?.string() ?: ""
@@ -23,10 +30,14 @@ class HttpRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun post(url: String, body: String): String {
+    override suspend fun post(url: String, token: String?, body: String): String {
         val request = Request.Builder()
             .post(body.toRequestBody("text/plain".toMediaType()))
-            .url(url)
+            .url(url).apply {
+                if (token != null) {
+                    addHeader("token", token)
+                }
+            }
             .build()
         return try {
             httpClient.newCall(request).execute().body?.string() ?: ""

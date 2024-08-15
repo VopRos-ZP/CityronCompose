@@ -5,9 +5,9 @@ sealed class Screen(val route: String) {
     data object Blank : Screen(ROUTE_BLANK)
     data object FindFlow : Screen(ROUTE_FIND_FLOW)
     data object Find : Screen(ROUTE_FIND)
-    data object AddController : Screen(ROUTE_ADD_CONTROLLER)
+    data class AddController(val role: String) : Screen("$ROUTE_ADD_CONTROLLER/$role")
     data object AddCustom : Screen(ROUTE_ADD_CUSTOM)
-    data class AuthRole(val role: Int) : Screen("$ROUTE_AUTH/$role")
+    data class AuthRole(val role: String) : Screen("$ROUTE_AUTH/$role")
 
     data object ChangeName : Screen(ROUTE_CHANGE_NAME)
     data object Auth : Screen(ROUTE_AUTH)

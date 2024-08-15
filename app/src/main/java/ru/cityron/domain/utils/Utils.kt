@@ -38,6 +38,8 @@ fun Int.fromIndexToFrequency(): Int = when (this) {
     else -> 1
 }
 
+fun Int.toControllerNum(): String = if (this < 10) "0$this" else "$this"
+
 val json = Json {
     ignoreUnknownKeys = true
 }

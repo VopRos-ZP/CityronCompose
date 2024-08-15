@@ -7,6 +7,7 @@ import ru.cityron.domain.usecase.all.sched.UpsertM3TaskUseCase
 import ru.cityron.domain.usecase.all.settings.eth.UpsertM3SettingsEthUseCase
 import ru.cityron.domain.usecase.all.settings.http.UpsertM3SettingsHttpUseCase
 import ru.cityron.domain.usecase.all.settings.metric.UpsertM3SettingsMetricUseCase
+import ru.cityron.domain.usecase.all.settings.other.UpsertM3SettingsOtherUseCase
 import ru.cityron.domain.usecase.all.settings.time.UpsertM3SettingsTimeUseCase
 import ru.cityron.domain.usecase.all.stat.UpsertM3StaticUseCase
 import ru.cityron.domain.usecase.all.state.UpsertM3StateUseCase
@@ -23,6 +24,7 @@ class UpsertM3AllUseCase @Inject constructor(
     private val upsertM3SettingsEthUseCase: UpsertM3SettingsEthUseCase,
     private val upsertM3SettingsHttpUseCase: UpsertM3SettingsHttpUseCase,
     private val upsertM3SettingsTimeUseCase: UpsertM3SettingsTimeUseCase,
+    private val upsertM3SettingsOtherUseCase: UpsertM3SettingsOtherUseCase,
     private val upsertM3SettingsMetricUseCase: UpsertM3SettingsMetricUseCase,
 ) {
 
@@ -104,6 +106,8 @@ class UpsertM3AllUseCase @Inject constructor(
             metricMin = all.static.settingsMin.metric,
             metricMax = all.static.settingsMax.metric,
         )
+        // Other
+        upsertM3SettingsOtherUseCase(all.settings.others)
     }
 
 }

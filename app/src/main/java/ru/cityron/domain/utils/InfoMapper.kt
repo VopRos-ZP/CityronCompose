@@ -12,5 +12,6 @@ fun Info.toController() = Controller(
     ipAddress = ip,
     idCpu = idCpu,
     idUsr = idUsr,
-    status = Status.Online(DataSource.LOCAL)
+    status = Status.Online(DataSource.LOCAL),
+    num = "00"
 )

@@ -16,6 +16,7 @@ fingerprint = "2.1.0"
 okhttp = "4.12.0"
 hilt-work = "1.2.0"
 datastore = "1.1.1"
+rustoreBom = "6.1.0"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -49,6 +50,9 @@ datastore = { module = "androidx.datastore:datastore-preferences", version.ref =
 fingerprint-android = { module = "com.github.fingerprintjs:fingerprint-android", version.ref = "fingerprint" }
 # Charts
 highcharts-android = { module = "com.github.highcharts:highcharts-android", version.ref = "highcharts" }
+# RuStore
+rustore-bom = { module = "ru.rustore.sdk:bom", version.ref = "rustoreBom" }
+rustore-pushclient = { module = "ru.rustore.sdk:pushclient" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

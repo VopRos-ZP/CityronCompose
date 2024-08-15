@@ -4,10 +4,16 @@ import android.content.Context
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.preferencesDataStore
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class PreferencesStore(private val context: Context) {
+@Singleton
+class PreferencesStore @Inject constructor(
+    @ApplicationContext private val context: Context,
+) {
 
     companion object {
         val Context.eventsStore by preferencesDataStore(name = "events")

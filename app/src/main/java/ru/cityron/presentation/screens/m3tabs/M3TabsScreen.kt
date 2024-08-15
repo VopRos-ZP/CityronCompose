@@ -10,6 +10,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.hilt.navigation.compose.hiltViewModel
+import ru.cityron.BuildConfig
 import ru.cityron.R
 import ru.cityron.presentation.components.DrawerScaffold
 import ru.cityron.presentation.components.HTabRow
@@ -50,7 +51,7 @@ private fun M3TabsScreenContent(
     onFilterClick: () -> Unit,
     viewModel: M3ViewModel,
 ) {
-    val pages = listOf(
+    val pages = mutableListOf(
         TabWithPage("Уставка", R.drawable.temp) {
             M3TempScreen(
                 onAlertsClick = onAlertsClick,
@@ -61,10 +62,12 @@ private fun M3TabsScreenContent(
         TabWithPage("События", R.drawable.task) {
             EventsScreen(onFilterClick = onFilterClick)
         },
-        TabWithPage("Метрики", R.drawable.metrics) {
-            MetricsScreen()
-        },
     )
+    if (BuildConfig.DEBUG) {
+        pages.add(TabWithPage("Метрики", R.drawable.metrics) {
+            MetricsScreen()
+        })
+    }
     val pagerState = rememberPagerState { pages.size }
     Column(
         modifier = Modifier.fillMaxSize()
