@@ -23,7 +23,7 @@ class AlertsViewModel @Inject constructor(
         withViewModelScope {
             getM3StateUseCase.flow.collect {
                 viewState = viewState.copy(
-                    alerts = titles.filterIndexed { i, _ -> utilsBitGet(it.alarms, i) }
+                    alerts = titles.filterIndexed { i, _ -> utilsBitGet(it.alarms, i + 1) }
                 )
             }
         }
