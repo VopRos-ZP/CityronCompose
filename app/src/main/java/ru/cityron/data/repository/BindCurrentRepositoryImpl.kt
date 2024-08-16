@@ -5,5 +5,5 @@ import ru.cityron.domain.repository.BindCurrentRepository
 import javax.inject.Inject
 
 class BindCurrentRepositoryImpl @Inject constructor() : BindCurrentRepository {
-    override lateinit var controller: Controller
+    override var controller: Controller? = null
 }

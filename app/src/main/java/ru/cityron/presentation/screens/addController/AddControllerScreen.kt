@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -36,7 +35,13 @@ fun AddControllerScreen(
         }
     }
 
-    BackScaffold(title = "Добавить контроллер", onClick = onClick) {
+    BackScaffold(
+        title = "Добавить контроллер",
+        onClick = {
+            viewModel.intent(AddControllerViewIntent.OnDispose)
+            onClick()
+        }
+    ) {
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -56,9 +61,8 @@ fun AddControllerScreen(
             )
         }
     }
-    DisposableEffect(Unit) {
+    LaunchedEffect(Unit) {
         viewModel.intent(AddControllerViewIntent.Launch(accessLevel))
-        onDispose { viewModel.intent(AddControllerViewIntent.OnDispose) }
     }
     LaunchedEffect(state.code) {
         if (state.code.length == 4) {

@@ -36,8 +36,7 @@ class DataSourceWorker @AssistedInject constructor(
 
     override suspend fun doWork(): Result {
         while (true) {
-            val controllers = getControllersUseCase()
-            controllers.forEach {
+            getControllersUseCase().forEach {
                 val (all, source, token) = try {
                     Triple(
                         first = fromJson<M3All>(httpRepository.get(url = "http://${it.ipAddress}/$JSON_ALL")),
@@ -71,11 +70,13 @@ class DataSourceWorker @AssistedInject constructor(
                     null -> it.name
                     else -> "${all.static.devName.replaceFirstChar(Char::uppercaseChar)} (${all.settings.others.loc.ifEmpty { all.static.idUsr.uppercase() }})"
                 }
-                upsertControllerUseCase(it.copy(
-                    name = name,
-                    status = status,
-                    token = token
-                ))
+                upsertControllerUseCase(
+                    it.copy(
+                        name = name,
+                        status = status,
+                        token = token
+                    )
+                )
             }
             delay(1000)
         }

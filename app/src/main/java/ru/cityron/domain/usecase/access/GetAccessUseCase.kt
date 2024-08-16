@@ -16,7 +16,7 @@ class GetAccessUseCase @Inject constructor(
 ) {
 
     suspend operator fun invoke(accessLevel: String): Pair<Boolean, Int> {
-        val controller = bindCurrentRepository.controller
+        val controller = bindCurrentRepository.controller!!
         val http = fromJson<JsonSettings<M3Settings>>(
             httpRepository.get("http://${controller.ipAddress}/$JSON_SETTINGS")
         ).settings.http

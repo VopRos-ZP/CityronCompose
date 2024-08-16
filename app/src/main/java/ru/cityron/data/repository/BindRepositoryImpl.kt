@@ -41,7 +41,7 @@ class BindRepositoryImpl @Inject constructor(
     }
 
     private suspend fun request(path: String, body: String): String {
-        val ip = bindCurrentRepository.controller.ipAddress
+        val ip = bindCurrentRepository.controller!!.ipAddress
         return httpRepository.post("http://$ip/$path", body = body)
     }
 

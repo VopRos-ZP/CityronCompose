@@ -25,6 +25,7 @@ class AuthRoleViewModel @Inject constructor(
     override fun intent(viewEvent: AuthRoleViewIntent) {
         when (viewEvent) {
             is AuthRoleViewIntent.Launch -> launch(viewEvent.accessLevel)
+            is AuthRoleViewIntent.OnDispose -> onDispose()
             is AuthRoleViewIntent.OnPasswordChangeFinish -> onPasswordChangeFinish(viewEvent.accessLevel)
             is AuthRoleViewIntent.OnPasswordChange -> onPasswordChange(viewEvent.value)
         }
@@ -36,7 +37,7 @@ class AuthRoleViewModel @Inject constructor(
             viewState = viewState.copy(length = length)
             if (!isPassEn) {
                 if (bindAuthUseCase.auth(
-                        num = bindCurrentRepository.controller.num,
+                        num = bindCurrentRepository.controller!!.num,
                         appUuid = getDeviceUseCase().deviceId
                     )
                 ) {
@@ -60,11 +61,17 @@ class AuthRoleViewModel @Inject constructor(
         }
     }
 
+    private fun onDispose() {
+        viewAction = null
+    }
+
     private fun onSuccessAuth() {
         withViewModelScope {
-            val controller = bindCurrentRepository.controller
+            val controller = bindCurrentRepository.controller!!
             upsertControllerUseCase(controller)
             currentRepository.setCurrentController(controller)
+            bindCurrentRepository.controller = null
+            viewAction = AuthRoleViewAction.Success
         }
     }
 

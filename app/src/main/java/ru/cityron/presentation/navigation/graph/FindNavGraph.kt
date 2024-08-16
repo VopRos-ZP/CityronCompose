@@ -59,6 +59,7 @@ fun NavGraphBuilder.findNavGraph(
         ) {
             AuthRoleScreen(
                 onClick = onBack,
+                onNavigate = onNavigateClick,
                 accessLevel = it.arguments?.getString("id") ?: ""
             )
         }

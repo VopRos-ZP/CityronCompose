@@ -8,6 +8,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -22,16 +23,25 @@ import ru.cityron.R
 import ru.cityron.presentation.components.BackScaffold
 import ru.cityron.presentation.components.CodeField
 import ru.cityron.presentation.components.Loader
+import ru.cityron.presentation.navigation.Screen
 
 @Composable
 fun AuthRoleScreen(
     onClick: () -> Unit,
+    onNavigate: (Screen) -> Unit,
     accessLevel: String,
     viewModel: AuthRoleViewModel = hiltViewModel()
 ) {
     val index = stringArrayResource(id = R.array.auth_role_short).indexOf(accessLevel)
     val roleTitled = stringArrayResource(id = R.array.auth_role_title)[index]
     val state by viewModel.state().collectAsState()
+    val viewAction = viewModel.action().collectAsState(initial = null)
+
+    viewAction.value?.let {
+        when (it) {
+            is AuthRoleViewAction.Success -> onNavigate(Screen.Blank)
+        }
+    }
 
     BackScaffold(
         title = "Подключение к контроллеру",
@@ -62,8 +72,9 @@ fun AuthRoleScreen(
             }
         }
     }
-    LaunchedEffect(Unit) {
+    DisposableEffect(Unit) {
         viewModel.intent(AuthRoleViewIntent.Launch(accessLevel))
+        onDispose { viewModel.intent(AuthRoleViewIntent.OnDispose) }
     }
     LaunchedEffect(state.password) {
         if (state.password.length == state.length) {

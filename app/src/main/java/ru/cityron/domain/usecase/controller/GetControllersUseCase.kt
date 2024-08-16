@@ -21,7 +21,7 @@ class GetControllersUseCase @Inject constructor(
 
     private val coroutineScope = CoroutineScope(Dispatchers.IO)
 
-    suspend operator fun invoke() = controllerDatabase.dao.fetchAll().map { it.toController() }
+    suspend operator fun invoke() = controllerDatabase.dao.fetchAll().map { c -> c.toController() }
 
     fun listenOne(id: Int = Table.ID) = controllerDatabase.dao.listenOne(id)
         .map { it.toController() }
@@ -32,7 +32,7 @@ class GetControllersUseCase @Inject constructor(
             initialValue = Controller()
         )
 
-    val controllers: Flow<List<Controller>> = controllerDatabase.dao
+    fun controllers(): Flow<List<Controller>> = controllerDatabase.dao
         .listenAll()
         .map { list -> list.map { it.toController() } }
         .distinctUntilChanged()

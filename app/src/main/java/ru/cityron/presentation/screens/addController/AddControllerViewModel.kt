@@ -47,7 +47,7 @@ class AddControllerViewModel @Inject constructor(
         withViewModelScope {
             try {
                 val response = bindConfirmUseCase(viewState.code)
-                bindCurrentRepository.controller = bindCurrentRepository.controller.copy(num = response.num.toControllerNum())
+                bindCurrentRepository.controller = bindCurrentRepository.controller?.copy(num = response.num.toControllerNum())
                 viewAction = AddControllerViewAction.Success
             } catch (_: Exception) {
                 viewAction = null

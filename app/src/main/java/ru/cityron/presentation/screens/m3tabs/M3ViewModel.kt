@@ -2,7 +2,6 @@ package ru.cityron.presentation.screens.m3tabs
 
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 import ru.cityron.domain.model.Controller
 import ru.cityron.domain.repository.ConfRepository
@@ -32,7 +31,7 @@ class M3ViewModel @Inject constructor(
 ) {
 
     private val _controller = MutableStateFlow(Controller())
-    val controller = _controller.asStateFlow()
+    val controller = currentRepository.current
 
     override fun intent(viewEvent: M3TempViewIntent) {
         when (viewEvent) {
@@ -46,13 +45,15 @@ class M3ViewModel @Inject constructor(
 
     private fun launch() {
         withViewModelScope {
-            launch {
-                currentRepository.current.value?.let { controller ->
-                    getControllersUseCase.listenOne(controller.id).collect {
-                        _controller.value = it
-                    }
-                }
-            }
+//            launch {
+//                currentRepository.current.value?.let { controller ->
+//                    try {
+//                        getControllersUseCase.listenOne(controller.id).collect {
+//                            _controller.value = it
+//                        }
+//                    }  catch (_: Exception) {}
+//                }
+//            }
             launch {
                 controller.collect {
                     getFiltersUseCase.flow.collect {

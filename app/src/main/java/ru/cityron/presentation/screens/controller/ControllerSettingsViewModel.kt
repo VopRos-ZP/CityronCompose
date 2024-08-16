@@ -2,6 +2,7 @@ package ru.cityron.presentation.screens.controller
 
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
+import ru.cityron.domain.repository.BindCurrentRepository
 import ru.cityron.domain.repository.CurrentRepository
 import ru.cityron.domain.usecase.all.settings.eth.GetM3SettingsEthUseCase
 import ru.cityron.domain.usecase.all.settings.http.GetM3SettingsHttpUseCase
@@ -21,6 +22,7 @@ class ControllerSettingsViewModel @Inject constructor(
     private val getM3SettingsEthUseCase: GetM3SettingsEthUseCase,
     private val getM3SettingsHttpUseCase: GetM3SettingsHttpUseCase,
     private val currentRepository: CurrentRepository,
+    private val bindCurrentRepository: BindCurrentRepository,
     private val deleteControllerUseCase: DeleteControllerUseCase,
     private val bindDeleteUseCase: BindDeleteUseCase
 ) : BaseSharedViewModel<ControllerSettingsViewState, Any, ControllerSettingsViewIntent>(
@@ -87,9 +89,10 @@ class ControllerSettingsViewModel @Inject constructor(
     private fun onDeleteClick() {
         withViewModelScope {
             currentRepository.current.value?.let {
-                if (bindDeleteUseCase(it.num)) {
+                if (bindDeleteUseCase(it)) {
                     deleteControllerUseCase(it.id)
                     currentRepository.setCurrentController(null)
+                    bindCurrentRepository.controller = null
                 }
             }
         }

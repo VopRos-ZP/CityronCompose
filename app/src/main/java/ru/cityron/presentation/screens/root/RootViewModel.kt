@@ -1,17 +1,12 @@
 package ru.cityron.presentation.screens.root
 
-import android.util.Log
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import ru.cityron.domain.model.Controller
 import ru.cityron.domain.repository.CurrentRepository
 import ru.cityron.domain.usecase.controller.GetControllersUseCase
 import ru.cityron.domain.usecase.def.GetDefaultUseCase
 import ru.cityron.domain.usecase.def.UpsertDefaultUseCase
-import ru.cityron.domain.usecase.events.DeleteEventsUseCase
-import ru.cityron.domain.usecase.events.GetFiltersUseCase
-import ru.cityron.domain.usecase.events.UpsertEventsUseCase
 import ru.cityron.presentation.mvi.BaseSharedViewModel
 import javax.inject.Inject
 
@@ -45,9 +40,8 @@ class RootViewModel @Inject constructor(
 
     private fun launch() {
         withViewModelScope {
-            while (true) {
-                viewState  = viewState.copy(controllers = getControllersUseCase())
-                delay(1000)
+            getControllersUseCase.controllers().collect {
+                viewState  = viewState.copy(controllers = it)
             }
         }
     }
